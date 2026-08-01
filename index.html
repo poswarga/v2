@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>POS WARGA - Warga Berkarya, Warga Berdaya</title>
+    <meta name="description" content="Media & Komunitas Warga - Platform tempat warga berkarya, berbagi cerita, menulis berita lokal, dan membangun perubahan bersama.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    
+    <link rel="canonical" id="metaCanonical" href="https://poswarga.com/postingan-detail.html">
+    <script>
+      (function() {
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const slug = urlParams.get('slug');
+          const canonicalLink = document.getElementById('metaCanonical');
+          if (slug && canonicalLink) {
+            canonicalLink.href = 'https://poswarga.com/postingan-detail.html?slug=' + encodeURIComponent(slug);
+          }
+        } catch (e) {
+          console.error("Gagal memuat link canonical otomatis:", e);
+        }
+      })();
+    </script>
+    <link href="https://ik.imagekit.io/1ctpzpi1o/icon.png" rel="icon" type="image/x-icon">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+    
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#dc2626">
+    <style>
+        .fa,.fas,.far,.fab,.fal,.fad{font-family:"Font Awesome 6 Free"!important;font-weight:900}.far{font-weight:400!important}.fab{font-family:"Font Awesome 6 Brands"!important}*{font-family:'Inter',system-ui,sans-serif!important}body{background:#f8fafc;color:#1e293b}#datetime{background:white;color:#4b5563;font-size:11px;padding:6px 16px;font-weight:500;letter-spacing:.5px;border-bottom:1px solid #e5e7eb;text-align:left}@media(min-width:768px){#datetime{font-size:12px;padding:7px 20px}}#datetime i{margin-right:6px;color:#10b981}#rss-ticker-widget{width:100%;background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);color:#fff;font-size:12px;padding:8px 0;overflow:hidden;white-space:nowrap;border-bottom:1px solid #4338ca}@media(min-width:768px){#rss-ticker-widget{font-size:13px;padding:10px 0}}#rss-ticker-widget .ticker-wrap{width:100%;overflow:hidden}#rss-ticker-widget .ticker-content{display:inline-block;white-space:nowrap;animation:tickerMove 180s linear infinite;padding-left:100%}#rss-ticker-widget:hover .ticker-content{animation-play-state:paused}#rss-ticker-widget .separator{color:#fbbf24;margin:0 16px;opacity:.5}@keyframes tickerMove{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}.article-card{transition:all .3s ease;cursor:pointer;background:white;border-radius:12px;overflow:hidden;border:1px solid #f1f5f9;display:flex;flex-direction:column;height:100%}.article-card:hover{transform:translateY(-4px);box-shadow:0 15px 25px -8px rgba(220,38,38,.15);border-color:#fca5a5}.article-card:active{transform:scale(.98)}.gradient-text{background:linear-gradient(135deg,#dc2626 0%,#16a34a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.category-badge-sm{display:inline-block;background:linear-gradient(135deg,#f3f4f6 0%,#e5e7eb 100%);color:#4b5563;font-size:9px;padding:2px 7px;border-radius:10px;font-weight:500;margin-bottom:5px;transition:all .2s ease}.category-badge-sm i{margin-right:2px;font-size:8px}.category-badge-sm:hover{background:linear-gradient(135deg,#dc2626 0%,#16a34a 100%);color:white}.hero-title{font-size:2.25rem;line-height:1.2;font-weight:900}@media(min-width:768px){.hero-title{font-size:3rem}}@media(min-width:1024px){.hero-title{font-size:3.5rem}}.hero-subtitle{font-size:.9rem}@media(min-width:768px){.hero-subtitle{font-size:1rem}}.hero-btn,.hero-btn-white{font-size:.85rem;padding:.65rem 1.25rem}@media(min-width:768px){.hero-btn,.hero-btn-white{font-size:.9rem;padding:.75rem 1.5rem}}.stat-number{font-size:1.75rem}@media(min-width:768px){.stat-number{font-size:2rem}}.hero-section-padding{padding:2.5rem 0}@media(min-width:768px){.hero-section-padding{padding:3rem 0}}@media(min-width:1024px){.hero-section-padding{padding:3.5rem 0}}.hamburger-btn{transition:all .2s ease;cursor:pointer;display:flex}.hamburger-line{width:22px;height:2.5px;background-color:#4b5563;margin:3.5px 0;transition:all .3s ease;border-radius:4px}.hamburger-btn:hover .hamburger-line{background-color:#dc2626}.mobile-menu{position:absolute;top:100%;left:0;right:0;background:white;border-top:1px solid #f1f5f9;box-shadow:0 10px 15px -3px rgba(0,0,0,.1);opacity:0;visibility:hidden;transform:translateY(-10px);transition:opacity .3s ease,visibility .3s ease,transform .3s ease;z-index:30}.mobile-menu.show{opacity:1;visibility:visible;transform:translateY(0)}.user-dropdown{position:absolute;top:100%;right:0;min-width:200px;background:white;border-radius:12px;box-shadow:0 10px 25px -5px rgba(0,0,0,.1);border:1px solid #f1f5f9;opacity:0;visibility:hidden;transform:translateY(-10px);transition:all .2s ease;z-index:50}.user-dropdown.show{opacity:1;visibility:visible;transform:translateY(0)}.user-dropdown a{display:flex;align-items:center;gap:10px;padding:12px 16px;color:#4b5563;font-size:14px;transition:all .15s ease}.user-dropdown a:hover{background:#f8fafc;color:#dc2626}.darkmode{background:#0f172a;color:#e2e8f0}.darkmode .bg-white{background:#1e293b}.darkmode .bg-gray-50{background:#0f172a}.darkmode .article-card{background:#1e293b;border-color:#334155}.darkmode .user-dropdown{background:#1e293b;border-color:#334155}.darkmode .user-dropdown a{color:#cbd5e1}.darkmode .user-dropdown a:hover{background:#0f172a;color:#f87171}.darkmode .skeleton{background:linear-gradient(90deg,#334155 25%,#475569 50%,#334155 75%);background-size:200% 100%}.darkmode #datetime{background:#1e293b;color:#cbd5e1;border-bottom:1px solid #334155}.darkmode .mobile-menu{background:#1e293b;border-color:#334155}.darkmode .category-badge-sm{background:linear-gradient(135deg,#334155 0%,#475569 100%);color:#cbd5e1}.backtop{position:fixed;bottom:20px;right:20px;width:48px;height:48px;background:linear-gradient(135deg,#dc2626 0%,#16a34a 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;visibility:hidden;transition:all .3s ease;box-shadow:0 8px 20px rgba(220,38,38,.4);z-index:40}.backtop.visible{opacity:1;visibility:visible}.floating-wa{position:fixed;bottom:85px;right:20px;width:48px;height:48px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(37,211,102,.4);z-index:39;transition:all .3s ease;animation:waPulse 2s infinite}.floating-wa:hover{transform:scale(1.1);box-shadow:0 12px 25px rgba(37,211,102,.6)}.floating-wa i{font-size:26px;color:white}.floating-pwa{position:fixed;bottom:150px;right:20px;width:48px;height:48px;background:linear-gradient(135deg,#3b82f6 0%,#1d4ed8 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(59,130,246,.4);z-index:39;transition:all .3s ease;display:none}.floating-pwa.visible{display:flex}.floating-pwa:hover{transform:scale(1.1);box-shadow:0 12px 25px rgba(59,130,246,.6)}.floating-pwa i{font-size:24px;color:white}@keyframes waPulse{0%,100%{box-shadow:0 8px 20px rgba(37,211,102,.4)}50%{box-shadow:0 8px 30px rgba(37,211,102,.8)}}.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.line-clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}.skeleton{animation:pulse 1.5s ease-in-out infinite;background:linear-gradient(90deg,#e5e7eb 25%,#f3f4f6 50%,#e5e7eb 75%);background-size:200% 100%;border-radius:12px}.trending-item:hover{background:#f8fafc;padding-left:8px}.darkmode .trending-item:hover{background:#1e293b}.trending-sticky-wrapper{position:relative;height:100%}#trendingSticky{position:sticky;top:90px;background:white;border-radius:16px;box-shadow:0 10px 25px -5px rgba(0,0,0,.1);border:1px solid #f1f5f9;transition:all .3s ease;max-height:calc(100vh - 120px);overflow-y:auto;z-index:10}.darkmode #trendingSticky{background:#1e293b;border-color:#334155}@media(max-width:1024px){#trendingSticky{position:relative;top:0;margin-top:1.5rem;max-height:none}}.carousel-container{position:relative;overflow:hidden}.carousel-slides{display:flex;transition:transform .5s ease-in-out}.carousel-slide{flex:0 0 100%;display:flex;flex-direction:column}.carousel-dots{display:flex;justify-content:center;gap:8px;margin-top:16px}.carousel-dot{width:8px;height:8px;border-radius:50%;background:#d1d5db;cursor:pointer;transition:all .3s}.carousel-dot.active{width:24px;border-radius:4px;background:#dc2626}.carousel-image-container{width:100%;position:relative;padding-top:56.25%;overflow:hidden}.carousel-image-container img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block}.carousel-image-fallback{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#dc2626 0%,#16a34a 100%)}.image-caption{font-size:10px;color:#6b7280;padding:4px 8px;background:#f9fafb;border-bottom:1px solid #e5e7eb;text-align:left;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.image-caption:empty{display:none}.carousel-caption{text-align:left;font-size:13px;color:#6b7280;padding:8px 16px;background:#f9fafb;font-style:italic}.carousel-caption:empty{display:none}#articleGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}#articleGrid .article-card{transform:none;margin-bottom:0;transition:all .3s ease}#articleGrid .article-card:hover{transform:translateY(-4px);z-index:10;box-shadow:0 15px 25px -8px rgba(220,38,38,.2)}.article-image-container{width:100%;position:relative;padding-top:56.25%;overflow:hidden;background:#f3f4f6}.article-image-container img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block}.image-fallback{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#dc2626 0%,#16a34a 100%)}.article-card-body{padding:.75rem;display:flex;flex-direction:column;flex:1;gap:.35rem}.article-card-body .card-category{font-size:.65rem;padding:.15rem .5rem;border-radius:999px;background:#f3f4f6;color:#6b7280;display:inline-block;width:fit-content;white-space:nowrap;cursor:pointer;transition:all .2s ease}.article-card-body .card-category i{margin-right:.2rem;font-size:.6rem}.article-card-body .card-category:hover{background:linear-gradient(135deg,#dc2626 0%,#16a34a 100%);color:white}.article-card-body .card-title{font-weight:600;font-size:.85rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#1f2937;margin:0;cursor:pointer}.article-card-body .card-title:hover{color:#dc2626}.article-card-body .card-meta{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:.4rem;border-top:1px solid #f3f4f6;font-size:.7rem;color:#9ca3af}@media(max-width:640px){#articleGrid{grid-template-columns:repeat(2,1fr);gap:.5rem}.article-card-body{padding:.5rem;gap:.25rem}.article-card-body .card-title{font-size:.75rem;line-height:1.3}}@media(min-width:1025px){#articleGrid{grid-template-columns:repeat(3,1fr);gap:1rem}}.badge-emas{background:linear-gradient(135deg,#fbbf24 0%,#d97706 100%);color:white;font-size:9px;padding:1px 5px;border-radius:10px;font-weight:600;white-space:nowrap}.badge-perak{background:linear-gradient(135deg,#cbd5e1 0%,#64748b 100%);color:white;font-size:9px;padding:1px 5px;border-radius:10px;font-weight:600;white-space:nowrap}.badge-perunggu{background:linear-gradient(135deg,#d97706 0%,#92400e 100%);color:white;font-size:9px;padding:1px 5px;border-radius:10px;font-weight:600;white-space:nowrap}.carousel-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;overflow:hidden}.carousel-avatar img{width:100%;height:100%;object-fit:cover}.kategori-link{font-size:.7rem;padding:5px 8px;cursor:pointer;transition:all .2s ease}@media(min-width:768px){.kategori-link{font-size:.8rem;padding:6px 10px}}.kategori-link.active-kategori{background:linear-gradient(135deg,#dc2626 0%,#16a34a 100%)!important;color:white!important;font-weight:600;box-shadow:0 4px 12px rgba(220,38,38,.3)}.promo-popup-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:10000;display:flex;justify-content:center;align-items:center;visibility:hidden;opacity:0;transition:.3s ease}.promo-popup-overlay.active{visibility:visible;opacity:1}.promo-popup-container{background:white;border-radius:20px;width:320px;max-width:90vw;overflow:hidden;position:relative;box-shadow:0 20px 35px rgba(0,0,0,.3);animation:slideDown .3s ease-out}@media(min-width:768px){.promo-popup-container{width:500px;border-radius:32px}}@keyframes slideDown{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}.popup-close-btn{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:white;width:28px;height:28px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;z-index:10}.popup-img-frame{width:100%;background:linear-gradient(135deg,#dc2626 0%,#16a34a 100%)}.popup-content-inner{padding:16px 14px;text-align:center}.popup-title{font-size:18px;font-weight:800;color:#1f2937;margin-bottom:8px}.popup-desc{font-size:13px;color:#6b7280;margin-bottom:16px;line-height:1.5}.popup-btn-order{background:linear-gradient(135deg,#dc2626 0%,#16a34a 100%);color:white;padding:10px 24px;border-radius:30px;font-size:14px;font-weight:bold;text-decoration:none;display:inline-block}.auto-close-timer{font-size:11px;color:#9ca3af;margin-top:12px}@keyframes papanSlideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}#floatingPapan{position:fixed;bottom:145px;right:20px;z-index:38;width:280px;transition:all .3s ease}#floatingPapan.collapsed #papanMessages{display:none}#floatingPapan.collapsed #papanFooter{display:none}@media(max-width:640px){#floatingPapan{width:240px;bottom:140px;right:10px}}#kategoriSection .flex-wrap{gap:.5rem}@media(max-width:640px){#kategoriSection .flex-wrap{gap:.35rem}}@media(min-width:1024px){.scale-75-desktop{transform:scale(.75);transform-origin:top center;margin-bottom:-5%}.scale-75-desktop-row{transform:scale(.75);transform-origin:top left;width:133.33%;margin-bottom:-15%}}
+        #trendingSticky{padding:0.9375rem!important}
+        #trendingSticky h3{font-size:1.03125rem!important}
+        #trendingSticky .trending-item{padding:0.46875rem!important;gap:0.46875rem!important}
+        #trendingSticky .trending-item .trending-number{font-size:1.171875rem!important}
+        #trendingSticky .trending-item h4{font-size:0.703125rem!important}
+        #trendingSticky .trending-item .trending-views{font-size:0.5625rem!important}
+        #trendingSticky a.block.text-center{font-size:0.703125rem!important}
+        #trendingSticky .bg-orange-100{font-size:0.5625rem!important}
+        .carousel-slide h2{font-size:1.875rem!important}
+        .carousel-slide h2 a{font-size:1.875rem!important}
+        @media(min-width:1025px){
+            .jadi-penulis-inner{padding-left:calc((100% + 32px) / 4)!important}
+        }
+        .grid-avatar{width:20px;height:20px;border-radius:50%;flex-shrink:0;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;background:#f3f4f6}
+        .grid-avatar img{width:100%;height:100%;object-fit:cover}
+        .grid-author-row{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+        .grid-author-name{font-size:0.65rem;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px}
+        .role-badge{font-size:7px;color:white;padding:1px 4px;border-radius:9999px;font-weight:500;white-space:nowrap;line-height:1.3}
+        .role-admin{background:#dc2626}.role-editor{background:#2563eb}.role-member{background:#16a34a}.role-user{background:#6b7280}
+        .carousel-author-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+        .carousel-author-name{font-size:0.85rem;color:#4b5563;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+        .carousel-date-row{display:flex;align-items:center;gap:12px;margin-top:6px;font-size:0.75rem;color:#9ca3af}
+        .ai-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:10001;display:flex;justify-content:center;align-items:center;visibility:hidden;opacity:0;transition:all .3s ease}.ai-overlay.active{visibility:visible;opacity:1}.ai-widget-container{background:white;border-radius:20px;width:420px;max-width:90vw;height:600px;max-height:80vh;overflow:hidden;position:relative;box-shadow:0 20px 40px rgba(0,0,0,.3);animation:aiSlideUp .3s ease-out;display:flex;flex-direction:column}@keyframes aiSlideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}.ai-widget-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;flex-shrink:0}.ai-widget-header-left{display:flex;align-items:center;gap:8px}.ai-widget-avatar{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}.ai-widget-title{font-size:14px;font-weight:600}.ai-widget-status{font-size:11px;opacity:.8;display:flex;align-items:center;gap:4px}.ai-widget-status-dot{width:6px;height:6px;background:#4ade80;border-radius:50%}.ai-widget-close{background:rgba(255,255,255,.2);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}.ai-widget-close:hover{background:rgba(255,255,255,.4)}.ai-widget-iframe{flex:1;border:none;width:100%}.floating-ai{position:fixed;bottom:210px;right:20px;width:48px;height:48px;background:linear-gradient(135deg,#dc2626,#b91c1c);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(220,38,38,.4);z-index:39;transition:all .3s ease;animation:aiPulse 2.5s infinite;border:none;outline:none}.floating-ai:hover{transform:scale(1.1);box-shadow:0 12px 25px rgba(220,38,38,.6)}.floating-ai i{font-size:22px;color:white}.floating-ai-tooltip{position:absolute;right:60px;background:#1f2937;color:white;padding:6px 14px;border-radius:20px;font-size:11px;white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(10px);transition:all .3s ease;font-weight:500}.floating-ai:hover .floating-ai-tooltip{opacity:1;transform:translateX(0)}@keyframes aiPulse{0%,100%{box-shadow:0 8px 20px rgba(220,38,38,.4)}50%{box-shadow:0 8px 30px rgba(220,38,38,.8),0 0 0 12px rgba(220,38,38,.08)}}@media(max-width:640px){.floating-ai{bottom:200px;right:10px}}
+    </style>
+</head>
+<body class="bg-gray-50">
+<div id="datetime"><i class="fas fa-clock" aria-hidden="true"></i><span id="datetime-text">Memuat waktu...</span></div>
+<div id="rss-ticker-widget">📡 Memuat berita utama nusantara...</div>
+<header class="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-gray-100">
+    <div class="container mx-auto px-4 py-3 md:py-4"><div class="flex justify-between items-center"><div class="flex items-center gap-3 md:gap-4"><button id="hamburgerButton" class="hamburger-btn w-9 h-9 md:w-10 md:h-10 bg-gray-100 rounded-full flex-col items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition" style="display:flex" aria-label="Buka Menu Navigasi"><span class="hamburger-line"></span><span class="hamburger-line"></span><span class="hamburger-line"></span></button><div class="flex items-center gap-2 md:gap-3"><div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg flex-shrink-0"><img src="https://ik.imagekit.io/1ctpzpi1o/icon.png" alt="Icon POS WARGA" class="w-full h-full object-cover"></div><a href="index.html" class="flex items-center"><img src="https://ik.imagekit.io/1ctpzpi1o/logo.png" alt="POS WARGA" class="h-8 md:h-10 w-auto object-contain"></a></div></div><div class="flex items-center gap-1 sm:gap-2"><div id="authSection" class="relative"><div id="guestButtons" class="flex items-center gap-1 sm:gap-2"><a href="auth/login.html" class="bg-gradient-to-r from-red-600 to-green-600 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium hover:from-red-700 hover:to-green-700 transition shadow-md whitespace-nowrap"><i class="fas fa-sign-in-alt mr-1" aria-hidden="true"></i><span class="hidden xs:inline">Login</span></a><a href="auth/register.html" class="bg-white text-red-600 px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium border border-red-200 hover:bg-red-50 transition whitespace-nowrap"><i class="fas fa-user-plus mr-1" aria-hidden="true"></i><span class="hidden xs:inline">Daftar</span></a></div><div id="userButtons" class="hidden"><button onclick="toggleUserDropdown()" class="flex items-center gap-2 bg-gradient-to-r from-red-600 to-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:from-red-700 hover:to-green-700 transition shadow-md" aria-label="Menu Pengguna"><span id="userRoleIcon" class="text-base"><i class="fas fa-user-circle" aria-hidden="true"></i></span><span id="userDisplayName" class="username-truncate hidden sm:inline">User</span><i class="fas fa-chevron-down text-xs opacity-75" aria-hidden="true"></i></button><div id="userDropdown" class="user-dropdown"><div class="px-4 py-3 border-b border-gray-100"><p id="dropdownUserName" class="font-medium text-gray-800">-</p><p id="dropdownUserEmail" class="text-xs text-gray-500">-</p></div><a href="#" id="dashboardLink"><i class="fas fa-tachometer-alt w-5" aria-hidden="true"></i>Dashboard</a><a href="#" id="writeLink"><i class="fas fa-pen-fancy w-5" aria-hidden="true"></i>Mulai Menulis</a><a href="https://postingan.poswarga.com"><i class="fas fa-newspaper w-5" aria-hidden="true"></i>Postingan</a><hr><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt w-5 text-red-500" aria-hidden="true"></i>Logout</a></div></div></div><button onclick="toggleSearch()" class="w-9 h-9 md:w-10 md:h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 active:bg-gray-300 transition" aria-label="Cari Artikel"><i class="fas fa-search text-sm md:text-base" aria-hidden="true"></i></button><button onclick="toggleDarkMode()" class="w-9 h-9 md:w-10 md:h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 active:bg-gray-300 transition" aria-label="Ubah Mode Tampilan"><i class="fas fa-moon text-sm md:text-base" id="darkModeIcon" aria-hidden="true"></i></button></div></div></div>
+    <div id="mobileMenu" class="mobile-menu"><div class="container mx-auto px-4 py-4"><nav class="flex flex-col gap-2" aria-label="Menu Seluler"><a href="index.html" class="text-red-600 font-medium py-3 px-3 flex items-center gap-2 rounded-lg hover:bg-red-50"><i class="fas fa-home w-5" aria-hidden="true"></i>Beranda</a><a href="https://postingan.poswarga.com" class="text-gray-600 hover:text-red-600 py-3 px-3 flex items-center gap-2 rounded-lg hover:bg-gray-50"><i class="fas fa-newspaper w-5" aria-hidden="true"></i>Postingan</a><a href="#kategoriSection" onclick="scrollToKategori(event)" class="text-gray-600 hover:text-red-600 py-3 px-3 flex items-center gap-2 rounded-lg hover:bg-gray-50"><i class="fas fa-folder w-5" aria-hidden="true"></i>Kategori</a><a href="about.html" class="text-gray-600 hover:text-red-600 py-3 px-3 flex items-center gap-2 rounded-lg hover:bg-gray-50"><i class="fas fa-info-circle w-5" aria-hidden="true"></i>Tentang</a><a href="contact.html" class="text-gray-600 hover:text-red-600 py-3 px-3 flex items-center gap-2 rounded-lg hover:bg-gray-50"><i class="fas fa-phone-alt w-5" aria-hidden="true"></i>Kontak</a></nav></div></div>
+    <div id="searchOverlay" class="hidden fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-16 md:pt-20 px-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden"><div class="p-4 border-b flex items-center gap-3"><i class="fas fa-search text-gray-400" aria-hidden="true"></i><input type="text" id="searchInputOverlay" placeholder="Cari artikel..." class="flex-1 outline-none text-base md:text-lg bg-transparent" aria-label="Masukkan kata kunci pencarian"><button onclick="toggleSearch()" class="text-gray-400 hover:text-gray-600 p-2" aria-label="Tutup Pencarian"><i class="fas fa-times text-xl" aria-hidden="true"></i></button></div><div class="p-4 max-h-96 overflow-y-auto"><p class="text-sm text-gray-500 mb-3"><i class="fas fa-fire text-orange-500" aria-hidden="true"></i>Pencarian populer:</p><div class="flex flex-wrap gap-2"><span onclick="searchTopic('UMKM')" class="bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-700 px-3 py-2 rounded-full text-sm cursor-pointer"><i class="fas fa-chart-line" aria-hidden="true"></i>UMKM</span><span onclick="searchTopic('Kabar Gardu')" class="bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-700 px-3 py-2 rounded-full text-sm cursor-pointer"><i class="fas fa-bullhorn" aria-hidden="true"></i>Kabar Gardu</span><span onclick="searchTopic('Rembuk Warga')" class="bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-700 px-3 py-2 rounded-full text-sm cursor-pointer"><i class="fas fa-globe" aria-hidden="true"></i>Rembuk Warga</span><span onclick="searchTopic('SEO')" class="bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-700 px-3 py-2 rounded-full text-sm cursor-pointer"><i class="fas fa-search" aria-hidden="true"></i>SEO</span><span onclick="searchTopic('AI')" class="bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-700 px-3 py-2 rounded-full text-sm cursor-pointer"><i class="fas fa-robot" aria-hidden="true"></i>AI</span></div></div></div></div>
+</header>
+<section class="relative overflow-hidden bg-gradient-to-br from-red-600 via-rose-500 to-green-600 text-white hero-section-padding">
+    <div class="absolute inset-0 opacity-10"><div class="absolute top-0 left-0 w-48 h-48 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div><div class="absolute bottom-0 right-0 w-72 h-72 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div></div>
+    <div class="container mx-auto px-4 relative"><div class="flex flex-col items-start gap-6"><div class="max-w-2xl"><div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs mb-4 hover:bg-white/30 transition"><i class="fas fa-bolt text-yellow-300" aria-hidden="true"></i><span>Media & Komunitas Warga Terpercaya</span></div><h1 class="hero-title mb-4 leading-tight">Warga Berkarya,<br><span class="text-yellow-200">Warga Berdaya</span></h1><p class="hero-subtitle opacity-95 mb-6">Platform komunitas digital untuk menulis berita seputar lingkungan, berbagi cerita inspiratif, dan membangun perubahan nyata bersama.</p><div class="flex flex-wrap gap-3 mb-6"><a href="https://postingan.poswarga.com" class="hero-btn bg-white text-red-600 rounded-xl font-semibold inline-flex items-center gap-2"><i class="fas fa-newspaper" aria-hidden="true"></i>Baca Cerita</a><a href="auth/login.html" id="writeArticleBtn" class="hero-btn-white bg-transparent border-2 border-white text-white rounded-xl font-semibold inline-flex items-center gap-2"><i class="fas fa-pen-fancy" aria-hidden="true"></i>Mulai Menulis</a></div><div class="scale-75-desktop inline-block" style="transform-origin:left center"><div class="flex flex-wrap gap-6"><div class="hero-stat"><div class="font-bold stat-number flex items-center gap-2" id="statsArticles"><i class="fas fa-file-alt" aria-hidden="true"></i>0</div><div class="text-xs opacity-80">Artikel</div></div><div class="hero-stat"><div class="font-bold stat-number flex items-center gap-2" id="statsWriters"><i class="fas fa-users" aria-hidden="true"></i>0</div><div class="text-xs opacity-80">Penulis</div></div><div class="hero-stat"><div class="font-bold stat-number flex items-center gap-2" id="statsReaders"><i class="fas fa-eye" aria-hidden="true"></i>0</div><div class="text-xs opacity-80">Pembaca</div></div><div class="hero-stat"><div class="font-bold stat-number flex items-center gap-2" id="statsReadersToday"><i class="fas fa-eye" aria-hidden="true"></i>0</div><div class="text-xs opacity-80">Pembaca Hari Ini</div></div></div></div></div></div></div>
+</section>
+<main class="container mx-auto px-4 py-8 pb-0">
+    <div class="scale-75-desktop-row"><div class="grid grid-cols-1 lg:grid-cols-4 gap-6"><div class="lg:col-span-3"><div id="featuredCarousel" class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"><div class="skeleton h-80 w-full"></div></div></div><div class="lg:col-span-1"><div class="trending-sticky-wrapper"><div id="trendingSticky" class="p-5"><div class="flex items-center justify-between mb-4"><h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-fire text-orange-500" aria-hidden="true"></i>Trending Saat Ini</h3><span class="bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full"><i class="fas fa-arrow-trend-up" aria-hidden="true"></i>Hot</span></div><div class="space-y-2" id="trendingList"><div class="skeleton h-12 w-full rounded-lg"></div><div class="skeleton h-12 w-full rounded-lg"></div><div class="skeleton h-12 w-full rounded-lg"></div><div class="skeleton h-12 w-full rounded-lg"></div><div class="skeleton h-12 w-full rounded-lg"></div></div><a href="https://postingan.poswarga.com" class="block text-center text-red-600 text-sm font-medium mt-4 hover:text-red-700">Lihat Semua <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i></a></div></div></div></div></div>
+    <div style="margin-top:-8px;margin-bottom:5mm"><div id="kategoriSection" class="bg-white rounded-2xl shadow-md p-4" style="margin:0;width:100%;box-sizing:border-box"><div class="flex items-center justify-between mb-2"><h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-folder text-green-600" aria-hidden="true"></i>Kategori Berita</h3><button onclick="window.resetKategori()" id="resetKategoriBtn" class="hidden text-xs text-red-600 hover:text-red-700 font-medium"><i class="fas fa-times mr-1" aria-hidden="true"></i>Reset Filter</button></div><div class="flex flex-wrap"><span onclick="window.filterByKategori('Kabar Gardu')" class="kategori-link bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm" data-kategori="Kabar Gardu"><i class="fas fa-broadcast-tower" aria-hidden="true"></i>Kabar Gardu</span><span onclick="window.filterByKategori('Jejak Lapangan')" class="kategori-link bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm" data-kategori="Jejak Lapangan"><i class="fas fa-map-marked-alt" aria-hidden="true"></i>Jejak Lapangan</span><span onclick="window.filterByKategori('Kisah Tetangga')" class="kategori-link bg-green-50 hover:bg-green-100 text-green-700 rounded-lg text-sm" data-kategori="Kisah Tetangga"><i class="fas fa-users" aria-hidden="true"></i>Kisah Tetangga</span><span onclick="window.filterByKategori('Obrolan Warung')" class="kategori-link bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg text-sm" data-kategori="Obrolan Warung"><i class="fas fa-coffee" aria-hidden="true"></i>Obrolan Warung</span><span onclick="window.filterByKategori('Rembuk Warga')" class="kategori-link bg-yellow-50 hover:bg-yellow-100 text-yellow-700 rounded-lg text-sm" data-kategori="Rembuk Warga"><i class="fas fa-comments" aria-hidden="true"></i>Rembuk Warga</span><span onclick="window.filterByKategori('Sorot Publik')" class="kategori-link bg-pink-50 hover:bg-pink-100 text-pink-700 rounded-lg text-sm" data-kategori="Sorot Publik"><i class="fas fa-lightbulb" aria-hidden="true"></i>Sorot Publik</span><span onclick="window.filterByKategori('Balai Komunitas')" class="kategori-link bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-sm" data-kategori="Balai Komunitas"><i class="fas fa-building" aria-hidden="true"></i>Balai Komunitas</span><span onclick="window.filterByKategori('Gerak Bareng')" class="kategori-link bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-sm" data-kategori="Gerak Bareng"><i class="fas fa-people-arrows" aria-hidden="true"></i>Gerak Bareng</span><span onclick="window.filterByKategori('Lapak Lokal')" class="kategori-link bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg text-sm" data-kategori="Lapak Lokal"><i class="fas fa-store" aria-hidden="true"></i>Lapak Lokal</span><span onclick="window.filterByKategori('Cerita Ladang')" class="kategori-link bg-lime-50 hover:bg-lime-100 text-lime-700 rounded-lg text-sm" data-kategori="Cerita Ladang"><i class="fas fa-seedling" aria-hidden="true"></i>Cerita Ladang</span><span onclick="window.filterByKategori('Denyut Negeri')" class="kategori-link bg-cyan-50 hover:bg-cyan-100 text-cyan-700 rounded-lg text-sm" data-kategori="Denyut Negeri"><i class="fas fa-globe-asia" aria-hidden="true"></i>Denyut Negeri</span><span onclick="window.filterByKategori('Gawe Kampung')" class="kategori-link bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm" data-kategori="Gawe Kampung"><i class="fas fa-hammer" aria-hidden="true"></i>Gawe Kampung</span></div></div></div>
+    <div class="mb-6"><div class="flex justify-between items-center mb-4"><h2 class="font-bold text-lg flex items-center gap-2" id="postinganTitle"><i class="fas fa-clock text-green-600" aria-hidden="true"></i>Postingan Terbaru Warga</h2><a href="https://postingan.poswarga.com" class="text-red-600 text-sm font-medium hover:text-red-700">Lihat Semua <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div><div id="articleGrid"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div></div>
+</main>
+<div class="py-3 pb-10" style="background:#f8fafc">
+    <div class="container mx-auto px-4">
+        <div class="bg-white rounded-2xl shadow-md p-3 flex flex-col md:flex-row items-start gap-4 jadi-penulis-inner" style="width:100%;box-sizing:border-box">
+            <div class="flex-shrink-0" style="width:280px"><img src="assets/writer.png" alt="Pewarta Pos Warga sedang menulis berita menggunakan komputer" class="w-full object-contain" style="max-height:100%" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\'w-full h-48 bg-gradient-to-br from-red-100 to-green-100 rounded-3xl flex items-center justify-center\'><i class=\'fas fa-pen-fancy text-6xl text-red-500\'></i></div>'"></div>
+            <div class="flex-1 text-center md:text-left">
+                <h3 class="text-xl md:text-2xl font-extrabold text-gray-800" style="margin-top:0">Jadi Pewarta di POS WARGA!</h3>
+                <p class="text-gray-500 text-sm mt-1 max-w-lg">Bagikan kisah, pengalaman, atau informasi dari sekitarmu.<br>Tulisanmu bisa berarti bagi banyak orang.</p>
+                <div class="flex justify-center md:justify-start mt-2"><a href="auth/register.html" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-green-600 text-white px-5 py-2.5 rounded-xl font-bold hover:from-red-700 hover:to-green-700 transition shadow-lg text-sm"><i class="fas fa-user-plus" aria-hidden="true"></i>Daftar Sekarang <i class="fas fa-arrow-right ml-1" aria-hidden="true"></i></a></div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer class="bg-gray-900 text-white py-12" id="footerCMS">
+    <div class="container mx-auto px-4"><div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="footerContent"><div id="footerBrand"><div class="flex items-center gap-2 mb-4"><div class="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0"><img src="https://ik.imagekit.io/1ctpzpi1o/icon.png" alt="Icon Resmi POS WARGA" class="w-full h-full object-cover"></div><a href="index.html" class="flex items-center"><img src="https://ik.imagekit.io/1ctpzpi1o/logo.png" alt="POS WARGA" class="h-8 md:h-10 w-auto object-contain"></a></div><p class="text-gray-400 text-sm mb-4">Warga Berkarya, Warga Berdaya</p><div class="flex gap-3" id="footerSocialIcons"></div></div><div class="grid grid-cols-2 gap-6"><div id="footerLinksSection"><h4 class="font-semibold mb-4 text-lg flex items-center gap-2"><i class="fas fa-link text-red-400" aria-hidden="true"></i><span id="footerLinksTitle">Tautan Cepat</span></h4><ul class="space-y-2 text-sm text-gray-400" id="footerLinksList"><li><a href="index.html" class="hover:text-white flex items-center gap-2"><i class="fas fa-home text-xs text-red-500" aria-hidden="true"></i>Beranda</a></li><li><a href="https://postingan.poswarga.com" class="hover:text-white flex items-center gap-2"><i class="fas fa-newspaper text-xs text-red-500" aria-hidden="true"></i>Postingan</a></li><li><a href="auth/login.html" class="hover:text-white flex items-center gap-2"><i class="fas fa-sign-in-alt text-xs text-red-500" aria-hidden="true"></i>Login</a></li><li><a href="auth/register.html" class="hover:text-white flex items-center gap-2"><i class="fas fa-user-plus text-xs text-red-500" aria-hidden="true"></i>Daftar</a></li></ul></div><div id="footerInfoSection"><h4 class="font-semibold mb-4 text-lg flex items-center gap-2"><i class="fas fa-info-circle text-green-400" aria-hidden="true"></i><span id="footerInfoTitle">Informasi</span></h4><ul class="space-y-2 text-sm text-gray-400" id="footerInfoList"><li><a href="privacy.html" class="hover:text-white flex items-center gap-2"><i class="fas fa-shield-alt text-xs text-green-500" aria-hidden="true"></i>Kebijakan Privasi</a></li><li><a href="terms.html" class="hover:text-white flex items-center gap-2"><i class="fas fa-file-contract text-xs text-green-500" aria-hidden="true"></i>Syarat Penggunaan</a></li><li><a href="about.html" class="hover:text-white flex items-center gap-2"><i class="fas fa-users text-xs text-green-500" aria-hidden="true"></i>Tentang Kami</a></li><li><a href="contact.html" class="hover:text-white flex items-center gap-2"><i class="fas fa-envelope text-xs text-green-500" aria-hidden="true"></i>Kontak</a></li></ul></div></div></div><div class="border-t border-gray-800 mt-8 pt-8 text-center" id="footerCopyright"><p class="text-gray-500 text-sm"><i class="far fa-copyright" aria-hidden="true"></i>2026 POSWARGA</p></div></div>
+</footer>
+<div class="ai-overlay" id="aiOverlay">    <div class="ai-widget-container">        <div class="ai-widget-header">            <div class="ai-widget-header-left">                <div class="ai-widget-avatar">P</div>                <div>                    <div class="ai-widget-title">POSWARGA AI</div>                    <div class="ai-widget-status">                        <span class="ai-widget-status-dot"></span>                        Online · Siap membantu                    </div>                </div>            </div>            <button class="ai-widget-close" onclick="closeAICS()" aria-label="Tutup chat">✕</button>        </div>        <iframe class="ai-widget-iframe" src="" id="aiIframe" title="Chat POSWARGA AI" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>    </div></div><button class="floating-ai" onclick="openAICS()" title="Tanya POSWARGA AI" aria-label="Chat dengan AI POS WARGA"><i class="fas fa-robot" aria-hidden="true"></i><span class="floating-ai-tooltip">Tanya AI POSWARGA</span></button>
+<div id="pwaInstallBtn" class="floating-pwa" title="Install Aplikasi"><i class="fas fa-download" aria-hidden="true"></i></div>
+<a href="https://wa.me/6285817543733?text=Halo%2C%20Saya%20ingin%20informasi%20tentang%20POS%20WARGA" target="_blank" class="floating-wa" title="Hubungi kami via WhatsApp" rel="noopener noreferrer"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+<button class="backtop" onclick="scrollToTop()" aria-label="Kembali ke Atas"><i class="fas fa-arrow-up text-white" aria-hidden="true"></i></button>
+<div id="floatingPapan" class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200"><div class="bg-gradient-to-r from-red-600 to-red-700 text-white px-3 py-2 flex items-center gap-2 cursor-pointer" onclick="toggleFloatingPapan()"><i class="fas fa-bullhorn text-sm" aria-hidden="true"></i><span class="font-semibold text-xs flex-1">Info POS WARGA</span><span class="w-2 h-2 bg-green-400 rounded-full animate-pulse" title="Live"></span><i id="papanToggleIcon" class="fas fa-chevron-down text-white/70 text-xs ml-1" aria-hidden="true"></i></div><div id="papanMessages" class="p-2 space-y-1 overflow-y-auto" style="max-height:180px;scroll-behavior:smooth"><div class="animate-pulse space-y-1.5"><div class="flex items-center gap-2 p-1.5"><div class="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0"></div><div class="flex-1 space-y-1"><div class="h-2 bg-gray-200 rounded w-3/4"></div><div class="h-1.5 bg-gray-100 rounded w-full"></div></div></div></div></div><div id="papanFooter" class="bg-gray-50 px-2 py-1 text-center border-t border-gray-100"><small id="papanLastUpdate" class="text-[10px] text-gray-400"><i class="fas fa-circle text-green-500 text-[5px] align-middle" aria-hidden="true"></i>Live • Memuat...</small></div></div>
+<div class="promo-popup-overlay" id="promoPopup"><div class="promo-popup-container"><button class="popup-close-btn" onclick="closePromoPopup()" aria-label="Tutup Banner Promo"><i class="fas fa-times" aria-hidden="true"></i></button><div class="popup-img-frame" style="padding:30px 20px;text-align:center"><i class="fas fa-graduation-cap" style="font-size:70px;color:white" aria-hidden="true"></i></div><div class="popup-content-inner"><h3 class="popup-title">🎓 Sekolah Pewarta Pos Warga</h3><p class="popup-desc">Belajar nulis berita dari nol,meski belum pernah menulis sama sekali.<br>Dalam 60 menit, kamu sudah bisa membuat berita dengan struktur yang benar. Dapatkan sertifikat resmi POS WARGA.</p><button class="popup-btn-order" onclick="window.location.href='auth/login.html'"><i class="fab fa-whatsapp mr-2" aria-hidden="true"></i>Daftar Sekarang</button><div class="auto-close-timer" id="popupTimer">Popup akan ditutup dalam <span id="timerSeconds">10</span> detik</div></div></div></div>
+<audio id="papanNotificationSound" preload="auto" style="display:none"><source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYAsT5sAAAAAAAAAAAAAAAAAAAA//tQZAAD8AAAaJz4gAAAAGgAn0gAAABwm0ANlREREiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIg=" type="audio/mpeg"></audio>
+<script>
+window.openAICS=function(){    var overlay=document.getElementById('aiOverlay');    var iframe=document.getElementById('aiIframe');    if(overlay&&iframe){        iframe.src='https://ai.poswarga.com/widget';        overlay.classList.add('active');        document.body.style.overflow='hidden';    }};window.closeAICS=function(){    var overlay=document.getElementById('aiOverlay');    var iframe=document.getElementById('aiIframe');    if(overlay){        overlay.classList.remove('active');        document.body.style.overflow='';    }    setTimeout(function(){        if(iframe) iframe.src='';    },300);};document.addEventListener('click',function(e){    var overlay=document.getElementById('aiOverlay');    if(overlay&&e.target===overlay) closeAICS();});document.addEventListener('keydown',function(e){    if(e.key==='Escape') closeAICS();});
+</script>
+<script>
+let deferredPrompt;
+const pwaBtn = document.getElementById('pwaInstallBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    pwaBtn.classList.add('visible');
+});
+
+pwaBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            pwaBtn.classList.remove('visible');
+        }
+        deferredPrompt = null;
+    }
+});
+
+window.addEventListener('appinstalled', () => {
+    pwaBtn.classList.remove('visible');
+    deferredPrompt = null;
+});
+
+var _appConfig = null;
+async function getAppConfig() {
+    if (_appConfig) return _appConfig;
+    var r = await fetch('https://api.poswarga.com/api/config', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+    });
+    if (!r.ok) throw new Error('Gagal memuat konfigurasi');
+    _appConfig = await r.json();
+    window.__APP_CONFIG__ = _appConfig;
+    return _appConfig;
+}
+
+async function loadFooterFromCMS() {
+    var url = null;
+    if (_appConfig && _appConfig.CMS_FOOTER_URL) {
+        url = _appConfig.CMS_FOOTER_URL;
+    } else if (window.__APP_CONFIG__ && window.__APP_CONFIG__.CMS_FOOTER_URL) {
+        url = window.__APP_CONFIG__.CMS_FOOTER_URL;
+    } else {
+        try {
+            var cfg = await getAppConfig();
+            url = cfg.CMS_FOOTER_URL;
+        } catch(e) {
+            return;
+        }
+    }
+    if (!url) return;
+    try {
+        var res = await fetch(url + '?path=all', { redirect: 'follow' });
+        if (!res.ok) throw new Error('Gagal fetch footer');
+        var data = await res.json();
+        renderFooter(data);
+    } catch(e) {}
+}
+
+function renderFooter(data) {
+    if (!data) return;
+    
+    if (data.brand) {
+        var brandData = data.brand;
+        var logoText = brandData.logo_text || 'https://ik.imagekit.io/1ctpzpi1o/logo.png';
+        var tagline = brandData.tagline || 'Warga Berkarya, Warga Berdaya';
+        var status = (brandData.status || '').toLowerCase();
+        
+        if (status === 'published') {
+            var brandHTML = '<div class="flex items-center gap-2 mb-4">' +
+                '<a href="index.html" class="flex items-center">' +
+                    '<img src="' + escapeHtml(logoText) + '" alt="POS WARGA" class="h-8 md:h-10 w-auto object-contain" onerror="this.src=\'https://ik.imagekit.io/1ctpzpi1o/logo.png\'">' +
+                '</a>' +
+            '</div>' +
+            '<p class="text-gray-400 text-sm mb-4">' + escapeHtml(tagline) + '</p>' +
+            '<div class="flex gap-3" id="footerSocialIcons"></div>';
+            
+            document.getElementById('footerBrand').innerHTML = brandHTML;
+        }
+    }
+    
+    if (data.social) {
+        var sc = document.getElementById('footerSocialIcons');
+        if (sc) sc.innerHTML = data.social.map(function(s) { 
+            return '<a href="' + escapeHtml(s.url||'#') + '" target="_blank" class="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:' + escapeHtml(s.color||'bg-red-600') + ' hover:text-white" aria-label="Media Sosial"><i class="fab ' + escapeHtml(s.icon||'fa-link') + '"></i></a>'; 
+        }).join('');
+    }
+    
+    if (data.sections) {
+        var ls = data.sections.find(function(s) { return s.section_key === 'links'; });
+        var info = data.sections.find(function(s) { return s.section_key === 'info'; });
+        if (ls) document.getElementById('footerLinksTitle').textContent = ls.title || 'Tautan Cepat';
+        if (info) document.getElementById('footerInfoTitle').textContent = info.title || 'Informasi';
+    }
+    
+    if (data.links) {
+        var ll = document.getElementById('footerLinksList');
+        if (ll) ll.innerHTML = data.links.map(function(l) { 
+            return '<li><a href="' + escapeHtml(l.url) + '" class="hover:text-white flex items-center gap-2"><i class="fas ' + escapeHtml(l.icon) + ' text-xs ' + escapeHtml(l.icon_color) + '"></i>' + escapeHtml(l.label) + '</a></li>'; 
+        }).join('');
+    }
+    
+    if (data.info) {
+        var il = document.getElementById('footerInfoList');
+        if (il) il.innerHTML = data.info.map(function(i) { 
+            return '<li><a href="' + escapeHtml(i.url) + '" class="hover:text-white flex items-center gap-2"><i class="fas ' + escapeHtml(i.icon) + ' text-xs ' + escapeHtml(i.icon_color) + '"></i>' + escapeHtml(i.label) + '</a></li>'; 
+        }).join('');
+    }
+    
+    if (data.copyright && data.copyright.text) {
+        var t = escapeHtml(data.copyright.text);
+        t = t.replace(/\\n/g,'<br>').replace(/\n/g,'<br>');
+        document.getElementById('footerCopyright').innerHTML = '<p class="text-gray-500 text-sm">' + t + '</p>';
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    var d = document.createElement('div');
+    d.textContent = String(text);
+    return d.innerHTML;
+}
+
+function updateDateTime() {
+    var d = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    var m = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    var n = new Date();
+    document.getElementById('datetime-text').textContent = d[n.getDay()] + ', ' + n.getDate() + ' ' + m[n.getMonth()] + ' ' + n.getFullYear() + ' ' + String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0') + ':' + String(n.getSeconds()).padStart(2,'0') + ' WIB';
+}
+setInterval(updateDateTime, 1000);
+updateDateTime();
+
+var popupTimerInterval = null, popupTimeout = null, popupSecondsLeft = 10;
+var POPUP_DURATION = 10, POPUP_INTERVAL = 60000;
+
+function updatePopupTimer() {
+    popupSecondsLeft--;
+    var t = document.getElementById('timerSeconds');
+    if (t) t.textContent = popupSecondsLeft;
+    if (popupSecondsLeft <= 0) closePromoPopup();
+}
+function showPromoPopup() {
+    var p = document.getElementById('promoPopup');
+    if (p && !p.classList.contains('active')) {
+        popupSecondsLeft = POPUP_DURATION;
+        document.getElementById('timerSeconds').textContent = popupSecondsLeft;
+        p.classList.add('active');
+        if (popupTimerInterval) clearInterval(popupTimerInterval);
+        popupTimerInterval = setInterval(updatePopupTimer, 1000);
+        if (popupTimeout) clearTimeout(popupTimeout);
+        popupTimeout = setTimeout(closePromoPopup, POPUP_DURATION * 1000);
+    }
+}
+function closePromoPopup() {
+    var p = document.getElementById('promoPopup');
+    if (p) p.classList.remove('active');
+    if (popupTimerInterval) { clearInterval(popupTimerInterval); popupTimerInterval = null; }
+    if (popupTimeout) { clearTimeout(popupTimeout); popupTimeout = null; }
+    popupSecondsLeft = POPUP_DURATION;
+}
+window.closePromoPopup = closePromoPopup;
+setTimeout(showPromoPopup, 10000);
+setInterval(function() {
+    var p = document.getElementById('promoPopup');
+    if (p && !p.classList.contains('active')) showPromoPopup();
+}, POPUP_INTERVAL + 10000);
+
+window.scrollToKategori = function(e) {
+    e.preventDefault();
+    var el = document.getElementById('kategoriSection');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var menu = document.getElementById('mobileMenu');
+    if (menu) menu.classList.remove('show');
+};
+
+window.toggleSearch = function() {
+    var el = document.getElementById('searchOverlay');
+    if (el) el.classList.toggle('hidden');
+};
+
+window.searchTopic = function(t) {
+    location.href = 'https://postingan.poswarga.com?search=' + encodeURIComponent(t);
+};
+
+window.toggleMobileMenu = function() {
+    var el = document.getElementById('mobileMenu');
+    if (el) el.classList.toggle('show');
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('hamburgerButton');
+    if (btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            window.toggleMobileMenu();
+        });
+    }
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('mobileMenu');
+        if (menu && menu.classList.contains('show') && !menu.contains(e.target) && btn && !btn.contains(e.target)) {
+            menu.classList.remove('show');
+        }
+    });
+});
+
+window.toggleDarkMode = function() {
+    document.body.classList.toggle('darkmode');
+    var i = document.getElementById('darkModeIcon');
+    if (i) {
+        i.classList.toggle('fa-moon');
+        i.classList.toggle('fa-sun');
+    }
+    localStorage.setItem('darkmode', document.body.classList.contains('darkmode') ? 'darkmode' : '');
+};
+
+window.scrollToTop = function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.addEventListener('scroll', function() {
+    var bt = document.querySelector('.backtop');
+    if (bt) bt.classList.toggle('visible', window.scrollY > 300);
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        var overlay = document.getElementById('searchOverlay');
+        if (overlay) overlay.classList.add('hidden');
+        var dd = document.getElementById('userDropdown');
+        if (dd) dd.classList.remove('show');
+        var menu = document.getElementById('mobileMenu');
+        if (menu) menu.classList.remove('show');
+    }
+});
+
+function initFooter() {
+    loadFooterFromCMS();
+}
+initFooter();
+
+window.toggleFloatingPapan = function() {
+    var p = document.getElementById('floatingPapan');
+    var icon = document.getElementById('papanToggleIcon');
+    if (!p || !icon) return;
+    p.classList.toggle('collapsed');
+    if (p.classList.contains('collapsed')) {
+        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+    } else {
+        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+    }
+};
+</script>
+
+<script>
+(function() {
+    var MAX_MESSAGES = 10, papanSupabase = null, notificationSound = null;
+    var ROLE_COLORS = {
+        'admin': { bg: 'bg-red-600', icon: 'fa-crown' },
+        'editor': { bg: 'bg-blue-600', icon: 'fa-pen-fancy' },
+        'member': { bg: 'bg-green-600', icon: 'fa-star' },
+        'user': { bg: 'bg-gray-600', icon: 'fa-user' }
+    };
+
+    async function initPapan() {
+        notificationSound = document.getElementById('papanNotificationSound');
+        var attempts = 0;
+        while (!window.supabase && attempts < 30) {
+            await new Promise(function(r) { setTimeout(r, 300); });
+            attempts++;
+        }
+        if (window.supabase) {
+            papanSupabase = window.supabase;
+        } else {
+            showPapanError();
+            return;
+        }
+        await loadPapanMessages();
+        subscribePapanRealtime();
+    }
+
+    async function loadPapanMessages() {
+        try {
+            var result = await papanSupabase.from('info_board').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(MAX_MESSAGES);
+            if (result.error) throw result.error;
+            if (result.data && result.data.length > 0) {
+                renderPapanMessages(result.data);
+            } else {
+                showEmptyPapan();
+            }
+        } catch(e) {
+            showEmptyPapan();
+        }
+    }
+
+    function renderPapanMessages(messages) {
+        var container = document.getElementById('papanMessages');
+        if (!container) return;
+        container.innerHTML = messages.map(function(msg) {
+            var roleStyle = ROLE_COLORS[msg.sender_role] || ROLE_COLORS['user'];
+            var timeAgo = formatTimeAgo(msg.created_at);
+            var avatarHtml = msg.sender_avatar
+                ? '<img src="' + escHtml(msg.sender_avatar) + '" alt="' + escHtml(msg.sender_name) + '" class="w-5 h-5 rounded-full flex-shrink-0 object-cover">'
+                : '<div class="w-5 h-5 rounded-full flex-shrink-0 ' + roleStyle.bg + ' flex items-center justify-center"><i class="fas ' + roleStyle.icon + ' text-white text-[7px]" aria-hidden="true"></i></div>';
+            return '<div class="flex gap-1.5 p-1.5 rounded-lg papan-msg-hover hover:bg-gray-50 transition-colors" id="pmsg-' + msg.id + '">' + avatarHtml + '<div class="flex-1 min-w-0"><div class="flex items-center gap-1 mb-0.5"><span class="text-[11px] font-semibold text-gray-700 truncate">' + escHtml(msg.sender_name) + '</span><span class="text-[8px] text-white px-1 py-0.5 rounded-full font-medium ' + roleStyle.bg + ' flex-shrink-0">' + msg.sender_role + '</span></div><p class="text-[11px] text-gray-600" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">' + escHtml(msg.message) + '</p><span class="text-[9px] text-gray-400 mt-0.5 block">' + timeAgo + '</span></div></div>';
+        }).join('');
+        updatePapanTimestamp();
+    }
+
+    function showEmptyPapan() {
+        var c = document.getElementById('papanMessages');
+        if (c) c.innerHTML = '<div class="text-center py-4"><i class="fas fa-bullhorn text-gray-300 text-lg mb-1 block" aria-hidden="true"></i><p class="text-[10px] text-gray-400">Belum ada pengumuman</p></div>';
+    }
+
+    function showPapanError() {
+        var c = document.getElementById('papanMessages');
+        if (c) c.innerHTML = '<div class="text-center py-4"><p class="text-[10px] text-gray-400">Tidak dapat memuat</p></div>';
+    }
+
+    function subscribePapanRealtime() {
+        if (!papanSupabase) return;
+        papanSupabase.channel('papan-poswarga-public')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'info_board', filter: 'is_active=eq.true' }, function(p) { handleNewMessage(p.new); })
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'info_board' }, function(p) { if (p.new && p.new.is_active === false) removeMessageFromPapan(p.new.id); })
+            .subscribe();
+    }
+
+    function handleNewMessage(m) {
+        var c = document.getElementById('papanMessages');
+        if (!c) return;
+        if (c.querySelector('.text-center')) {
+            renderPapanMessages([m]);
+            return;
+        }
+        var cur = c.querySelectorAll('[id^="pmsg-"]');
+        if (cur.length >= MAX_MESSAGES) {
+            var last = cur[cur.length - 1];
+            if (last) last.remove();
+        }
+        var rs = ROLE_COLORS[m.sender_role] || ROLE_COLORS['user'];
+        var av = m.sender_avatar
+            ? '<img src="' + escHtml(m.sender_avatar) + '" alt="' + escHtml(m.sender_name) + '" class="w-5 h-5 rounded-full flex-shrink-0 object-cover">'
+            : '<div class="w-5 h-5 rounded-full flex-shrink-0 ' + rs.bg + ' flex items-center justify-center"><i class="fas ' + rs.icon + ' text-white text-[7px]" aria-hidden="true"></i></div>';
+        var h = '<div class="flex gap-1.5 p-1.5 rounded-lg papan-msg-hover hover:bg-gray-50 transition-colors" id="pmsg-' + m.id + '" style="animation: papanSlideDown 0.3s ease-out;">' + av + '<div class="flex-1 min-w-0"><div class="flex items-center gap-1 mb-0.5"><span class="text-[11px] font-semibold text-gray-700 truncate">' + escHtml(m.sender_name) + '</span><span class="text-[8px] text-white px-1 py-0.5 rounded-full font-medium ' + rs.bg + ' flex-shrink-0">' + m.sender_role + '</span></div><p class="text-[11px] text-gray-600" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">' + escHtml(m.message) + '</p><span class="text-[9px] text-gray-400 mt-0.5 block">Baru saja</span></div></div>';
+        var f = c.firstChild;
+        if (f) f.insertAdjacentHTML('beforebegin', h);
+        else c.innerHTML = h;
+        c.scrollTop = 0;
+        playPapanSound();
+        updatePapanTimestamp();
+    }
+
+    function removeMessageFromPapan(id) {
+        var el = document.getElementById('pmsg-' + id);
+        if (el) {
+            el.style.transition = 'opacity 0.3s ease';
+            el.style.opacity = '0';
+            setTimeout(function() { el.remove(); }, 300);
+        }
+    }
+
+    function playPapanSound() {
+        if (notificationSound) {
+            notificationSound.currentTime = 0;
+            notificationSound.play().catch(function() {});
+        }
+    }
+
+    function updatePapanTimestamp() {
+        var el = document.getElementById('papanLastUpdate');
+        if (el) el.innerHTML = '<i class="fas fa-circle text-green-500 text-[5px] align-middle" aria-hidden="true"></i> Live • Baru saja';
+    }
+
+    function formatTimeAgo(ts) {
+        var n = new Date(), d = new Date(ts), diff = Math.floor((n - d) / 1000);
+        if (diff < 60) return 'Baru saja';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm lalu';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'j lalu';
+        if (diff < 604800) return Math.floor(diff / 86400) + 'h lalu';
+        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    }
+
+    function escHtml(t) {
+        if (!t) return '';
+        var d = document.createElement('div');
+        d.textContent = String(t);
+        return d.innerHTML;
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPapan);
+    } else {
+        initPapan();
+    }
+})();
+</script>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+var cachedConfig = null, supabase = null;
+
+async function loadConfig() {
+    if (cachedConfig) return cachedConfig;
+    if (window.__APP_CONFIG__) {
+        cachedConfig = window.__APP_CONFIG__;
+        return cachedConfig;
+    }
+    var r = await fetch('https://api.poswarga.com/api/config', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(8000)
+    });
+    if (!r.ok) throw new Error('Gagal memuat konfigurasi (' + r.status + ')');
+    cachedConfig = await r.json();
+    window.__APP_CONFIG__ = cachedConfig;
+    return cachedConfig;
+}
+
+async function initSupabase() {
+    try {
+        var c = await loadConfig();
+        supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY);
+        window.supabase = supabase;
+        return supabase;
+    } catch(e) {
+        supabase = null;
+        return null;
+    }
+}
+
+var allArticles = [], currentUser = null, authorProfiles = {}, authorBadges = {};
+
+async function loadTickerNews() {
+    var el = document.getElementById('rss-ticker-widget');
+    try {
+        var c = await loadConfig();
+        var res = await fetch(c.RSS_WORKER_URL);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var news = await res.json();
+        if (!Array.isArray(news)) news = Object.values(news).filter(function(i) { return i && typeof i === 'object'; });
+        news.sort(function(a, b) { return new Date(b.pubDate || 0) - new Date(a.pubDate || 0); });
+        news = news.slice(0, 15);
+        el.innerHTML = '<div class="ticker-wrap"><div class="ticker-content">' + news.map(function(i) {
+            return '<span class="ticker-item"><span><i class="fas fa-rss mr-1" aria-hidden="true"></i>' + (i.source || 'Berita') + ':</span><span><a href="' + (i.link || '#') + '" target="_blank">' + (i.title || 'Tanpa Judul') + '</a></span></span><span class="separator">◆</span>';
+        }).join('') + '</div></div>';
+    } catch(e) {
+        el.innerHTML = '<div class="text-center py-2"><i class="fas fa-rss mr-1" aria-hidden="true"></i>Berita terkini - POS WARGA</div>';
+    }
+}
+
+async function fetchAuthorProfiles(authorIds) {
+    if (!supabase || authorIds.length === 0) return;
+    var uncached = authorIds.filter(function(id) { return !authorProfiles[id]; });
+    if (uncached.length === 0) return;
+    var result = await supabase.from('profiles').select('id,full_name,avatar_url,role,jabatan').in('id', uncached);
+    if (!result.error && result.data) {
+        result.data.forEach(function(p) { authorProfiles[p.id] = p; });
+    }
+}
+
+async function calculateBadge(authorId) {
+    if (!authorId || !supabase) return null;
+    if (authorBadges[authorId] !== undefined) return authorBadges[authorId];
+    try {
+        var now = new Date();
+        var w = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        var m = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        var result = await supabase.from('article_index').select('created_at').eq('author_id', authorId).eq('status', 'published');
+        if (result.error) { authorBadges[authorId] = null; return null; }
+        var wk = result.data.filter(function(a) { return new Date(a.created_at) >= w; }).length;
+        var mo = result.data.filter(function(a) { return new Date(a.created_at) >= m; }).length;
+        var badge = null;
+        if (wk >= 6) badge = { level: 'emas', icon: '🥇', label: 'Emas', class: 'badge-emas' };
+        else if (wk >= 3) badge = { level: 'perak', icon: '🥈', label: 'Perak', class: 'badge-perak' };
+        else if (mo >= 4) badge = { level: 'perunggu', icon: '🥉', label: 'Perunggu', class: 'badge-perunggu' };
+        authorBadges[authorId] = badge;
+        return badge;
+    } catch(e) { authorBadges[authorId] = null; return null; }
+}
+
+async function loadArticles() {
+    if (!supabase) return;
+    try {
+        var result = await supabase.from('article_index').select('*').eq('status', 'published').order('created_at', { ascending: false });
+        if (result.error) throw result.error;
+        allArticles = result.data || [];
+        var authorIds = Array.from(new Set(allArticles.map(function(a) { return a.author_id; }).filter(Boolean)));
+        await fetchAuthorProfiles(authorIds);
+        await Promise.all(authorIds.map(function(id) { return calculateBadge(id); }));
+        await updateStats();
+        loadFeaturedCarousel();
+        loadTrendingSticky();
+        loadRecentArticles(allArticles.filter(function(a) { return !a.is_featured; }).slice(0, 9));
+    } catch(e) {}
+}
+
+async function updateStats() {
+    document.getElementById('statsArticles').innerHTML = '<i class="fas fa-file-alt" aria-hidden="true"></i>' + allArticles.length;
+    document.getElementById('statsWriters').innerHTML = '<i class="fas fa-users" aria-hidden="true"></i>' + (Array.from(new Set(allArticles.map(function(a) { return a.author_id; }))).filter(Boolean).length || 1);
+    document.getElementById('statsReaders').innerHTML = '<i class="fas fa-eye" aria-hidden="true"></i>' + allArticles.reduce(function(s, a) { return s + (a.views || 0); }, 0);
+
+    var todayStart = new Date();
+    todayStart.setHours(0,0,0,0);
+    try {
+        var { count, error } = await supabase
+            .from('article_views')
+            .select('*', { count: 'exact', head: true })
+            .gte('viewed_at', todayStart.toISOString());
+        if (!error && count !== null) {
+            document.getElementById('statsReadersToday').innerHTML = '<i class="fas fa-eye" aria-hidden="true"></i>' + count;
+        } else {
+            document.getElementById('statsReadersToday').innerHTML = '<i class="fas fa-eye" aria-hidden="true"></i>0';
+        }
+    } catch(e) {
+        document.getElementById('statsReadersToday').innerHTML = '<i class="fas fa-eye" aria-hidden="true"></i>0';
+    }
+}
+
+function loadFeaturedCarousel() {
+    var container = document.getElementById('featuredCarousel');
+    var featured = allArticles.filter(function(a) { return a.is_featured === true; });
+    if (featured.length === 0) featured = allArticles.slice(0, 3);
+    if (featured.length === 0) {
+        container.innerHTML = '<div class="p-6"><h2 class="text-2xl font-bold text-center">Selamat Datang di POS WARGA</h2></div>';
+        return;
+    }
+    var trulyFeatured = allArticles.filter(function(a) { return a.is_featured === true; });
+    var CI = {
+        'Kabar Gardu': 'fa-broadcast-tower', 'Jejak Lapangan': 'fa-map-marked-alt',
+        'Kisah Tetangga': 'fa-users', 'Obrolan Warung': 'fa-coffee',
+        'Rembuk Warga': 'fa-comments', 'Sorot Publik': 'fa-lightbulb',
+        'Balai Komunitas': 'fa-building', 'Gerak Bareng': 'fa-people-arrows',
+        'Lapak Lokal': 'fa-store', 'Cerita Ladang': 'fa-seedling',
+        'Denyut Negeri': 'fa-globe-asia', 'Gawe Kampung': 'fa-hammer'
+    };
+    var roleLabels = { 'admin': 'Admin', 'editor': 'Editor', 'member': 'Member', 'user': 'User' };
+    var roleCSS = { 'admin': 'role-admin', 'editor': 'role-editor', 'member': 'role-member', 'user': 'role-user' };
+    var slidesHtml = featured.map(function(a, i) {
+        var date = new Date(a.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        var isTrulyFeatured = trulyFeatured.some(function(f) { return f.id === a.id; });
+        var badge = isTrulyFeatured
+            ? '<span class="absolute top-3 left-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-3 py-1 rounded-full text-xs font-medium z-10 shadow-lg"><i class="fas fa-crown mr-1" aria-hidden="true"></i>Pilihan Editor</span>'
+            : '<span class="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-xs z-10"><i class="fas fa-star mr-1" aria-hidden="true"></i>Featured</span>';
+        var cat = a.category || 'Kabar Gardu', ci = CI[cat] || 'fa-broadcast-tower';
+        var profile = a.author_id ? authorProfiles[a.author_id] : null, avatarUrl = profile ? profile.avatar_url : null;
+        var authorName = a.author_name || (profile ? profile.full_name : null) || 'POS WARGA';
+        var authorRole = (profile && profile.role) ? profile.role : 'user';
+        var ab = a.author_id ? authorBadges[a.author_id] : null;
+        var avatarHtml = avatarUrl
+            ? '<div class="carousel-avatar"><img src="' + avatarUrl + '" alt="' + escapeHtml(authorName) + '" loading="lazy"></div>'
+            : '<div class="carousel-avatar"><i class="fas fa-user text-red-600 text-sm" aria-hidden="true"></i></div>';
+        var bh = ab ? '<span class="' + ab.class + '">' + ab.icon + ' ' + ab.label + '</span>' : '';
+        var roleHTML = '<span class="role-badge ' + (roleCSS[authorRole] || 'role-user') + '">' + (roleLabels[authorRole] || 'User') + '</span>';
+        var authorRow = '<div class="carousel-author-row">' + avatarHtml + '<span class="carousel-author-name" title="' + escapeHtml(authorName) + '">' + escapeHtml(authorName) + '</span>' + roleHTML + bh + '</div>';
+        var dateRow = '<div class="carousel-date-row"><span><i class="far fa-calendar mr-1" aria-hidden="true"></i>' + date + '</span><span><i class="far fa-eye mr-1" aria-hidden="true"></i>' + (a.views || 0) + ' pembaca</span></div>';
+        var imageHtml = a.featured_image
+            ? '<div class="carousel-image-container"><img src="' + a.featured_image + '" alt="' + escapeHtml(a.title) + '" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><div class="carousel-image-fallback" style="display:none"><i class="fas fa-newspaper text-white text-4xl opacity-30" aria-hidden="true"></i></div>' + (a.image_caption ? '<div class="carousel-caption">' + escapeHtml(a.image_caption) + '</div>' : '') + '</div>'
+            : '<div class="carousel-image-container"><div class="carousel-image-fallback"><i class="fas fa-newspaper text-white text-4xl opacity-30" aria-hidden="true"></i></div></div>';
+        return '<div class="carousel-slide">' + imageHtml + badge + (featured.length > 1 ? '<span class="absolute bottom-3 right-3 bg-black/50 text-white px-2 py-1 rounded-full text-xs z-10">' + (i + 1) + '/' + featured.length + '</span>' : '') + '<div class="p-5"><span class="category-badge-sm"><i class="fas ' + ci + '" aria-hidden="true"></i>' + cat + '</span><h2 class="text-xl font-bold mb-2"><a href="https://postingan.poswarga.com/posts/' + a.slug + '" class="hover:text-red-600">' + escapeHtml(a.title) + '</a></h2><p class="text-gray-600 mb-3 line-clamp-2 text-sm">' + (escapeHtml(a.excerpt) || 'Klik untuk membaca...') + '</p>' + authorRow + dateRow + '</div></div>';
+    }).join('');
+    var dotsHtml = '';
+    if (featured.length > 1) dotsHtml = featured.map(function(_, i) { return '<span class="carousel-dot ' + (i === 0 ? 'active' : '') + '" onclick="goToSlide(' + i + ')" aria-label="Slide ' + (i + 1) + '"></span>'; }).join('');
+    container.innerHTML = '<div class="carousel-container"><div class="carousel-slides" id="carouselSlides">' + slidesHtml + '</div></div>' + (dotsHtml ? '<div class="carousel-dots">' + dotsHtml + '</div>' : '');
+    window.featuredCount = featured.length;
+    window.currentSlide = 0;
+}
+
+window.goToSlide = function(index) {
+    if (index < 0) index = window.featuredCount - 1;
+    if (index >= window.featuredCount) index = 0;
+    window.currentSlide = index;
+    var slides = document.getElementById('carouselSlides');
+    if (slides) slides.style.transform = 'translateX(-' + (index * 100) + '%)';
+    document.querySelectorAll('.carousel-dot').forEach(function(dot, i) { dot.classList.toggle('active', i === index); });
+};
+
+setInterval(function() {
+    if (window.featuredCount > 1 && document.getElementById('carouselSlides')) {
+        var next = window.currentSlide + 1;
+        if (next >= window.featuredCount) next = 0;
+        window.goToSlide(next);
+    }
+}, 5000);
+
+function loadTrendingSticky() {
+    var trending = Array.from(allArticles).sort(function(a, b) { return (b.views || 0) - (a.views || 0); }).slice(0, 5);
+    var c = document.getElementById('trendingList');
+    document.querySelectorAll('#trendingList .skeleton').forEach(function(e) { e.remove(); });
+    if (!trending.length) {
+        c.innerHTML = '<p class="text-gray-500 text-xs text-center py-4">Belum ada artikel trending</p>';
+        return;
+    }
+    c.innerHTML = trending.map(function(a, i) {
+        return '<a href="https://postingan.poswarga.com/posts/' + a.slug + '" class="trending-item flex items-start gap-2 p-2 rounded-lg" style="gap:0.46875rem;padding:0.46875rem"><span class="text-xl font-bold ' + (i < 3 ? 'text-orange-500' : 'text-gray-400') + '" style="font-size:1.171875rem">' + (i + 1) + '</span><div><h4 class="font-medium text-xs line-clamp-2" style="font-size:0.703125rem">' + escapeHtml(a.title) + '</h4><p class="text-[10px] text-gray-500 mt-1" style="font-size:0.5625rem"><i class="far fa-eye mr-1" aria-hidden="true"></i>' + (a.views || 0) + '</p></div></a>';
+    }).join('');
+}
+
+function loadRecentArticles(articles) {
+    var grid = document.getElementById('articleGrid');
+    document.querySelectorAll('#articleGrid .skeleton').forEach(function(e) { e.remove(); });
+    if (!articles.length) {
+        grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">Belum ada artikel dalam kategori ini</p>';
+        return;
+    }
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(3,1fr)';
+    grid.style.gap = '1rem';
+    var CI = {
+        'Kabar Gardu': 'fa-broadcast-tower', 'Jejak Lapangan': 'fa-map-marked-alt',
+        'Kisah Tetangga': 'fa-users', 'Obrolan Warung': 'fa-coffee',
+        'Rembuk Warga': 'fa-comments', 'Sorot Publik': 'fa-lightbulb',
+        'Balai Komunitas': 'fa-building', 'Gerak Bareng': 'fa-people-arrows',
+        'Lapak Lokal': 'fa-store', 'Cerita Ladang': 'fa-seedling',
+        'Denyut Negeri': 'fa-globe-asia', 'Gawe Kampung': 'fa-hammer'
+    };
+    var roleLabels = { 'admin': 'Admin', 'editor': 'Editor', 'member': 'Member', 'user': 'User' };
+    var roleCSS = { 'admin': 'role-admin', 'editor': 'role-editor', 'member': 'role-member', 'user': 'role-user' };
+    grid.innerHTML = articles.map(function(a) {
+        var cat = a.category || 'Kabar Gardu', ci = CI[cat] || 'fa-broadcast-tower';
+        var date = new Date(a.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        var imageHtml = a.featured_image
+            ? '<div class="article-image-container"><img src="' + a.featured_image + '" alt="' + escapeHtml(a.title) + '" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><div class="image-fallback" style="display:none"><i class="fas fa-newspaper text-white text-3xl opacity-50" aria-hidden="true"></i></div>' + (a.image_caption ? '<div class="image-caption">' + escapeHtml(a.image_caption) + '</div>' : '') + '</div>'
+            : '<div class="article-image-container"><div class="image-fallback"><i class="fas fa-newspaper text-white text-3xl opacity-50" aria-hidden="true"></i></div></div>';
+        var profile = a.author_id ? authorProfiles[a.author_id] : null;
+        var avatarUrl = profile ? profile.avatar_url : null;
+        var authorName = a.author_name || (profile ? profile.full_name : null) || 'POS WARGA';
+        var authorRole = (profile && profile.role) ? profile.role : 'user';
+        var ab = a.author_id ? authorBadges[a.author_id] : null;
+        var avatarHTML = avatarUrl
+            ? '<span class="grid-avatar"><img src="' + avatarUrl + '" alt="' + escapeHtml(authorName) + '" loading="lazy"></span>'
+            : '<span class="grid-avatar"><i class="fas fa-user" style="color:#9ca3af;font-size:10px" aria-hidden="true"></i></span>';
+        var badgeHTML = ab ? '<span class="' + ab.class + '">' + ab.icon + ' ' + ab.label + '</span>' : '';
+        var roleHTML = '<span class="role-badge ' + (roleCSS[authorRole] || 'role-user') + '">' + (roleLabels[authorRole] || 'User') + '</span>';
+        var authorRow = '<div class="grid-author-row">' + avatarHTML + '<span class="grid-author-name" title="' + escapeHtml(authorName) + '">' + escapeHtml(authorName) + '</span>' + roleHTML + badgeHTML + '</div>';
+        return '<article class="article-card" onclick="location.href=\'https://postingan.poswarga.com/posts/' + a.slug + '\'">' + imageHtml + '<div class="article-card-body"><span class="card-category" onclick="event.stopPropagation();window.location.href=\'https://postingan.poswarga.com?category=' + encodeURIComponent(cat) + '\'" title="Kategori: ' + escapeHtml(cat) + '"><i class="fas ' + ci + '" aria-hidden="true"></i>' + cat + '</span><h3 class="card-title" title="' + escapeHtml(a.title) + '">' + escapeHtml(a.title) + '</h3>' + authorRow + '<div class="card-meta"><span title="' + date + '"><i class="far fa-calendar" aria-hidden="true"></i>' + date + '</span><span title="' + (a.views || 0) + ' pembaca"><i class="far fa-eye" aria-hidden="true"></i>' + (a.views || 0) + '</span></div></div></article>';
+    }).join('');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+var selectedKategori = null;
+window.filterByKategori = function(kategori) {
+    if (selectedKategori === kategori) { window.resetKategori(); return; }
+    selectedKategori = kategori;
+    document.querySelectorAll('.kategori-link').forEach(function(el) {
+        el.classList.remove('active-kategori');
+        if (el.dataset.kategori === kategori) el.classList.add('active-kategori');
+    });
+    document.getElementById('resetKategoriBtn').classList.remove('hidden');
+    document.getElementById('postinganTitle').innerHTML = '<i class="fas fa-folder text-green-600" aria-hidden="true"></i>' + kategori;
+    var filtered = allArticles.filter(function(a) { return a.category === kategori; });
+    loadRecentArticles(filtered);
+};
+
+window.resetKategori = function() {
+    selectedKategori = null;
+    document.querySelectorAll('.kategori-link').forEach(function(el) { el.classList.remove('active-kategori'); });
+    document.getElementById('resetKategoriBtn').classList.add('hidden');
+    document.getElementById('postinganTitle').innerHTML = '<i class="fas fa-clock text-green-600" aria-hidden="true"></i>Postingan Terbaru Warga';
+    var nonFeatured = allArticles.filter(function(a) { return !a.is_featured; });
+    loadRecentArticles(nonFeatured.slice(0, 9));
+};
+
+async function checkUserLogin() {
+    if (!supabase) return;
+    var result = await supabase.auth.getSession();
+    var session = result.data.session;
+    var guest = document.getElementById('guestButtons');
+    var user = document.getElementById('userButtons');
+    var write = document.getElementById('writeArticleBtn');
+    if (session) {
+        currentUser = session.user;
+        var profileResult = await supabase.from('profiles').select('role,full_name').eq('id', currentUser.id).single();
+        if (profileResult.data) {
+            var profile = profileResult.data;
+            var icon = '<i class="fas fa-user-circle"></i>', dash = 'user/dashboard.html', writeUrl = 'user/create-article.html';
+            if (profile.role === 'admin') { icon = '<i class="fas fa-crown"></i>'; dash = 'admin/dashboard.html'; writeUrl = 'admin/articles/create.html'; }
+            else if (profile.role === 'editor') { icon = '<i class="fas fa-pen-fancy"></i>'; dash = 'editor/dashboard.html'; writeUrl = 'editor/create-article.html'; }
+            else if (profile.role === 'member') { icon = '<i class="fas fa-star"></i>'; dash = 'member/dashboard.html'; writeUrl = 'member/create-article.html'; }
+            document.getElementById('userRoleIcon').innerHTML = icon;
+            document.getElementById('userDisplayName').textContent = (profile.full_name || 'User').split(' ')[0];
+            document.getElementById('dropdownUserName').textContent = profile.full_name || 'User';
+            document.getElementById('dropdownUserEmail').textContent = currentUser.email;
+            document.getElementById('dashboardLink').href = dash;
+            document.getElementById('writeLink').href = writeUrl;
+            write.href = writeUrl;
+            guest.classList.add('hidden');
+            user.classList.remove('hidden');
+        }
+    } else {
+        guest.classList.remove('hidden');
+        user.classList.add('hidden');
+        write.href = 'auth/login.html';
+    }
+}
+
+window.logout = async function() {
+    if (supabase) await supabase.auth.signOut();
+    location.reload();
+};
+
+window.toggleUserDropdown = function() {
+    var dd = document.getElementById('userDropdown');
+    if (dd) dd.classList.toggle('show');
+};
+
+document.addEventListener('click', function(e) {
+    var authSection = document.getElementById('authSection');
+    var dd = document.getElementById('userDropdown');
+    if (authSection && dd && !authSection.contains(e.target)) {
+        dd.classList.remove('show');
+    }
+});
+
+async function init() {
+    loadTickerNews();
+    await initSupabase();
+    if (supabase) {
+        await loadArticles();
+        await checkUserLogin();
+    }
+    if (localStorage.getItem('darkmode') === 'darkmode') {
+        document.body.classList.add('darkmode');
+        var icon = document.getElementById('darkModeIcon');
+        if (icon) { icon.classList.replace('fa-moon', 'fa-sun'); }
+    }
+}
+init();
+</script>
+</body>
+</html>

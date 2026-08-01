@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Resmi - POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; }
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 99px; font-size: 13px; font-weight: 700; text-transform: uppercase; }
+        .status-valid { background: #10b981; color: white; }
+        .status-invalid { background: #ef4444; color: white; }
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+    </style>
+</head>
+<body class="p-4 flex flex-col justify-center items-center">
+
+<div class="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden border mt-10">
+    <div class="bg-red-600 h-2 w-full"></div>
+    
+    <div id="loading" class="p-10 text-center">
+        <div class="animate-spin text-red-600 text-3xl mb-3"><i class="fas fa-spinner"></i></div>
+        <p class="text-slate-600 text-sm font-medium">Memvalidasi ID Pewarta...</p>
+    </div>
+
+    <div id="error" class="p-8 text-center hidden">
+        <div class="text-red-500 text-4xl mb-3"><i class="fas fa-times-circle"></i></div>
+        <h3 class="font-bold text-slate-800 text-base">Verifikasi Gagal</h3>
+        <p id="error-msg" class="text-xs text-slate-500 mt-1">-</p>
+        <button onclick="window.location.reload()" class="mt-4 bg-slate-800 text-white text-xs px-4 py-2 rounded-lg">Coba Lagi</button>
+    </div>
+
+    <div id="success" class="hidden p-5">
+        <div class="text-center">
+            <div id="badge" class="status-badge status-invalid">Memuat...</div>
+        </div>
+        
+        <div class="flex justify-center my-4">
+            <img id="v-foto" class="w-28 h-32 object-cover rounded-xl border-2 border-slate-100 shadow-sm" src="" alt="Foto">
+        </div>
+
+        <div class="text-center mb-4">
+            <h2 id="v-nama" class="text-lg font-bold text-slate-800 uppercase">-</h2>
+            <p id="v-jabatan" class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full inline-block mt-0.5">-</p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-3 border">
+            <div class="info-row"><span class="text-slate-500 font-medium">No. Anggota</span><span id="v-id" class="font-bold text-red-600 font-mono">-</span></div>
+            <div class="info-row"><span class="text-slate-500 font-medium">Masa Berlaku</span><span id="v-berlaku" class="font-semibold text-slate-700">-</span></div>
+            <div class="info-row"><span class="text-slate-500 font-medium">Sistem Terbit</span><span class="font-semibold text-slate-700">POSWARGA.COM</span></div>
+        </div>
+        
+        <p id="v-time" class="text-center text-[10px] text-slate-400 mt-4">-</p>
+    </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// ========== PERBAIKAN: Pakai API Config ==========
+const API_URL = 'https://api.poswarga.com/api/config';
+let supabase = null;
+let cachedConfig = null;
+
+async function loadConfig() {
+    if (cachedConfig) return cachedConfig;
+    const r = await fetch(API_URL, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(5000)
+    });
+    if (!r.ok) throw new Error(`Server error (${r.status})`);
+    cachedConfig = await r.json();
+    return cachedConfig;
+}
+
+async function initSupabase() {
+    const c = await loadConfig();
+    supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY);
+    return supabase;
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const cardId = urlParams.get('id');
+
+async function verify() {
+    if (!cardId) {
+        showErr('Parameter ID verifikasi tidak ditemukan / QR tidak sah.');
+        return;
+    }
+
+    try {
+        console.log('Verifikasi ID:', cardId);
+        
+        // Cari berdasarkan id_no (case sensitive, trim)
+        let { data: card, error } = await supabase
+            .from('press_card_requests')
+            .select('*')
+            .eq('id_no', cardId.trim())
+            .maybeSingle();
+
+        console.log('Hasil query:', card, error);
+        
+        if (error) {
+            console.error('Query error:', error);
+            showErr('Gagal mengamankan jembatan data basis data: ' + error.message);
+            return;
+        }
+
+        if (!card) {
+            // Coba cari dengan LIKE (case insensitive)
+            const { data: cardLike, error: likeError } = await supabase
+                .from('press_card_requests')
+                .select('*')
+                .ilike('id_no', `%${cardId.trim()}%`)
+                .maybeSingle();
+            
+            if (likeError || !cardLike) {
+                showErr(`ID "${cardId}" tidak terdaftar dalam database resmi.`);
+                return;
+            }
+            card = cardLike;
+        }
+
+        // Cek status
+        if (card.status !== 'approved') {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('success').classList.remove('hidden');
+            const badge = document.getElementById('badge');
+            badge.className = "status-badge status-invalid";
+            badge.innerHTML = '<i class="fas fa-times-circle"></i> KARTU TIDAK AKTIF';
+            document.getElementById('v-nama').textContent = card.full_name;
+            document.getElementById('v-id').textContent = card.id_no;
+            document.getElementById('v-jabatan').textContent = card.jabatan || 'Pewarta / Wartawan';
+            document.getElementById('v-berlaku').textContent = card.berlaku_hingga || 'Selamanya';
+            
+            const img = document.getElementById('v-foto');
+            if (card.foto_url) {
+                img.src = card.foto_url.startsWith('http') ? card.foto_url : `${cachedConfig.SUPABASE_URL}/storage/v1/object/public/avatars/${card.foto_url}`;
+            } else {
+                img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(card.full_name)}&background=dc2626&color=fff`;
+            }
+            
+            const now = new Date();
+            document.getElementById('v-time').textContent = `Diverifikasi pada: ${now.toLocaleDateString('id-ID')} - ${now.toLocaleTimeString('id-ID')} WIB`;
+            return;
+        }
+
+        // Tampilkan sukses
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('success').classList.remove('hidden');
+
+        document.getElementById('v-nama').textContent = card.full_name;
+        document.getElementById('v-id').textContent = card.id_no;
+        document.getElementById('v-jabatan').textContent = card.jabatan || 'Pewarta / Wartawan';
+        document.getElementById('v-berlaku').textContent = card.berlaku_hingga || 'Selamanya';
+
+        const badge = document.getElementById('badge');
+        badge.className = "status-badge status-valid";
+        badge.innerHTML = '<i class="fas fa-check-circle"></i> KARTU AKTIF / SAH';
+
+        const img = document.getElementById('v-foto');
+        if (card.foto_url) {
+            img.src = card.foto_url.startsWith('http') ? card.foto_url : `${cachedConfig.SUPABASE_URL}/storage/v1/object/public/avatars/${card.foto_url}`;
+        } else {
+            img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(card.full_name)}&background=dc2626&color=fff`;
+        }
+
+        const now = new Date();
+        document.getElementById('v-time').textContent = `Diverifikasi pada: ${now.toLocaleDateString('id-ID')} - ${now.toLocaleTimeString('id-ID')} WIB`;
+
+    } catch (err) {
+        console.error('Verify error:', err);
+        showErr('Terjadi kendala pemrosesan sistem internal: ' + err.message);
+    }
+}
+
+function showErr(msg) {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('error').classList.remove('hidden');
+    document.getElementById('error-msg').textContent = msg;
+}
+
+// Inisialisasi
+(async () => {
+    try {
+        await initSupabase();
+        await verify();
+    } catch (e) {
+        console.error(e);
+        showErr('Gagal terhubung ke server verifikasi.');
+    }
+})();
+</script>
+</body>
+</html>

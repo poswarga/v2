@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Tulis Artikel - User POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Quill Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link rel="stylesheet" href="../assets/css/article-chat.css">
+    <style>
+        .ql-editor { min-height: 350px; font-size: 16px; }
+        .ql-container { font-size: 16px; }
+        .action-btn { @apply px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2; }
+        .ql-toolbar { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; }
+        .ql-container { border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+        
+        /* ===== ENHANCED: SPACING SYNC (Create → Preview → Publish) ===== */
+        .ql-editor p { margin-bottom: 1.25em; line-height: 1.8; }
+        .ql-editor p:last-child { margin-bottom: 0; }
+        .ql-editor br + br { display: none; }
+        .ql-editor h1 { margin: 1.5em 0 0.75em; line-height: 1.3; font-size: 1.5em; font-weight: 700; }
+        .ql-editor h2 { margin: 1.25em 0 0.5em; line-height: 1.4; font-size: 1.25em; font-weight: 600; }
+        .ql-editor ol, .ql-editor ul { margin-bottom: 1.25em; padding-left: 2em; }
+        .ql-editor li { margin-bottom: 0.5em; line-height: 1.7; }
+        .ql-editor li:last-child { margin-bottom: 0; }
+        .ql-editor blockquote { margin: 1.25em 0; padding: 0.75em 1.25em; border-left: 4px solid #e5a50a; background: #fef9e7; border-radius: 0 8px 8px 0; }
+        .ql-editor pre.ql-syntax { margin: 1.25em 0; padding: 1em; background: #1e293b; color: #e2e8f0; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; }
+        .ql-editor img { max-width: 100%; height: auto; margin: 1.25em 0; border-radius: 8px; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="../index.html" class="text-gray-500 hover:text-yellow-600 transition p-2 rounded-lg hover:bg-yellow-50" title="Beranda">
+                        <i class="fas fa-home text-lg"></i>
+                    </a>
+                    <a href="dashboard.html" class="text-gray-500 hover:text-yellow-600 transition p-2 rounded-lg hover:bg-yellow-50" title="Dashboard Saya">
+                        <i class="fas fa-tachometer-alt text-lg"></i>
+                    </a>
+                    <button onclick="window.location.reload()" class="text-gray-500 hover:text-yellow-600 transition p-2 rounded-lg hover:bg-yellow-50" title="Refresh Halaman">
+                        <i class="fas fa-sync-alt text-lg"></i>
+                    </button>
+                    <div class="w-10 h-10 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-plus-circle text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-yellow-500 to-amber-600 bg-clip-text text-transparent">Tulis Artikel</h1>
+                        <p class="text-xs text-gray-400 hidden sm:block">Bagikan tulisan Anda</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <a href="my-articles.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-list mr-1"></i> Artikel Saya
+                    </a>
+                    <div class="text-right hidden sm:block">
+                        <p id="userName" class="text-sm font-semibold text-gray-800">User</p>
+                        <p id="userEmail" class="text-xs text-gray-500">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-4">
+                <!-- Judul & Slug -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul Artikel <span class="text-red-500">*</span></label>
+                    <input type="text" id="articleTitle" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition" placeholder="Masukkan judul artikel yang menarik...">
+                    
+                    <div class="flex items-center justify-between mt-4">
+                        <label class="block text-sm font-medium text-gray-700">Slug URL</label>
+                        <span class="text-xs text-gray-400">Otomatis dari judul</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="articleSlug" class="flex-1 border border-gray-200 rounded-lg px-4 py-2 bg-gray-50 font-mono text-sm" placeholder="slug-artikel">
+                        <button onclick="copySlug()" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition" title="Copy Slug">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button onclick="generateSlug()" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-4 py-2 rounded-lg transition" title="Generate Ulang">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Slug akan digunakan sebagai URL artikel. Gunakan huruf kecil, angka, dan tanda hubung.</p>
+                </div>
+
+                <!-- ✅ KATEGORI ARTIKEL — 12 KATEGORI BARU -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Artikel <span class="text-red-500">*</span></label>
+                    <select id="articleCategory" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition bg-white">
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="Kabar Gardu">📡 Kabar Gardu</option>
+                        <option value="Jejak Lapangan">🗺️ Jejak Lapangan</option>
+                        <option value="Kisah Tetangga">👥 Kisah Tetangga</option>
+                        <option value="Obrolan Warung">☕ Obrolan Warung</option>
+                        <option value="Rembuk Warga">💬 Rembuk Warga</option>
+                        <option value="Sorot Publik">🔦 Sorot Publik</option>
+                        <option value="Balai Komunitas">🏛️ Balai Komunitas</option>
+                        <option value="Gerak Bareng">🤝 Gerak Bareng</option>
+                        <option value="Lapak Lokal">🛍️ Lapak Lokal</option>
+                        <option value="Cerita Ladang">🌱 Cerita Ladang</option>
+                        <option value="Denyut Negeri">🌏 Denyut Negeri</option>
+                        <option value="Gawe Kampung">🔨 Gawe Kampung</option>
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Pilih kategori yang sesuai dengan isi artikel.</p>
+                </div>
+
+                <!-- Konten Artikel -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Konten Artikel <span class="text-red-500">*</span></label>
+                    <div id="editorContainer"><div id="editor"></div></div>
+                    <p class="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                        <i class="fas fa-info-circle"></i> <span id="wordCountDisplay">0 kata</span> - Tidak ada batasan minimal kata
+                    </p>
+                </div>
+
+                <!-- Excerpt -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Excerpt (Ringkasan) <span class="text-red-500">*</span></label>
+                        <span class="text-xs text-gray-400" id="excerptCount">0/160</span>
+                    </div>
+                    <textarea id="articleExcerpt" rows="3" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition" placeholder="Ringkasan singkat artikel (maksimal 160 karakter)..."></textarea>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Ringkasan akan tampil di halaman daftar artikel.</p>
+                </div>
+
+                <!-- Sumber Artikel -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Sumber Artikel</label>
+                        <span class="text-xs text-gray-400">Opsional</span>
+                    </div>
+                    <div class="relative">
+                        <i class="fas fa-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="url" id="articleSource" class="w-full border border-gray-200 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition" placeholder="https://... (opsional)">
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Cantumkan URL sumber jika artikel mengutip atau merujuk dari sumber lain.</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Alur Review -->
+                <div class="bg-gradient-to-r from-yellow-400 to-amber-500 rounded-xl shadow-md p-5 text-white">
+                    <h3 class="font-semibold mb-2 flex items-center gap-2"><i class="fas fa-info-circle"></i> Alur Review</h3>
+                    <div class="space-y-2 text-sm text-yellow-50">
+                        <div class="flex items-center gap-2"><span class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs">1</span><span>Anda submit artikel</span></div>
+                        <div class="flex items-center gap-2"><span class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs">2</span><span>Editor mereview</span></div>
+                        <div class="flex items-center gap-2"><span class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs">3</span><span>Editor publish / tolak</span></div>
+                    </div>
+                </div>
+
+                <!-- ========== WIDGET CHAT (MUNCUL SETELAH DRAFT TERSIMPAN) ========== -->
+                <div id="articleChatWidget" class="hidden"></div>
+                <!-- ========== END WIDGET CHAT ========== -->
+
+                <!-- Gambar Utama -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-image text-yellow-600"></i> Gambar Utama</h3>
+                    <div class="space-y-3">
+                        <div class="flex border-b border-gray-200">
+                            <button id="tabFile" class="flex-1 py-2 text-sm font-medium text-yellow-600 border-b-2 border-yellow-600 transition" onclick="switchImageTab('file')">
+                                <i class="fas fa-upload mr-1"></i>Upload File
+                            </button>
+                            <button id="tabUrl" class="flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-yellow-600 transition" onclick="switchImageTab('url')">
+                                <i class="fas fa-link mr-1"></i>URL Gambar
+                            </button>
+                        </div>
+                        
+                        <div id="uploadFileSection">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Pilih file gambar:</label>
+                            <input type="file" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="w-full border border-gray-200 rounded-lg p-2 text-sm">
+                            <p class="text-xs text-gray-400 mt-1">Format: JPG, PNG, GIF, WebP. Maks 5MB. (Otomatis dikonversi ke WebP)</p>
+                            <div id="uploadProgress" class="mt-2 hidden">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2"><div id="progressBar" class="bg-yellow-600 h-2 rounded-full" style="width: 0%"></div></div>
+                                    <span id="progressText" class="text-xs text-gray-500">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="uploadUrlSection" class="hidden">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">URL Gambar</label>
+                            <input type="text" id="featuredImage" class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition" placeholder="https://...">
+                            <p class="text-xs text-gray-400 mt-1">Masukkan URL gambar dari internet</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Keterangan Gambar (Caption / Alt Text)</label>
+                            <input type="text" id="imageCaption" class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition" placeholder="Contoh: Ilustrasi artikel (opsional)">
+                            <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Keterangan akan ditampilkan di bawah gambar.</p>
+                        </div>
+                        
+                        <div id="imagePreview" class="mt-3 hidden">
+                            <img id="previewImg" class="w-full h-32 object-cover rounded-lg border border-gray-200" src="" alt="Preview">
+                            <p id="previewCaption" class="text-xs text-gray-500 mt-1 text-center italic"></p>
+                            <button onclick="removeImage()" class="text-red-500 text-xs mt-2 hover:text-red-700 transition">
+                                <i class="fas fa-trash"></i> Hapus Gambar
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3"><i class="fas fa-lightbulb"></i> Gambar yang menarik akan meningkatkan pembaca.</p>
+                </div>
+
+                <!-- Publikasi -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-paper-plane text-yellow-600"></i> Publikasi</h3>
+                    <div class="space-y-2">
+                        <button onclick="submitArticle()" id="submitBtn" class="action-btn w-full bg-yellow-600 hover:bg-yellow-700 text-white justify-center shadow-md">
+                            <i class="fas fa-paper-plane"></i> Kirim ke Editor
+                        </button>
+                        <button onclick="saveAsDraft()" id="draftBtn" class="action-btn w-full bg-gray-100 hover:bg-gray-200 text-gray-700 justify-center border border-gray-200">
+                            <i class="fas fa-save"></i> Simpan sebagai Draft
+                        </button>
+                        <hr class="my-3 border-gray-200">
+                        <button onclick="previewArticle()" class="action-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-700 justify-center border border-blue-200">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                        <button onclick="window.location.href='dashboard.html'" class="action-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-600 justify-center border border-gray-200">
+                            <i class="fas fa-times"></i> Batal
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <h4 class="font-medium text-blue-800 mb-2 flex items-center gap-2"><i class="fas fa-lightbulb text-yellow-500"></i> Tips Artikel Diterima</h4>
+                    <ul class="text-xs text-blue-700 space-y-1">
+                        <li>• Judul maksimal 70 karakter</li>
+                        <li>• Pilih kategori yang sesuai</li>
+                        <li>• Konten bebas, tidak ada batasan minimal kata</li>
+                        <li>• Gunakan gambar original/bebas hak cipta</li>
+                        <li>• Isi keterangan gambar untuk konteks</li>
+                        <li>• Cek ejaan dan tata bahasa</li>
+                        <li>• Cantumkan sumber jika mengutip</li>
+                        <li>• Hasil liputan harus ada wawancara narasumber primer</li>
+                        <li>• Menghormati perbedaan SARA (Suku, Agama, Ras, Antargolongan).</li>
+                        <li>• Tidak menyebarkan kebencian atau diskriminasi</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden transition-all">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let cachedConfig = null, supabase = null;
+        async function loadConfig() { 
+            if (cachedConfig) return cachedConfig; 
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`Server error (${r.status})`);
+            cachedConfig = await r.json();
+            if (!cachedConfig.SUPABASE_URL || !cachedConfig.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            return cachedConfig; 
+        }
+        
+        async function initSupabase() { 
+            try { const c = await loadConfig(); supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); window.supabase = supabase; console.log("✅ Supabase connected"); } 
+            catch (e) { console.warn("⚠️ Supabase gagal"); supabase = null; throw e; } 
+        }
+        
+        let convertedImageBase64 = null, tempWebPFile = null;
+        
+        async function convertToWebP(file, quality = 0.85) {
+            return new Promise((resolve, reject) => {
+                const img = new Image(), reader = new FileReader();
+                reader.onload = e => img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'), maxWidth = 1200;
+                    let width = img.width, height = img.height;
+                    if (width > maxWidth) { height = height * (maxWidth / width); width = maxWidth; }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                    convertedImageBase64 = canvas.toDataURL('image/webp', quality);
+                    document.getElementById('previewImg').src = convertedImageBase64;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    canvas.toBlob(blob => {
+                        if (!blob) return reject('Gagal convert ke WebP');
+                        const newFileName = file.name.replace(/\.\w+$/, '.webp');
+                        const webpFile = new File([blob], newFileName, { type: 'image/webp' });
+                        tempWebPFile = webpFile; resolve(webpFile);
+                    }, 'image/webp', quality);
+                };
+                img.onerror = () => reject('Gagal memuat gambar');
+                reader.onerror = () => reject('Gagal membaca file');
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        let userId = null, userRole = null, quill = null, savedArticleId = null, currentImageTab = 'file';
+        
+        async function checkUser() {
+            if (!supabase) return;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '../auth/login.html'; return; }
+            const { data: profile, error } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if (error) { showToast('Gagal memuat profil: ' + error.message, 'error'); return; }
+            if (profile?.role !== 'user' && profile?.role !== 'member') { 
+                if (profile?.role === 'admin') window.location.href = '../admin/dashboard.html'; 
+                else if (profile?.role === 'editor') window.location.href = '../editor/dashboard.html'; 
+                return; 
+            }
+            userId = session.user.id; userRole = profile.role;
+            document.getElementById('userName').textContent = profile?.full_name || session.user.email;
+            document.getElementById('userEmail').textContent = session.user.email;
+            initQuill();
+        }
+        
+        function initQuill() {
+            if (quill) return;
+            
+            // Override default tag DIV → P
+            const Block = Quill.import('blots/block');
+            Block.tagName = 'P';
+            Quill.register(Block, true);
+            
+            quill = new Quill('#editor', { theme: 'snow', placeholder: 'Tulis konten artikel Anda di sini...', 
+                modules: { toolbar: [['bold','italic','underline','strike'],['blockquote','code-block'],[{'header':1},{'header':2}],[{'list':'ordered'},{'list':'bullet'}],[{'indent':'-1'},{'indent':'+1'}],[{'size':['small',false,'large','huge']}],[{'color':[]},{'background':[]}],[{'align':[]}],['clean'],['link','image']] } });
+            quill.on('text-change', function() { updateWordCount(); hasChanges = true; });
+            
+            // Shift+Enter = line break, Enter = new paragraph
+            quill.keyboard.addBinding({
+                key: 13,
+                shiftKey: true
+            }, function(range, context) {
+                quill.insertText(range.index, '\n');
+                return false;
+            });
+            
+            updateWordCount();
+        }
+        
+        function updateWordCount() { 
+            if (!quill) return;
+            const text = quill.getText().trim(), count = text ? text.split(/\s+/).filter(w => w.length > 0).length : 0;
+            document.getElementById('wordCountDisplay').textContent = `${count} kata`; 
+        }
+        
+        // ✅ Slug generator — dipasang di window untuk akses dari onclick
+        window.generateSlug = function() { 
+            const t = document.getElementById('articleTitle').value;
+            if (t) {
+                document.getElementById('articleSlug').value = t
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g,'')
+                    .replace(/\s+/g,'-')
+                    .replace(/-+/g,'-')
+                    .trim()
+                    .substring(0, 100); // batasi panjang slug
+            }
+        };
+        window.copySlug = function() { 
+            const s = document.getElementById('articleSlug'); 
+            if (!s.value) window.generateSlug(); 
+            s.select(); s.setSelectionRange(0, 99999); // mobile support
+            navigator.clipboard?.writeText(s.value).catch(() => {
+                // fallback untuk browser lama
+                document.execCommand('copy');
+            }); 
+            showToast('✅ Slug disalin!'); 
+        };
+        
+        document.getElementById('articleTitle').addEventListener('input', window.generateSlug);
+        document.getElementById('articleTitle').addEventListener('blur', window.generateSlug);
+        document.getElementById('articleExcerpt').addEventListener('input', function() { document.getElementById('excerptCount').textContent = `${this.value.length}/160`; });
+        
+        window.switchImageTab = function(tab) {
+            currentImageTab = tab;
+            document.getElementById('tabFile').className = tab === 'file' ? 'flex-1 py-2 text-sm font-medium text-yellow-600 border-b-2 border-yellow-600 transition' : 'flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-yellow-600 transition';
+            document.getElementById('tabUrl').className = tab === 'url' ? 'flex-1 py-2 text-sm font-medium text-yellow-600 border-b-2 border-yellow-600 transition' : 'flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-yellow-600 transition';
+            document.getElementById('uploadFileSection').classList.toggle('hidden', tab !== 'file');
+            document.getElementById('uploadUrlSection').classList.toggle('hidden', tab !== 'url');
+        };
+        
+        document.getElementById('imageFile').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                try {
+                    showToast('🔄 Mengkonversi gambar ke WebP...', 'info');
+                    await convertToWebP(file, 0.85);
+                    showToast('✅ Gambar siap (WebP)', 'success');
+                } catch (error) {
+                    showToast('❌ Gagal konversi: ' + error.message, 'error');
+                    const reader = new FileReader();
+                    reader.onload = function(e) { convertedImageBase64 = e.target.result; document.getElementById('previewImg').src = e.target.result; document.getElementById('imagePreview').classList.remove('hidden'); };
+                    reader.readAsDataURL(file); tempWebPFile = file;
+                }
+            }
+        });
+        
+        document.getElementById('featuredImage').addEventListener('input', function() { 
+            if (this.value) { document.getElementById('previewImg').src = this.value; document.getElementById('imagePreview').classList.remove('hidden'); } 
+            else { document.getElementById('imagePreview').classList.add('hidden'); }
+        });
+        document.getElementById('imageCaption').addEventListener('input', function() { document.getElementById('previewCaption').textContent = this.value || 'Gambar utama artikel'; });
+        window.removeImage = function() { 
+            document.getElementById('featuredImage').value = ''; document.getElementById('imageFile').value = ''; 
+            document.getElementById('imageCaption').value = ''; document.getElementById('imagePreview').classList.add('hidden'); 
+            convertedImageBase64 = null; tempWebPFile = null;
+        };
+        
+        async function uploadImageToStorage(file) {
+            const fileName = `article-images/${userId}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+            const { data, error } = await supabase.storage.from('articles').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) throw error;
+            const { data: urlData } = supabase.storage.from('articles').getPublicUrl(fileName);
+            return urlData.publicUrl;
+        }
+        
+        function validateForm() {
+            const t = document.getElementById('articleTitle').value.trim(), 
+                  c = quill ? quill.root.innerHTML.trim() : '', 
+                  e = document.getElementById('articleExcerpt').value.trim(), 
+                  cat = document.getElementById('articleCategory').value;
+            if (!t) { showToast('Judul artikel harus diisi', 'error'); return false; }
+            if (t.length > 70) { showToast('Judul maksimal 70 karakter', 'error'); return false; }
+            if (!cat) { showToast('Kategori artikel harus dipilih', 'error'); return false; }
+            if (!c || c === '<p><br></p>') { showToast('Konten artikel harus diisi', 'error'); return false; }
+            if (!e) { showToast('Excerpt harus diisi', 'error'); return false; }
+            if (e.length > 160) { showToast('Excerpt maksimal 160 karakter', 'error'); return false; }
+            return true;
+        }
+        
+        async function getFormData() {
+            if (!document.getElementById('articleSlug').value) window.generateSlug();
+            const authorRole = userRole === 'member' ? 'member' : 'user'; 
+            let img = null;
+            if (currentImageTab === 'file') {
+                let file = tempWebPFile || document.getElementById('imageFile').files[0];
+                if (file) {
+                    try {
+                        document.getElementById('uploadProgress').classList.remove('hidden');
+                        if (!tempWebPFile) { 
+                            document.getElementById('progressText').textContent = 'Konversi...'; 
+                            document.getElementById('progressBar').style.width = '30%'; 
+                            file = await convertToWebP(file, 0.85); 
+                        }
+                        document.getElementById('progressText').textContent = 'Upload...'; 
+                        document.getElementById('progressBar').style.width = '70%';
+                        img = await uploadImageToStorage(file); 
+                        document.getElementById('progressBar').style.width = '100%';
+                        document.getElementById('uploadProgress').classList.add('hidden'); 
+                        showToast('✅ Gambar berhasil diupload (WebP)', 'success');
+                    } catch (error) { 
+                        document.getElementById('uploadProgress').classList.add('hidden'); 
+                        throw new Error('Gagal upload gambar: ' + error.message); 
+                    }
+                }
+            } else { 
+                img = document.getElementById('featuredImage').value || null; 
+            }
+            const cap = document.getElementById('imageCaption').value || null, 
+                  sourceUrl = document.getElementById('articleSource').value.trim() || null, 
+                  category = document.getElementById('articleCategory').value;
+            return { 
+                title: document.getElementById('articleTitle').value.trim(), 
+                slug: document.getElementById('articleSlug').value, 
+                excerpt: document.getElementById('articleExcerpt').value.trim(), 
+                content: quill ? quill.root.innerHTML : '', 
+                category: category, 
+                featured_image: img, 
+                image_caption: cap, 
+                source_url: sourceUrl, 
+                file_path: img, 
+                author_id: userId, 
+                author_role: authorRole, 
+                author_name: document.getElementById('userName').textContent, 
+                updated_at: new Date().toISOString() 
+            };
+        }
+        
+        // ========== CHAT WIDGET (KONDISIONAL) ==========
+        async function initChatWidget() {
+            if (!savedArticleId || !userId) return;
+            try {
+                const widgetContainer = document.getElementById('articleChatWidget');
+                if (!widgetContainer) return;
+                
+                // Cek apakah widget sudah ada (hindari duplikat)
+                if (widgetContainer.children.length > 0 && widgetContainer.querySelector('.article-chat-container')) return;
+                
+                const response = await fetch('../shared/article-chat-widget.html');
+                const html = await response.text();
+                
+                widgetContainer.innerHTML = html;
+                widgetContainer.classList.remove('hidden');
+                
+                // Animasi muncul
+                widgetContainer.style.opacity = '0';
+                widgetContainer.style.transition = 'opacity 0.3s ease';
+                requestAnimationFrame(() => { widgetContainer.style.opacity = '1'; });
+                
+                const script = document.createElement('script');
+                script.src = '../assets/js/article-chat.js?v=20260501';
+                script.onload = () => {
+                    if (typeof ArticleChat !== 'undefined') {
+                        new ArticleChat(savedArticleId, userId, userRole);
+                    }
+                };
+                document.body.appendChild(script);
+            } catch (e) {
+                console.error('Gagal load chat widget:', e);
+            }
+        }
+        // ========== END CHAT WIDGET ==========
+        
+        window.saveAsDraft = async function() {
+            const t = document.getElementById('articleTitle').value.trim(), cat = document.getElementById('articleCategory').value;
+            if (!t) { showToast('Minimal isi judul untuk menyimpan draft', 'error'); return; }
+            const btn = document.getElementById('draftBtn'); 
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...';
+            try {
+                const fd = await getFormData(); 
+                fd.status = 'draft'; 
+                if (!fd.category) fd.category = 'Kabar Gardu';
+                let r; 
+                if (savedArticleId) { 
+                    r = await supabase.from('article_index').update(fd).eq('id', savedArticleId).eq('author_id', userId).select(); 
+                } else { 
+                    fd.created_at = new Date().toISOString(); 
+                    r = await supabase.from('article_index').insert(fd).select().single(); 
+                    if (r.data) { 
+                        savedArticleId = r.data.id; 
+                        await initChatWidget(); // Munculkan chat widget setelah draft tersimpan
+                    } 
+                }
+                if (r.error) { 
+                    showToast('Gagal menyimpan draft: ' + r.error.message, 'error'); 
+                    return; 
+                }
+                showToast('✅ Draft berhasil disimpan');
+            } catch (error) { 
+                showToast('❌ ' + error.message, 'error'); 
+            } finally { 
+                btn.disabled = false; 
+                btn.innerHTML = '<i class="fas fa-save"></i> Simpan sebagai Draft'; 
+            }
+        };
+        
+        window.submitArticle = async function() {
+            if (!validateForm()) return; 
+            if (!confirm('Kirim artikel ke Editor untuk direview?')) return;
+            const btn = document.getElementById('submitBtn'); 
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Mengirim...';
+            try {
+                const fd = await getFormData(); 
+                fd.status = 'pending_editor'; 
+                let r; 
+                if (savedArticleId) { 
+                    r = await supabase.from('article_index').update(fd).eq('id', savedArticleId).eq('author_id', userId).select(); 
+                } else { 
+                    fd.created_at = new Date().toISOString(); 
+                    r = await supabase.from('article_index').insert(fd).select().single(); 
+                }
+                if (r.error) { 
+                    let m = r.error.message; 
+                    if (r.error.code === '42501') m = 'Tidak memiliki izin.'; 
+                    else if (r.error.code === '23505') m = 'Slug sudah digunakan. Silakan ganti judul.'; 
+                    showToast('Gagal: ' + m, 'error'); 
+                    return; 
+                }
+                showToast('✅ Artikel berhasil dikirim ke Editor!'); 
+                setTimeout(() => window.location.href = 'my-articles.html', 1500);
+            } catch (error) { 
+                showToast('❌ ' + error.message, 'error'); 
+            } finally { 
+                btn.disabled = false; 
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim ke Editor'; 
+            }
+        };
+        
+        window.previewArticle = function() {
+            let img = null;
+            if (currentImageTab === 'file') { 
+                img = convertedImageBase64; 
+                if (!img) { 
+                    const fileInput = document.getElementById('imageFile'); 
+                    if (fileInput.files[0]) { 
+                        const reader = new FileReader(); 
+                        reader.onload = e => { 
+                            const previewData = { ...JSON.parse(localStorage.getItem('preview_article') || '{}'), image: e.target.result };
+                            localStorage.setItem('preview_article', JSON.stringify(previewData));
+                        };
+                        reader.readAsDataURL(fileInput.files[0]); 
+                    } 
+                }
+            } else { 
+                img = document.getElementById('featuredImage').value || null; 
+            }
+            const previewData = {
+                title: document.getElementById('articleTitle').value || 'Tanpa Judul',
+                content: quill ? quill.root.innerHTML : '<p>Tidak ada konten</p>',
+                excerpt: document.getElementById('articleExcerpt').value || null,
+                category: document.getElementById('articleCategory').value || 'Kabar Gardu',
+                image: img, 
+                caption: document.getElementById('imageCaption').value || null,
+                sourceUrl: document.getElementById('articleSource').value.trim() || null
+            };
+            localStorage.setItem('preview_article', JSON.stringify(previewData)); 
+            window.open('preview.html', '_blank');
+        };
+        
+        function showToast(m, t = 'success') { 
+            const toast = document.getElementById('toast'), msg = document.getElementById('toastMessage'); 
+            toast.classList.remove('bg-green-500','bg-red-500','bg-yellow-500','bg-blue-500'); 
+            if (t==='success') toast.classList.add('bg-green-500'); 
+            else if (t==='error') toast.classList.add('bg-red-500'); 
+            else if (t==='info') toast.classList.add('bg-blue-500'); 
+            else toast.classList.add('bg-yellow-500');
+            msg.textContent = m; 
+            toast.classList.remove('hidden'); 
+            setTimeout(() => toast.classList.add('hidden'), 5000); 
+        }
+        
+        let hasChanges = false;
+        document.getElementById('articleTitle').addEventListener('input', () => hasChanges = true);
+        document.getElementById('articleCategory').addEventListener('change', () => hasChanges = true);
+        document.getElementById('imageCaption')?.addEventListener('input', () => hasChanges = true);
+        document.getElementById('articleSource')?.addEventListener('input', () => hasChanges = true);
+        window.addEventListener('beforeunload', e => { if (hasChanges) { e.preventDefault(); e.returnValue = ''; } });
+        
+        (async () => { 
+            try { 
+                await initSupabase(); 
+                if (supabase) { 
+                    await checkUser(); 
+                } else { 
+                    window.location.href = '../auth/login.html'; 
+                } 
+            } catch(e) { 
+                window.location.href = '../auth/login.html'; 
+            } 
+        })();
+    </script>
+</body>
+</html>

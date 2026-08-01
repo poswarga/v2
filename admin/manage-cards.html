@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Kelola Kartu PEWARTA - Admin POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .status-badge { transition: all 0.2s ease; }
+        .card-preview { transition: transform 0.2s ease; }
+        .card-preview:hover { transform: scale(1.02); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { max-width: 90%; max-height: 90%; overflow: auto; }
+        @media (max-width: 768px) { table { font-size: 12px; } th, td { padding: 8px 4px; } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="dashboard.html" class="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition"><i class="fas fa-arrow-left text-xl"></i></a>
+                    <div class="w-10 h-10 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl flex items-center justify-center shadow-md"><i class="fas fa-id-card text-white text-sm"></i></div>
+                    <div><h1 class="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent">Kelola Kartu PEWARTA</h1><p class="text-xs text-gray-400 hidden sm:block">Verifikasi & Cetak Kartu PEWARTA</p></div>
+                </div>
+                <div class="flex items-center gap-2"><span id="adminEmailDisplay" class="text-gray-600 text-sm hidden sm:inline"></span><button onclick="logout()" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm shadow-md"><i class="fas fa-sign-out-alt"></i><span class="hidden sm:inline ml-1">Logout</span></button></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+        <div class="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
+            <div class="flex border-b border-gray-200">
+                <button onclick="showTab('pending')" id="tabPending" class="tab-btn px-6 py-3 text-sm font-medium transition-all border-b-2 border-blue-600 text-blue-600 bg-blue-50"><i class="fas fa-clock mr-2"></i>Menunggu<span id="pendingCount" class="ml-2 bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs">0</span></button>
+                <button onclick="showTab('approved')" id="tabApproved" class="tab-btn px-6 py-3 text-sm font-medium transition-all border-b-2 border-transparent text-gray-500 hover:text-gray-700"><i class="fas fa-check-circle mr-2"></i>Disetujui</button>
+                <button onclick="showTab('rejected')" id="tabRejected" class="tab-btn px-6 py-3 text-sm font-medium transition-all border-b-2 border-transparent text-gray-500 hover:text-gray-700"><i class="fas fa-times-circle mr-2"></i>Ditolak</button>
+                <button onclick="showTab('all')" id="tabAll" class="tab-btn px-6 py-3 text-sm font-medium transition-all border-b-2 border-transparent text-gray-500 hover:text-gray-700"><i class="fas fa-list mr-2"></i>Semua</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+            <div class="flex flex-col md:flex-row gap-4"><div class="flex-1"><div class="relative"><i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i><input type="text" id="searchInput" placeholder="Cari nama, email, atau ID kartu..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></div></div><div><button onclick="refreshData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"><i class="fas fa-sync-alt"></i> Refresh</button></div></div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 border-b border-gray-200"><tr><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Foto</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Nama/Email</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Jabatan</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">ID Kartu</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Berlaku</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Telepon</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Status</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Tanggal</th><th class="py-3 px-4 text-center text-xs font-semibold text-gray-500 uppercase">Aksi</th></tr></thead><tbody id="cardsTableBody"><tr><td colspan="9" class="text-center py-12 text-gray-500"><div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div><p class="mt-2">Memuat data...</p></td></tr></tbody></table></div>
+            <div class="border-t border-gray-200 px-4 py-3 flex justify-between items-center"><div class="text-sm text-gray-500" id="paginationInfo"></div><div class="flex gap-2"><button onclick="prevPage()" id="prevBtn" class="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50" disabled><i class="fas fa-chevron-left"></i> Sebelumnya</button><button onclick="nextPage()" id="nextBtn" class="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50" disabled>Selanjutnya <i class="fas fa-chevron-right"></i></button></div></div>
+        </div>
+    </div>
+
+    <div id="previewModal" class="modal"><div class="modal-content bg-transparent p-4"><div class="flex justify-end mb-2"><button onclick="closeModal()" class="bg-white rounded-full p-2 shadow-lg hover:bg-gray-100"><i class="fas fa-times text-gray-600"></i></button></div><iframe id="previewIframe" src="" class="w-full max-w-md mx-auto rounded-xl shadow-2xl" style="height:600px;background:transparent;"></iframe></div></div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let supabase = null, currentUser = null, allCards = [], filteredCards = [], currentTab = 'pending', currentPage = 1, itemsPerPage = 10;
+        
+        async function initSupabase() {
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const c = await r.json();
+            if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY);
+        }
+        
+        async function checkAdmin() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '../auth/login.html'; return; }
+            currentUser = session.user;
+            document.getElementById('adminEmailDisplay').textContent = currentUser.email;
+            const { data: p } = await supabase.from('profiles').select('role').eq('id', currentUser.id).single();
+            if (!p || p.role !== 'admin') { window.location.href = '../user/dashboard.html'; return; }
+        }
+        
+        async function loadCards() {
+            const { data, error } = await supabase.from('press_card_requests').select('*').order('created_at', { ascending: false });
+            if (error) { Swal.fire('Error', 'Gagal memuat data', 'error'); return; }
+            allCards = data || []; applyFilter();
+        }
+        
+        function applyFilter() {
+            const s = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            let f = [...allCards];
+            if (currentTab !== 'all') f = f.filter(c => c.status === currentTab);
+            if (s) f = f.filter(c => (c.full_name||'').toLowerCase().includes(s) || (c.email||'').toLowerCase().includes(s) || (c.id_no||'').toLowerCase().includes(s) || (c.phone||'').toLowerCase().includes(s));
+            filteredCards = f; currentPage = 1; renderTable(); updatePaginationInfo(); updatePendingCount();
+        }
+        
+        function updatePendingCount() { const n = allCards.filter(c => c.status === 'pending').length; const el = document.getElementById('pendingCount'); if (el) { el.textContent = n; n > 0 ? el.classList.add('animate-pulse') : el.classList.remove('animate-pulse'); } }
+        
+        function renderTable() {
+            const tbody = document.getElementById('cardsTableBody'), start = (currentPage-1)*itemsPerPage, pageCards = filteredCards.slice(start, start+itemsPerPage);
+            if (!pageCards.length) { tbody.innerHTML = `<tr><td colspan="9" class="text-center py-12 text-gray-500"><i class="fas fa-inbox text-4xl mb-3 opacity-50"></i><p>Tidak ada data</p></td></tr>`; return; }
+            tbody.innerHTML = pageCards.map(c => `<tr class="border-b hover:bg-gray-50"><td class="py-3 px-4"><img src="${c.foto_url||'https://ui-avatars.com/api/?name='+encodeURIComponent(c.full_name||'User')+'&background=3b82f6&color=fff'}" class="w-10 h-10 rounded-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(c.full_name||'User')}&background=3b82f6&color=fff'" alt="Foto"></td><td class="py-3 px-4"><p class="font-semibold">${escapeHtml(c.full_name||'-')}</p><p class="text-xs text-gray-500">${escapeHtml(c.email||'-')}</p></td><td class="py-3 px-4 text-sm">${escapeHtml(c.jabatan||'-')}</td><td class="py-3 px-4"><code class="text-xs bg-gray-100 px-2 py-1 rounded">${escapeHtml(c.id_no||'-')}</code></td><td class="py-3 px-4 text-sm">${c.berlaku_hingga||'-'}</td><td class="py-3 px-4 text-sm">${c.phone||'-'}</td><td class="py-3 px-4">${getStatusBadge(c.status)}</td><td class="py-3 px-4 text-sm">${formatDate(c.created_at)}</td><td class="py-3 px-4 text-center"><div class="flex flex-wrap gap-1 justify-center"><button onclick="previewCard('${c.id}')" class="bg-blue-100 text-blue-600 p-1.5 rounded-lg" title="Preview"><i class="fas fa-eye text-sm"></i></button>${c.status==='pending'?`<button onclick="approveCard('${c.id}')" class="bg-green-100 text-green-600 p-1.5 rounded-lg" title="Setujui"><i class="fas fa-check text-sm"></i></button><button onclick="showRejectModal('${c.id}','${escapeHtml(c.full_name)}')" class="bg-red-100 text-red-600 p-1.5 rounded-lg" title="Tolak"><i class="fas fa-times text-sm"></i></button>`:''}${c.status==='approved'?`<button onclick="downloadCardAsImage('${c.id}')" class="bg-purple-100 text-purple-600 p-1.5 rounded-lg" title="Download"><i class="fas fa-download text-sm"></i></button><button onclick="printCard('${c.id}')" class="bg-green-100 text-green-600 p-1.5 rounded-lg" title="Cetak"><i class="fas fa-print text-sm"></i></button>`:''}<button onclick="deleteCard('${c.id}','${escapeHtml(c.full_name)}')" class="bg-gray-100 text-gray-600 p-1.5 rounded-lg" title="Hapus"><i class="fas fa-trash-alt text-sm"></i></button></div></td></tr>`).join('');
+        }
+        
+        function getStatusBadge(s) { const b = { pending: '<span class="status-badge bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs"><i class="fas fa-clock mr-1"></i>Menunggu</span>', approved: '<span class="status-badge bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs"><i class="fas fa-check-circle mr-1"></i>Disetujui</span>', rejected: '<span class="status-badge bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs"><i class="fas fa-times-circle mr-1"></i>Ditolak</span>' }; return b[s] || b.pending; }
+        function formatDate(d) { if (!d) return '-'; return new Date(d).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); }
+        function escapeHtml(s) { return s ? String(s).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]) : ''; }
+        
+        function updatePaginationInfo() { const t = filteredCards.length, tp = Math.ceil(t/itemsPerPage), s = (currentPage-1)*itemsPerPage+1, e = Math.min(currentPage*itemsPerPage, t); document.getElementById('paginationInfo').innerHTML = `Menampilkan ${s}-${e} dari ${t}`; document.getElementById('prevBtn').disabled = currentPage===1; document.getElementById('nextBtn').disabled = currentPage===tp||tp===0; }
+        window.prevPage = () => { if (currentPage>1) { currentPage--; renderTable(); updatePaginationInfo(); } };
+        window.nextPage = () => { if (currentPage*itemsPerPage<filteredCards.length) { currentPage++; renderTable(); updatePaginationInfo(); } };
+        
+        window.approveCard = async (id) => { const r = await Swal.fire({ title:'Setujui?', icon:'question', showCancelButton:true, confirmButtonColor:'#27ae60', confirmButtonText:'Ya', cancelButtonText:'Batal' }); if (!r.isConfirmed) return; const { error } = await supabase.from('press_card_requests').update({ status:'approved', approved_at:new Date().toISOString() }).eq('id',id); if (error) { Swal.fire('Error','Gagal','error'); return; } Swal.fire('Berhasil!','Disetujui','success'); await loadCards(); };
+        
+        let rejectCardId = null;
+        window.showRejectModal = (id, name) => { rejectCardId = id; Swal.fire({ title:'Tolak?', html:`<p>${name}</p><textarea id="rejectReason" class="swal2-textarea mt-3" placeholder="Alasan..." rows="3"></textarea>`, icon:'warning', showCancelButton:true, confirmButtonColor:'#d33', confirmButtonText:'Tolak', cancelButtonText:'Batal', preConfirm: () => { const r = document.getElementById('rejectReason').value; if (!r) { Swal.showValidationMessage('Alasan wajib diisi'); return false; } return r; } }).then(async (res) => { if (res.isConfirmed&&rejectCardId) { const { error } = await supabase.from('press_card_requests').update({ status:'rejected', rejection_reason:res.value, approved_at:null }).eq('id',rejectCardId); if (error) { Swal.fire('Error','Gagal','error'); return; } Swal.fire('Ditolak','Berhasil','success'); await loadCards(); } }); };
+        
+        window.previewCard = async (id) => { const { data:c } = await supabase.from('press_card_requests').select('*').eq('id',id).single(); if (!c) { Swal.fire('Error','Tidak ditemukan','error'); return; } let foto = c.foto_url; if (!foto||foto==='null') foto = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.full_name||'User')}&background=dc2626&color=fff&size=200`; const p = new URLSearchParams({ nama:c.full_name||'-', jabatan:c.jabatan||'-', id_no:c.id_no||'-', berlaku:c.berlaku_hingga||'-', telepon:c.phone||'', email:c.email||'', foto:foto, user_id:c.user_id||'' }); document.getElementById('previewIframe').src = `../../digital-card-pers.html?${p}`; document.getElementById('previewModal').classList.add('active'); };
+        window.closeModal = () => { document.getElementById('previewModal').classList.remove('active'); document.getElementById('previewIframe').src = ''; };
+        
+        window.downloadCardAsImage = async (id) => { const { data:c } = await supabase.from('press_card_requests').select('*').eq('id',id).single(); if (!c) return; let foto = c.foto_url||''; if (!foto||foto==='null') foto = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.full_name||'User')}&background=dc2626&color=fff&size=200`; const p = new URLSearchParams({ nama:c.full_name, jabatan:c.jabatan, id_no:c.id_no, berlaku:c.berlaku_hingga, telepon:c.phone||'', email:c.email||'', foto, user_id:c.user_id||'' }); window.open(`../../digital-card-pers.html?${p}&download=true`, '_blank'); };
+        window.printCard = async (id) => { const { data:c } = await supabase.from('press_card_requests').select('*').eq('id',id).single(); if (!c) return; let foto = c.foto_url||''; if (!foto||foto==='null') foto = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.full_name||'User')}&background=dc2626&color=fff&size=200`; const p = new URLSearchParams({ nama:c.full_name, jabatan:c.jabatan, id_no:c.id_no, berlaku:c.berlaku_hingga, telepon:c.phone||'', email:c.email||'', foto, user_id:c.user_id||'' }); const w = window.open(`../../digital-card-pers.html?${p}&print=true`, '_blank'); if (w) w.onload = () => setTimeout(() => w.print(), 1000); };
+        
+        window.deleteCard = async (id, name) => { const r = await Swal.fire({ title:'Hapus?', html:`<p>${name}</p><span class="text-sm text-red-500">Tidak dapat dibatalkan!</span>`, icon:'warning', showCancelButton:true, confirmButtonColor:'#d33', confirmButtonText:'Hapus', cancelButtonText:'Batal' }); if (!r.isConfirmed) return; const { error } = await supabase.from('press_card_requests').delete().eq('id',id); if (error) { Swal.fire('Error','Gagal','error'); return; } Swal.fire('Terhapus!','Berhasil','success'); await loadCards(); };
+        
+        window.showTab = (t) => { currentTab = t; currentPage = 1; ['pending','approved','rejected','all'].forEach(x => { const b = document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1)); if (b) b.className = x===t ? 'tab-btn px-6 py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600 bg-blue-50' : 'tab-btn px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700'; }); applyFilter(); };
+        
+        window.refreshData = async () => { const b = event?.target?.closest('button'); if (b) { b.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; b.disabled = true; } await loadCards(); if (b) { b.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh'; b.disabled = false; } };
+        window.logout = async () => { await supabase.auth.signOut(); window.location.href = '../auth/login.html'; };
+        
+        document.addEventListener('DOMContentLoaded', () => { document.getElementById('searchInput').addEventListener('input', applyFilter); });
+        
+        (async () => { try { await initSupabase(); } catch(e) { Swal.fire('Error', 'Gagal terhubung ke server', 'error'); return; } await checkAdmin(); await loadCards(); })();
+    </script>
+</body>
+</html>

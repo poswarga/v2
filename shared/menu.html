@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Menu - POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .product-card { transition: all 0.3s ease; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* Image container agar gambar fit sempurna */
+        .product-image-container {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        }
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .product-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* ✅ PERBAIKAN: Product card relative untuk badge stok */
+        .product-card {
+            position: relative;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <!-- ✅ KIRI: Back + Logo + Judul + Role Badge -->
+                <div class="flex items-center gap-3">
+                    <!-- Back to Dashboard -->
+                    <a href="#" id="backToDashboard" class="text-gray-600 hover:text-primary transition p-2 rounded-lg hover:bg-opacity-10" title="Dashboard">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="flex items-center gap-2">
+                        <div id="logoIcon" class="w-9 h-9 bg-gradient-to-r rounded-xl flex items-center justify-center shadow-md">
+                            <i class="fas fa-store text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r bg-clip-text text-transparent" id="logoText">
+                            Menu Produk
+                        </h1>
+                    </div>
+                    <!-- ✅ Role Badge dipindah ke samping kanan judul -->
+                    <span id="userRoleBadge" class="text-xs px-2 py-1 rounded-full"></span>
+                </div>
+                
+                <!-- ✅ KANAN: Beranda + Refresh + Cart + Orders + Email -->
+                <div class="flex items-center gap-2 md:gap-3">
+                    <!-- Icon Beranda -->
+                    <a href="#" id="homeLink" class="text-gray-600 hover:text-primary transition p-2 rounded-lg hover:bg-opacity-10" title="Beranda">
+                        <i class="fas fa-home text-lg"></i>
+                    </a>
+                    <!-- Icon Refresh -->
+                    <button onclick="refreshProducts()" id="refreshBtn" class="text-gray-600 hover:text-primary transition p-2 rounded-lg hover:bg-opacity-10" title="Refresh Menu">
+                        <i class="fas fa-sync-alt text-lg"></i>
+                    </button>
+                    <!-- Cart -->
+                    <a href="cart.html" class="relative p-2 hover:bg-opacity-10 rounded-lg transition" id="cartLink" title="Keranjang Belanja">
+                        <i class="fas fa-shopping-cart text-xl text-gray-600"></i>
+                        <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                    </a>
+                    <!-- Orders -->
+                    <a href="my-orders.html" class="relative p-2 hover:bg-opacity-10 rounded-lg transition" title="Pesanan Saya" id="ordersLink">
+                        <i class="fas fa-truck text-xl text-gray-600"></i>
+                    </a>
+                    <!-- Email -->
+                    <span id="userEmail" class="text-gray-600 text-sm hidden md:inline"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mx-auto p-4 md:p-6">
+        <!-- Header -->
+        <div class="mb-6 flex flex-wrap justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-list" id="headerIcon"></i>
+                    Menu Kami
+                </h2>
+                <!-- ✅ Text diubah -->
+                <p class="text-gray-500 text-sm mt-1">Pilih produk POS WARGA</p>
+            </div>
+            <!-- Info Role -->
+            <div id="roleInfo" class="bg-opacity-10 border rounded-lg px-4 py-2 text-sm">
+                <i class="fas fa-info-circle mr-1"></i>
+                Role: <span id="roleDisplay">User</span>
+            </div>
+        </div>
+        
+        <!-- Products Grid -->
+        <div id="productsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="col-span-full text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2" id="spinner"></div>
+                <p class="mt-4 text-gray-500">Loading menu...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden transition-all">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script type="module">
+        import { 
+            getSupabase, 
+            checkSession, 
+            getThemeColors, 
+            showToast, 
+            formatRupiah,
+            redirectToLogin 
+        } from '../js/shared-theme.js';
+        
+        let supabase = null;
+        let sessionData = null;
+        let theme = null;
+        let products = [];
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        // =====================================================
+        // INITIALIZATION
+        // =====================================================
+        async function init() {
+            supabase = await getSupabase();
+            
+            if (!supabase) {
+                showToast('Gagal menghubungkan ke database', 'error');
+                return;
+            }
+            
+            sessionData = await checkSession(supabase);
+            
+            if (!sessionData.isLoggedIn) {
+                redirectToLogin();
+                return;
+            }
+            
+            theme = sessionData.theme;
+            
+            // Apply theme to UI
+            applyTheme();
+            
+            // Update UI
+            updateUserInfo();
+            
+            // Load products
+            await loadProducts();
+            
+            // Update cart count
+            updateCartCount();
+        }
+        
+        // =====================================================
+        // APPLY THEME TO UI
+        // =====================================================
+        function applyTheme() {
+            // Logo icon gradient
+            const logoIcon = document.getElementById('logoIcon');
+            logoIcon.className = `w-9 h-9 bg-gradient-to-r ${theme.gradient} rounded-xl flex items-center justify-center shadow-md`;
+            
+            // Logo text
+            const logoText = document.getElementById('logoText');
+            logoText.className = `text-xl font-bold bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent`;
+            
+            // Header icon
+            const headerIcon = document.getElementById('headerIcon');
+            headerIcon.className = `fas fa-list ${theme.text}`;
+            
+            // Home link
+            const homeLink = document.getElementById('homeLink');
+            homeLink.href = sessionData.role === 'admin' ? '../admin/dashboard.html' : 
+                           sessionData.role === 'editor' ? '../editor/dashboard.html' :
+                           sessionData.role === 'member' ? '../member/dashboard.html' : '../user/dashboard.html';
+            homeLink.className = `text-gray-600 hover:${theme.text} transition p-2 rounded-lg ${theme.bgLight} hover:bg-opacity-20`;
+            
+            // Back button hover
+            const backBtn = document.getElementById('backToDashboard');
+            backBtn.href = sessionData.dashboardUrl;
+            backBtn.className = `text-gray-600 hover:${theme.text} transition p-2 rounded-lg ${theme.bgLight} hover:bg-opacity-20`;
+            
+            // Refresh button
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.className = `text-gray-600 hover:${theme.text} transition p-2 rounded-lg ${theme.bgLight} hover:bg-opacity-20`;
+            
+            // Cart link hover
+            const cartLink = document.getElementById('cartLink');
+            cartLink.className = `relative p-2 ${theme.bgLight} hover:bg-opacity-20 rounded-lg transition`;
+            
+            // Orders link hover
+            const ordersLink = document.getElementById('ordersLink');
+            ordersLink.className = `relative p-2 ${theme.bgLight} hover:bg-opacity-20 rounded-lg transition`;
+            
+            // Role info box
+            const roleInfo = document.getElementById('roleInfo');
+            roleInfo.className = `${theme.bgLight} ${theme.borderLight} border rounded-lg px-4 py-2 text-sm ${theme.textDark}`;
+            
+            // Spinner
+            const spinner = document.getElementById('spinner');
+            spinner.className = `inline-block animate-spin rounded-full h-8 w-8 border-b-2 ${theme.border}`;
+            
+            // Role display
+            document.getElementById('roleDisplay').textContent = sessionData.role.charAt(0).toUpperCase() + sessionData.role.slice(1);
+        }
+        
+        // =====================================================
+        // UPDATE USER INFO
+        // =====================================================
+        function updateUserInfo() {
+            document.getElementById('userEmail').textContent = sessionData.email;
+            
+            const roleBadge = document.getElementById('userRoleBadge');
+            roleBadge.textContent = sessionData.role.toUpperCase();
+            roleBadge.className = `text-xs px-2 py-1 ${theme.badge} rounded-full`;
+        }
+        
+        // =====================================================
+        // LOAD PRODUCTS
+        // =====================================================
+        async function loadProducts() {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .eq('is_active', true)
+                .gt('stock', 0)
+                .order('id', { ascending: true });
+                
+            const container = document.getElementById('productsContainer');
+            
+            if (error) {
+                console.error('Error:', error);
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-3"></i>
+                        <p class="text-red-500">Gagal memuat produk</p>
+                        <button onclick="refreshProducts()" class="mt-4 ${theme.bg} text-white px-4 py-2 rounded-lg text-sm ${theme.bgHover}">
+                            <i class="fas fa-sync-alt mr-1"></i>Coba Lagi
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            products = data || [];
+            renderProducts();
+        }
+        
+        // =====================================================
+        // RENDER PRODUCTS
+        // =====================================================
+        function renderProducts() {
+            const container = document.getElementById('productsContainer');
+            
+            if (!products.length) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-box-open text-5xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">Belum ada produk tersedia</p>
+                        <p class="text-gray-400 text-sm mt-1">Silakan cek kembali nanti</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = products.map(p => {
+                const stockStatus = p.stock <= 5 ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700';
+                const stockText = p.stock <= 5 ? `Stok: ${p.stock}` : 'Tersedia';
+                const isOutOfStock = p.stock <= 0;
+                
+                // ✅ PERBAIKAN: Gambar fit dengan frame (object-fit: cover)
+                const imageHtml = p.image_url 
+                    ? `<div class="product-image-container">
+                        <img src="${p.image_url}" alt="${escapeHtml(p.name)}" 
+                             loading="lazy"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="product-image-placeholder" style="display:none;">
+                            <i class="fas fa-box text-5xl ${theme.text} opacity-50"></i>
+                        </div>
+                       </div>`
+                    : `<div class="product-image-container">
+                        <div class="product-image-placeholder">
+                            <i class="fas fa-box text-5xl ${theme.text} opacity-50"></i>
+                        </div>
+                       </div>`;
+                
+                return `
+                <div class="product-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                    ${imageHtml}
+                    ${p.stock <= 5 && p.stock > 0 ? `<span class="absolute top-2 right-2 ${stockStatus} text-xs px-2 py-1 rounded-full z-10">Stok terbatas</span>` : ''}
+                    ${isOutOfStock ? `<span class="absolute top-2 right-2 bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full z-10">Habis</span>` : ''}
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg text-gray-800 line-clamp-1">${escapeHtml(p.name)}</h3>
+                        <p class="text-gray-500 text-sm mt-1 line-clamp-2 min-h-[40px]">${escapeHtml(p.description) || 'Tidak ada deskripsi'}</p>
+                        <div class="mt-3 flex justify-between items-center">
+                            <div>
+                                <span class="${theme.text} font-bold text-lg">${formatRupiah(p.price)}</span>
+                                <span class="text-xs text-gray-500 block">${stockText}</span>
+                            </div>
+                            <button onclick="addToCart(${p.id})" 
+                                class="${theme.bg} text-white px-4 py-2 rounded-lg text-sm ${theme.bgHover} transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                ${isOutOfStock ? 'disabled' : ''}>
+                                <i class="fas fa-cart-plus mr-1"></i>
+                                ${isOutOfStock ? 'Habis' : 'Keranjang'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+        
+        // =====================================================
+        // HELPER: Escape HTML
+        // =====================================================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // =====================================================
+        // ADD TO CART
+        // =====================================================
+        window.addToCart = function(productId) {
+            const p = products.find(x => x.id === productId);
+            if (!p) return;
+            
+            const existing = cart.find(i => i.id === productId);
+            const currentQty = existing?.quantity || 0;
+            
+            if (currentQty + 1 > p.stock) {
+                showToast(`Stok tidak mencukupi! Tersedia: ${p.stock}`, 'error');
+                return;
+            }
+            
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    quantity: 1,
+                    image_url: p.image_url,
+                    max_stock: p.stock
+                });
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check mr-1"></i>Ditambahkan';
+            btn.disabled = true;
+            btn.classList.add('bg-green-600', 'hover:bg-green-700');
+            btn.classList.remove(theme.bg, theme.bgHover);
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                btn.classList.add(theme.bg, theme.bgHover);
+            }, 1000);
+            
+            showToast(`"${p.name}" ditambahkan ke keranjang`);
+        };
+        
+        // =====================================================
+        // UPDATE CART COUNT
+        // =====================================================
+        function updateCartCount() {
+            const cnt = cart.reduce((s, i) => s + (i.quantity || 1), 0);
+            const el = document.getElementById('cartCount');
+            el.textContent = cnt;
+            el.classList.toggle('hidden', cnt === 0);
+        }
+        
+        // =====================================================
+        // REFRESH PRODUCTS
+        // =====================================================
+        window.refreshProducts = async function() {
+            const btn = document.getElementById('refreshBtn');
+            const icon = btn.querySelector('i');
+            icon.classList.add('fa-spin');
+            btn.disabled = true;
+            
+            await loadProducts();
+            
+            icon.classList.remove('fa-spin');
+            btn.disabled = false;
+            showToast('Menu berhasil diperbarui');
+        };
+        
+        // =====================================================
+        // START
+        // =====================================================
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>AI Article Generator Pro - POS WARGA</title>
+    <meta name="description" content="Generator artikel SEO friendly dengan fitur upload gambar, schema.org, dan konten berkualitas untuk website UMKM.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-error { background: #ef4444; }
+        .progress-bar { transition: width 0.3s ease; }
+        .cart-item { transition: all 0.2s; }
+        .cart-item:hover { background: #f3f4f6; transform: translateX(4px); }
+        .step { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .step-number { 
+            width: 32px; height: 32px; 
+            background: linear-gradient(135deg, #8b5cf6, #6366f1); 
+            color: white; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; flex-shrink: 0; 
+        }
+        .seo-preview { background: #f8fafc; border-radius: 12px; padding: 16px; margin-top: 16px; font-family: Arial, sans-serif; }
+        .seo-preview-title { color: #1a0dab; font-size: 18px; cursor: pointer; }
+        .seo-preview-title:hover { text-decoration: underline; }
+        .seo-preview-url { color: #006621; font-size: 12px; margin: 4px 0; }
+        .seo-preview-desc { color: #545454; font-size: 13px; }
+        .meta-editor { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-top: 16px; }
+        .meta-editor input, .meta-editor textarea, .meta-editor select { 
+            width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; 
+            border-radius: 10px; font-size: 14px; transition: all 0.2s;
+        }
+        .meta-editor input:focus, .meta-editor textarea:focus, .meta-editor select:focus {
+            outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px #8b5cf620;
+        }
+        .meta-editor label { font-weight: 600; font-size: 13px; margin-bottom: 4px; display: block; color: #374151; }
+        .badge-seo { background: #10b98120; color: #059669; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .quality-badge { background: #8b5cf620; color: #7c3aed; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .image-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; border: 2px solid #e5e7eb; }
+        .schema-badge { background: #3b82f620; color: #2563eb; padding: 4px 10px; border-radius: 20px; font-size: 11px; }
+        
+        .rich-preview { 
+            max-height: 500px; overflow-y: auto; padding: 20px; 
+            background: #fafafa; border-radius: 12px; line-height: 1.7;
+        }
+        .rich-preview h2 { font-size: 1.4rem; font-weight: 700; margin-top: 1.2rem; margin-bottom: 0.8rem; color: #1f2937; border-left: 4px solid #8b5cf6; padding-left: 16px; }
+        .rich-preview h3 { font-size: 1.15rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.6rem; color: #8b5cf6; }
+        .rich-preview ul, .rich-preview ol { padding-left: 1.8rem; margin: 0.8rem 0; }
+        .rich-preview li { margin: 0.3rem 0; }
+        .rich-preview p { margin-bottom: 1rem; }
+        
+        .tab-active {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        
+        @media (max-width: 768px) {
+            .step { font-size: 12px; }
+            .step-number { width: 28px; height: 28px; font-size: 12px; }
+            button, .btn-touch { min-height: 44px; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="glass-effect shadow-md sticky top-0 z-20 border-b border-gray-200">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <!-- KIRI: Logo + Judul -->
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-robot text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            POS WARGA AI
+                        </h1>
+                        <p class="text-xs text-gray-500">Article Generator Pro • SEO Ready</p>
+                    </div>
+                </div>
+                
+                <!-- KANAN: Icon Navigasi + User + Logout -->
+                <div class="flex items-center gap-2 md:gap-3">
+                    <!-- ✅ Icon Beranda -->
+                    <a href="../index.html" title="Beranda" class="w-9 h-9 md:w-10 md:h-10 bg-gray-100 hover:bg-purple-100 rounded-full flex items-center justify-center text-gray-600 hover:text-purple-600 transition">
+                        <i class="fas fa-home text-sm md:text-base"></i>
+                    </a>
+                    
+                    <!-- ✅ Icon Postingan -->
+                    <a href="../postingan.html" title="Postingan" class="w-9 h-9 md:w-10 md:h-10 bg-gray-100 hover:bg-pink-100 rounded-full flex items-center justify-center text-gray-600 hover:text-pink-600 transition">
+                        <i class="fas fa-newspaper text-sm md:text-base"></i>
+                    </a>
+                    
+                    <!-- ✅ Icon Refresh -->
+                    <button onclick="location.reload()" title="Refresh" class="w-9 h-9 md:w-10 md:h-10 bg-gray-100 hover:bg-blue-100 rounded-full flex items-center justify-center text-gray-600 hover:text-blue-600 transition">
+                        <i class="fas fa-sync-alt text-sm md:text-base"></i>
+                    </button>
+                    
+                    <span id="userEmail" class="text-gray-600 text-xs sm:text-sm hidden sm:inline"></span>
+                    <span id="roleBadge" class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100"></span>
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition shadow-md">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+
+        <!-- Header Banner -->
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-5 mb-6 text-white shadow-xl">
+            <div class="flex items-center gap-3 mb-3">
+                <i class="fas fa-magic text-2xl"></i>
+                <h2 class="text-xl font-bold">AI Article Generator Pro</h2>
+                <span class="bg-white/20 px-3 py-1 rounded-full text-xs">Schema.org • SEO • Gambar</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-2 text-sm">
+                <div class="step"><div class="step-number bg-white/20">1</div><p class="text-white/90">Keyword</p></div>
+                <div class="step"><div class="step-number bg-white/20">2</div><p class="text-white/90">Upload Gambar</p></div>
+                <div class="step"><div class="step-number bg-white/20">3</div><p class="text-white/90">Generate</p></div>
+                <div class="step"><div class="step-number bg-white/20">4</div><p class="text-white/90">Edit Meta</p></div>
+                <div class="step"><div class="step-number bg-white/20">5</div><p class="text-white/90">+ Keranjang</p></div>
+                <div class="step"><div class="step-number bg-white/20">6</div><p class="text-white/90">Download ZIP</p></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- KIRI: Form Generate -->
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">
+                        <i class="fas fa-plus-circle text-purple-500 mr-2"></i>Buat Artikel SEO
+                    </h2>
+                    <span class="quality-badge"><i class="fas fa-star mr-1"></i>Premium AI</span>
+                </div>
+                
+                <!-- Keyword Input -->
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-key text-purple-500 mr-1"></i>Keyword Utama
+                    </label>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <input type="text" id="keywordInput" 
+                            placeholder="Contoh: jasa website umkm, toko online murah, digital marketing"
+                            class="flex-1 border border-gray-300 rounded-xl px-5 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <button onclick="generateArticle()" 
+                            class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-lg">
+                            <i class="fas fa-magic mr-2"></i> Generate AI
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Upload Image -->
+                <div class="mb-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-image text-purple-500 mr-1"></i> Gambar Featured (Opsional)
+                    </label>
+                    <div class="flex flex-col md:flex-row gap-3 items-start">
+                        <input type="file" id="imageUpload" accept="image/*" class="text-sm border rounded-lg p-2 bg-white">
+                        <button onclick="uploadImage()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition shadow">
+                            <i class="fas fa-cloud-upload-alt mr-1"></i> Upload
+                        </button>
+                        <button onclick="useUnsplashImage()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm transition shadow">
+                            <i class="fas fa-link mr-1"></i> Dari URL
+                        </button>
+                    </div>
+                    <div id="imagePreviewContainer" class="hidden mt-3">
+                        <div class="flex items-start gap-3">
+                            <img id="imagePreview" class="image-preview shadow-md">
+                            <div class="flex-1">
+                                <p id="imageUrlDisplay" class="text-xs text-gray-600 break-all"></p>
+                                <button onclick="removeImage()" class="text-red-500 text-xs mt-2 hover:text-red-700">
+                                    <i class="fas fa-trash mr-1"></i> Hapus gambar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Loading -->
+                <div id="loadingBox" class="hidden bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-5 text-center mb-4">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mx-auto mb-3"></div>
+                    <p class="text-sm text-gray-700">AI sedang menulis artikel tentang</p>
+                    <p class="font-semibold text-purple-600 text-lg" id="loadingKeyword"></p>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+                        <div id="progressBar" class="progress-bar bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Hasil Generate -->
+                <div id="resultBox" class="hidden border border-gray-200 rounded-xl p-4 mb-4 bg-gray-50/50">
+                    <div class="flex justify-between items-start mb-3 flex-wrap gap-2">
+                        <span class="bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full">
+                            <i class="fas fa-brain mr-1"></i> AI Generated
+                        </span>
+                        <span class="badge-seo"><i class="fas fa-chart-line mr-1"></i>SEO Ready</span>
+                        <span class="schema-badge"><i class="fas fa-code mr-1"></i>Schema.org</span>
+                    </div>
+                    
+                    <!-- SEO Preview Google Style -->
+                    <div class="seo-preview border border-gray-200">
+                        <div class="seo-preview-title" id="seoPreviewTitle">Judul artikel akan muncul di sini</div>
+                        <div class="seo-preview-url" id="seoPreviewUrl">poswarga.id/artikel/...</div>
+                        <div class="seo-preview-desc" id="seoPreviewDesc">Deskripsi meta artikel untuk hasil pencarian Google...</div>
+                    </div>
+                    
+                    <!-- Meta Tag Editor -->
+                    <div class="meta-editor">
+                        <h4 class="font-semibold text-gray-800 mb-3 text-sm"><i class="fas fa-tags mr-1 text-purple-500"></i> SEO Meta Tags</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label>Meta Title <span id="titleCount" class="text-xs text-gray-400">0/65</span></label>
+                                <input type="text" id="metaTitle" maxlength="65" class="text-sm">
+                            </div>
+                            <div>
+                                <label>Meta Description <span id="descCount" class="text-xs text-gray-400">0/160</span></label>
+                                <textarea id="metaDescription" rows="2" maxlength="160" class="text-sm"></textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label>Focus Keyword</label>
+                                    <input type="text" id="focusKeyword" class="text-sm bg-gray-100" readonly>
+                                </div>
+                                <div>
+                                    <label>Canonical URL</label>
+                                    <input type="text" id="canonicalUrl" placeholder="https://poswarga.id/artikel/..." class="text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label>Schema Type</label>
+                                <select id="schemaType" class="text-sm">
+                                    <option value="Article">Article (Default)</option>
+                                    <option value="BlogPosting">BlogPosting</option>
+                                    <option value="HowTo">HowTo (Panduan)</option>
+                                    <option value="FAQPage">FAQPage</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex justify-between items-center flex-wrap gap-2">
+                        <button onclick="addToCart()" class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white text-sm px-5 py-2.5 rounded-lg transition shadow-md">
+                            <i class="fas fa-cart-plus mr-1"></i> + Tambah ke Keranjang
+                        </button>
+                        <button onclick="regenerateContent()" id="regenerateBtn" class="bg-gradient-to-r from-orange-400 to-amber-400 hover:from-orange-500 hover:to-amber-500 text-white text-sm px-5 py-2.5 rounded-lg transition shadow-md">
+                            <i class="fas fa-sync-alt mr-1"></i> Regenerate
+                        </button>
+                        <button onclick="copyToClipboard()" class="text-gray-500 hover:text-gray-700 text-sm bg-gray-100 px-4 py-2 rounded-lg">
+                            <i class="fas fa-copy mr-1"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Preview Konten dengan Tab -->
+                <div id="contentPreviewBox" class="hidden mt-4 border border-gray-200 rounded-xl overflow-hidden">
+                    <div class="flex border-b bg-gray-50">
+                        <button onclick="switchTab('preview')" id="tabPreviewBtn" class="px-5 py-2.5 text-sm font-medium transition tab-active">
+                            <i class="fas fa-eye mr-1"></i>Preview
+                        </button>
+                        <button onclick="switchTab('html')" id="tabHtmlBtn" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition">
+                            <i class="fas fa-code mr-1"></i>HTML
+                        </button>
+                        <button onclick="switchTab('schema')" id="tabSchemaBtn" class="px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition">
+                            <i class="fas fa-database mr-1"></i>Schema
+                        </button>
+                    </div>
+                    <div id="previewContent" class="rich-preview"></div>
+                    <div id="htmlContent" class="hidden rich-preview font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto"></div>
+                    <div id="schemaContent" class="hidden rich-preview font-mono text-xs bg-gray-900 text-blue-400 overflow-x-auto"></div>
+                </div>
+            </div>
+
+            <!-- KANAN: Keranjang Artikel -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="px-6 py-4 border-b bg-gradient-to-r from-purple-50 to-pink-50 flex justify-between items-center flex-wrap gap-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-shopping-cart text-purple-600 text-xl"></i>
+                        <h2 class="font-semibold text-gray-800">📦 Keranjang Artikel</h2>
+                        <span id="cartCount" class="bg-purple-100 text-purple-700 text-sm px-3 py-1 rounded-full font-semibold">0</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="generateSitemap()" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-xs shadow transition">
+                            <i class="fas fa-sitemap mr-1"></i>Sitemap
+                        </button>
+                        <button onclick="generateCombinedSchema()" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-xs shadow transition">
+                            <i class="fas fa-database mr-1"></i>Schema
+                        </button>
+                        <button onclick="downloadAsZip()" class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-4 py-2 rounded-lg transition text-sm shadow-md">
+                            <i class="fas fa-file-archive mr-1"></i>Download ZIP
+                        </button>
+                    </div>
+                </div>
+                <div id="cartList" class="p-4 max-h-[500px] overflow-y-auto">
+                    <div class="text-center text-gray-400 py-8">
+                        <i class="fas fa-inbox text-5xl mb-3 opacity-50"></i>
+                        <p>Keranjang kosong</p>
+                        <p class="text-xs mt-2">Generate artikel dan klik "Tambah ke Keranjang"</p>
+                    </div>
+                </div>
+                <div class="px-6 py-3 border-t bg-gray-50 flex justify-between items-center">
+                    <button onclick="clearCart()" class="text-red-500 hover:text-red-700 text-sm">
+                        <i class="fas fa-trash-alt mr-1"></i> Kosongkan
+                    </button>
+                    <span id="zipInfo" class="text-xs text-gray-500"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Fitur -->
+        <div class="mt-6 bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="px-6 py-4 border-b bg-gradient-to-r from-green-50 to-emerald-50">
+                <h2 class="font-semibold text-gray-800"><i class="fas fa-check-circle text-green-600 mr-2"></i>Fitur Premium POS WARGA AI</h2>
+            </div>
+            <div class="p-5">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Konten Variatif</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> 800-1500 Kata</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Struktur H2-H3</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Schema.org</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Upload Gambar</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> FAQ Section</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Call to Action</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Breadcrumb</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Open Graph</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Twitter Card</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let supabase = null;
+        let cart = [];
+        let currentGeneratedArticle = null;
+        let currentContent = null;
+        let currentSchemaJson = null;
+        let currentImageData = null;
+        let currentTab = 'preview';
+        let currentProfile = null;
+        
+        async function initSupabase() {
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const c = await r.json();
+            if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY);
+        }
+        
+        // ==================== CHECK ACCESS (ADMIN & MEMBER) ====================
+        async function checkAccess() {
+            if (!supabase) await initSupabase();
+            
+            const { data: { session } } = await supabase.auth.getSession()
+            
+            if (!session) {
+                window.location.href = '../auth/login.html'
+                return null
+            }
+            
+            // Ambil profile untuk cek role
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role, full_name, email')
+                .eq('id', session.user.id)
+                .single()
+            
+            if (!profile || (profile.role !== 'admin' && profile.role !== 'member')) {
+                await Swal.fire({
+                    icon: 'warning',
+                    title: 'Akses Terbatas',
+                    text: 'Fitur AI Article Generator hanya untuk Member Premium dan Admin.',
+                    confirmButtonText: 'Ke Dashboard'
+                })
+                window.location.href = '../user/dashboard.html'
+                return null
+            }
+            
+            currentProfile = profile
+            
+            // Update UI
+            document.getElementById('userEmail').textContent = session.user.email
+            
+            const roleBadge = document.getElementById('roleBadge')
+            if (profile.role === 'admin') {
+                roleBadge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800'
+                roleBadge.innerHTML = '👑 Admin'
+            } else {
+                roleBadge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800'
+                roleBadge.innerHTML = '⭐ Member Premium'
+            }
+            
+            return session
+        }
+        
+        window.logout = async () => {
+            await supabase.auth.signOut()
+            window.location.href = '../auth/login.html'
+        }
+        
+        // ==================== UPLOAD IMAGE ====================
+        window.uploadImage = function() {
+            const fileInput = document.getElementById('imageUpload');
+            const file = fileInput.files[0];
+            if (!file) {
+                showToast('Pilih file gambar dulu!', true);
+                return;
+            }
+            if (!file.type.startsWith('image/')) {
+                showToast('File harus gambar!', true);
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Ukuran maksimal 2MB!', true);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImageData = {
+                    base64: e.target.result,
+                    filename: file.name,
+                    url: e.target.result
+                };
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('imageUrlDisplay').innerHTML = `<i class="fas fa-check-circle text-green-500 mr-1"></i>${file.name}`;
+                document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                showToast('Gambar berhasil diupload!');
+            };
+            reader.readAsDataURL(file);
+        };
+        
+        window.useUnsplashImage = function() {
+            Swal.fire({
+                title: 'Masukkan URL Gambar',
+                input: 'url',
+                inputLabel: 'URL Gambar (Unsplash, ImgBB, dll)',
+                inputPlaceholder: 'https://images.unsplash.com/...',
+                showCancelButton: true,
+                confirmButtonText: 'Gunakan',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    currentImageData = {
+                        base64: null,
+                        filename: 'featured-image.jpg',
+                        url: result.value
+                    };
+                    document.getElementById('imagePreview').src = result.value;
+                    document.getElementById('imageUrlDisplay').innerHTML = `<i class="fas fa-link text-blue-500 mr-1"></i>${result.value.substring(0, 60)}...`;
+                    document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                    showToast('Gambar dari URL berhasil ditambahkan!');
+                }
+            });
+        };
+        
+        window.removeImage = function() {
+            currentImageData = null;
+            document.getElementById('imagePreviewContainer').classList.add('hidden');
+            document.getElementById('imageUpload').value = '';
+            showToast('Gambar dihapus');
+        };
+        
+        // ==================== GENERATE KONTEN PREMIUM ====================
+        const contentVariations = {
+            intro: [
+                "Di era digital yang semakin kompetitif, {keyword} menjadi faktor kunci kesuksesan bisnis modern.",
+                "Tahukah Anda bahwa 85% konsumen mencari informasi online sebelum membeli produk? {keyword} adalah jawabannya.",
+                "{keyword} bukan lagi tren, tapi kebutuhan fundamental bagi UMKM yang ingin bertahan dan berkembang.",
+                "Dalam 5 tahun terakhir, permintaan akan {keyword} meningkat hingga 200% di Indonesia."
+            ],
+            benefits: [
+                "Meningkatkan visibilitas bisnis hingga 3x lipat",
+                "Menghemat biaya operasional hingga 40%",
+                "Memperluas jangkauan pasar ke seluruh Indonesia",
+                "Meningkatkan kepercayaan dan kredibilitas bisnis",
+                "Memudahkan pelanggan menemukan produk/jasa Anda",
+                "Memberikan data analitik untuk pengambilan keputusan"
+            ],
+            tips: [
+                "Mulai dengan memahami kebutuhan spesifik bisnis Anda",
+                "Pilih solusi yang sesuai dengan skala dan budget",
+                "Konsisten dalam implementasi dan evaluasi",
+                "Manfaatkan tools dan platform yang tersedia",
+                "Ikuti perkembangan tren dan teknologi terbaru",
+                "Bangun tim atau partner yang kompeten"
+            ]
+        };
+        
+        function getRandomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function getRandomItems(arr, count = 4) { return arr.sort(() => 0.5 - Math.random()).slice(0, count); }
+        
+        function generatePremiumContent(keyword) {
+            const capKw = keyword.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            const slug = keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            
+            let intro = getRandomItem(contentVariations.intro).replace(/{keyword}/g, capKw);
+            const benefits = getRandomItems(contentVariations.benefits, 5);
+            const tips = getRandomItems(contentVariations.tips, 5);
+            
+            const titles = [
+                `${capKw}: Panduan Lengkap untuk Pemula dan Profesional`,
+                `Mengenal Lebih Dalam ${capKw}: Strategi & Implementasi ${new Date().getFullYear()}`,
+                `${capKw} di Era Digital: Peluang dan Tantangan untuk UMKM`,
+                `Tips Sukses Menggunakan ${capKw} untuk Mengembangkan Bisnis`,
+                `${capKw} Terbaik: Rekomendasi dan Review Lengkap`
+            ];
+            const randomTitle = titles[Math.floor(Math.random() * titles.length)];
+            
+            const metaDescList = [
+                `Pelajari semua tentang ${keyword} dalam panduan lengkap ini. Temukan manfaat, tips, dan strategi terbaik untuk mengoptimalkan ${keyword} bagi bisnis Anda.`,
+                `Ingin tahu lebih dalam tentang ${keyword}? Artikel ini membahas secara komprehensif mulai dari dasar hingga implementasi ${keyword} yang efektif.`,
+                `${capKw} menjadi kunci sukses bisnis modern. Baca panduan praktis ${keyword} untuk meningkatkan performa dan keunggulan kompetitif Anda.`
+            ];
+            const metaDescription = metaDescList[Math.floor(Math.random() * metaDescList.length)];
+            
+            const faqs = [
+                { q: `Apakah ${capKw} cocok untuk bisnis kecil?`, a: `Tentu saja! ${capKw} justru sangat direkomendasikan untuk bisnis kecil karena dapat membantu meningkatkan visibilitas dan efisiensi operasional.` },
+                { q: `Berapa biaya untuk ${capKw}?`, a: `Biaya ${keyword} bervariasi tergantung kebutuhan dan skala bisnis. Mulai dari paket basic hingga enterprise yang bisa disesuaikan.` },
+                { q: `Berapa lama melihat hasil dari ${capKw}?`, a: `Hasil biasanya mulai terlihat dalam 1-3 bulan dengan implementasi yang konsisten dan tepat.` },
+                { q: `Apakah saya perlu ahli untuk ${capKw}?`, a: `Untuk hasil optimal, disarankan berkonsultasi dengan ahli. Namun, ada juga solusi yang bisa dipelajari secara mandiri.` }
+            ];
+            const selectedFaqs = faqs.slice(0, 3);
+            
+            let content = `
+<p><strong>${capKw}</strong> menjadi topik yang semakin krusial di era digital saat ini. ${intro}</p>
+
+<h2>📌 Apa Itu ${capKw}?</h2>
+<p>${capKw} adalah konsep yang berkembang pesat seiring dengan kemajuan teknologi dan perubahan perilaku konsumen. Memahami ${keyword} dengan baik akan memberikan keunggulan kompetitif yang signifikan bagi bisnis Anda.</p>
+
+<h2>🎯 Manfaat ${capKw} untuk Bisnis Anda</h2>
+<ul>
+    ${benefits.map(item => `<li><strong>${item.split(' ')[0]}</strong> ${item.substring(item.split(' ')[0].length)}</li>`).join('')}
+</ul>
+
+<h2>💡 Tips & Strategi ${capKw} yang Efektif</h2>
+<ol>
+    ${tips.map((item, i) => `<li><strong>${i+1}.</strong> ${item}</li>`).join('')}
+</ol>
+
+<h2>📊 Studi Kasus: Keberhasilan ${capKw}</h2>
+<p>Sebuah UMKM di Jakarta berhasil meningkatkan omzet hingga 200% setelah menerapkan strategi ${keyword} yang tepat. Contoh lainnya, toko online di Bandung mengalami peningkatan traffic 150% dalam 2 bulan.</p>
+
+<h2>❓ Frequently Asked Questions (FAQ)</h2>
+<div class="faq-section">
+    ${selectedFaqs.map(faq => `
+    <div class="faq-item" style="margin-bottom: 1.5rem;">
+        <p class="faq-question" style="font-weight: 600; color: #8b5cf6; margin-bottom: 0.5rem;"><i class="fas fa-question-circle mr-1"></i>${faq.q}</p>
+        <div class="faq-answer" style="margin-left: 1.5rem; color: #4b5563;">${faq.a}</div>
+    </div>
+    `).join('')}
+</div>
+
+<h2>🚀 Kesimpulan</h2>
+<p>${capKw} bukan sekadar tren, melainkan kebutuhan fundamental di era digital. Dengan menerapkan ${keyword} secara konsisten, bisnis Anda dapat meraih pertumbuhan yang signifikan.</p>
+
+<div class="cta-box" style="background: linear-gradient(135deg, #8b5cf610 0%, #ec489910 100%); padding: 1.5rem; border-radius: 1rem; margin: 1.5rem 0; text-align: center; border: 1px solid #8b5cf620;">
+    <p style="margin: 0; font-weight: 700; color: #8b5cf6;">📞 Siap optimalkan ${capKw} untuk bisnis Anda?</p>
+    <p style="margin: 0.75rem 0 0; font-size: 0.9rem;">Konsultasikan kebutuhan Anda dengan tim POS WARGA secara GRATIS!</p>
+    <p style="margin: 0.75rem 0 0;"><strong>📱 Hubungi: 0812-3456-7890</strong></p>
+</div>`;
+            
+            return {
+                title: randomTitle,
+                metaTitle: randomTitle,
+                metaDescription: metaDescription,
+                keyword: keyword,
+                focusKeyword: keyword,
+                slug: slug,
+                content: content,
+                excerpt: content.replace(/<[^>]*>/g, '').substring(0, 160),
+                faqs: selectedFaqs
+            };
+        }
+        
+        // ==================== GENERATE SCHEMA.ORG ====================
+        function generateSchema(article, schemaType, imageUrl) {
+            const baseSchema = {
+                "@context": "https://schema.org",
+                "@type": schemaType,
+                "headline": article.metaTitle,
+                "description": article.metaDescription,
+                "author": {
+                    "@type": "Organization",
+                    "name": "POS WARGA",
+                    "url": "https://poswarga.id"
+                },
+                "datePublished": article.isoDate,
+                "dateModified": article.isoDate,
+                "mainEntityOfPage": {
+                    "@type": "WebPage",
+                    "@id": article.canonicalUrl || `https://poswarga.id/artikel/${article.slug}`
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "POS WARGA",
+                    "logo": {
+                        "@type": "ImageObject",
+                        "url": "https://poswarga.id/logo.png"
+                    }
+                }
+            };
+            
+            if (imageUrl) {
+                baseSchema.image = {
+                    "@type": "ImageObject",
+                    "url": imageUrl,
+                    "contentUrl": imageUrl,
+                    "caption": article.metaTitle
+                };
+            }
+            
+            if (schemaType === 'FAQPage' && article.faqs) {
+                baseSchema.mainEntity = article.faqs.map(faq => ({
+                    "@type": "Question",
+                    "name": faq.q,
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": faq.a
+                    }
+                }));
+            }
+            
+            return baseSchema;
+        }
+        
+        function getReadingTime(content) {
+            const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+            return Math.max(3, Math.ceil(wordCount / 250));
+        }
+        
+        function getCurrentDate() {
+            return new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+        
+        function getISODate() {
+            return new Date().toISOString().split('T')[0];
+        }
+        
+        function getFileDate() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        }
+        
+        function showToast(msg, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + (isError ? 'toast-error' : '');
+            toast.innerHTML = '<i class="fas ' + (isError ? 'fa-exclamation-triangle' : 'fa-check-circle') + ' mr-2"></i> ' + msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        }
+        
+        function updateSEOPreview() {
+            const title = document.getElementById('metaTitle').value;
+            const desc = document.getElementById('metaDescription').value;
+            const slug = currentGeneratedArticle?.slug || 'artikel';
+            document.getElementById('seoPreviewTitle').textContent = title.substring(0, 65) || 'Judul artikel';
+            document.getElementById('seoPreviewUrl').textContent = `poswarga.id/artikel/${slug}`;
+            document.getElementById('seoPreviewDesc').textContent = desc.substring(0, 160) || 'Deskripsi meta artikel...';
+            document.getElementById('titleCount').textContent = `${title.length}/65`;
+            document.getElementById('descCount').textContent = `${desc.length}/160`;
+        }
+        
+        window.switchTab = function(tab) {
+            currentTab = tab;
+            const previewDiv = document.getElementById('previewContent');
+            const htmlDiv = document.getElementById('htmlContent');
+            const schemaDiv = document.getElementById('schemaContent');
+            const tabPreview = document.getElementById('tabPreviewBtn');
+            const tabHtml = document.getElementById('tabHtmlBtn');
+            const tabSchema = document.getElementById('tabSchemaBtn');
+            
+            [previewDiv, htmlDiv, schemaDiv].forEach(div => div.classList.add('hidden'));
+            [tabPreview, tabHtml, tabSchema].forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('text-gray-600', 'bg-transparent');
+            });
+            
+            if (tab === 'preview') {
+                previewDiv.classList.remove('hidden');
+                tabPreview.classList.add('tab-active');
+                tabPreview.classList.remove('text-gray-600');
+            } else if (tab === 'html') {
+                htmlDiv.classList.remove('hidden');
+                tabHtml.classList.add('tab-active');
+                tabHtml.classList.remove('text-gray-600');
+            } else if (tab === 'schema') {
+                schemaDiv.classList.remove('hidden');
+                tabSchema.classList.add('tab-active');
+                tabSchema.classList.remove('text-gray-600');
+            }
+        };
+        
+        window.copyToClipboard = function() {
+            let textToCopy = '';
+            if (currentTab === 'preview') {
+                textToCopy = document.getElementById('previewContent').innerText;
+            } else if (currentTab === 'html') {
+                textToCopy = document.getElementById('htmlContent').innerText;
+            } else if (currentTab === 'schema') {
+                textToCopy = document.getElementById('schemaContent').innerText;
+            }
+            navigator.clipboard?.writeText(textToCopy).then(() => {
+                showToast('Berhasil disalin ke clipboard!');
+            }).catch(() => {
+                showToast('Gagal menyalin', true);
+            });
+        };
+        
+        window.generateArticle = async function() {
+            const keyword = document.getElementById('keywordInput').value.trim();
+            if (!keyword) { showToast('Masukkan keyword dulu!', true); return; }
+            
+            document.getElementById('loadingBox').classList.remove('hidden');
+            document.getElementById('resultBox').classList.add('hidden');
+            document.getElementById('contentPreviewBox').classList.add('hidden');
+            document.getElementById('loadingKeyword').innerText = keyword;
+            
+            const progressBar = document.getElementById('progressBar');
+            for (let i = 0; i <= 100; i += 20) {
+                await new Promise(r => setTimeout(r, 100));
+                progressBar.style.width = i + '%';
+            }
+            
+            const article = generatePremiumContent(keyword);
+            const schemaType = document.getElementById('schemaType').value;
+            const imageUrl = currentImageData?.url || null;
+            const schemaJson = generateSchema(article, schemaType, imageUrl);
+            
+            currentContent = article.content;
+            currentSchemaJson = schemaJson;
+            currentGeneratedArticle = { 
+                ...article, 
+                date: getCurrentDate(), 
+                isoDate: getISODate(), 
+                readingTime: getReadingTime(article.content), 
+                fileDate: getFileDate(),
+                schemaType: schemaType,
+                imageUrl: imageUrl,
+                imageBase64: currentImageData?.base64 || null
+            };
+            
+            document.getElementById('metaTitle').value = article.metaTitle;
+            document.getElementById('metaDescription').value = article.metaDescription;
+            document.getElementById('canonicalUrl').value = `https://poswarga.id/artikel/${article.slug}`;
+            document.getElementById('focusKeyword').value = article.keyword;
+            updateSEOPreview();
+            
+            document.getElementById('previewContent').innerHTML = currentContent;
+            document.getElementById('htmlContent').innerHTML = escapeHtml(currentContent);
+            document.getElementById('schemaContent').innerHTML = JSON.stringify(schemaJson, null, 2);
+            
+            document.getElementById('loadingBox').classList.add('hidden');
+            document.getElementById('resultBox').classList.remove('hidden');
+            document.getElementById('contentPreviewBox').classList.remove('hidden');
+            
+            document.getElementById('metaTitle').addEventListener('input', updateSEOPreview);
+            document.getElementById('metaDescription').addEventListener('input', updateSEOPreview);
+            
+            document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        };
+        
+        window.regenerateContent = function() {
+            if (!currentGeneratedArticle) {
+                showToast('Generate artikel dulu!', true);
+                return;
+            }
+            
+            const keyword = currentGeneratedArticle.keyword;
+            const article = generatePremiumContent(keyword);
+            const schemaType = document.getElementById('schemaType').value;
+            const imageUrl = currentImageData?.url || null;
+            const schemaJson = generateSchema(article, schemaType, imageUrl);
+            
+            currentContent = article.content;
+            currentSchemaJson = schemaJson;
+            currentGeneratedArticle = { 
+                ...currentGeneratedArticle,
+                ...article,
+                schemaType: schemaType
+            };
+            
+            document.getElementById('metaTitle').value = article.metaTitle;
+            document.getElementById('metaDescription').value = article.metaDescription;
+            document.getElementById('previewContent').innerHTML = currentContent;
+            document.getElementById('htmlContent').innerHTML = escapeHtml(currentContent);
+            document.getElementById('schemaContent').innerHTML = JSON.stringify(schemaJson, null, 2);
+            updateSEOPreview();
+            
+            showToast('✨ Konten berhasil diregenerasi!');
+        };
+        
+        function generateHtmlFile(article, metaTitle, metaDescription, canonicalUrl, schemaJson, imageData) {
+            const currentYear = new Date().getFullYear();
+            const imageHtml = imageData ? 
+                `<meta property="og:image" content="${escapeHtml(imageData.url)}">
+                <meta name="twitter:image" content="${escapeHtml(imageData.url)}">` : '';
+            
+            const imageInContent = imageData ? 
+                `<div class="featured-image mb-6">
+                    <img src="${escapeHtml(imageData.url)}" alt="${escapeHtml(metaTitle)}" class="w-full rounded-xl shadow-md" loading="lazy">
+                </div>` : '';
+            
+            return `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${escapeHtml(metaTitle)} - POS WARGA</title>
+    <meta name="description" content="${escapeHtml(metaDescription.substring(0, 160))}">
+    <meta name="keywords" content="${escapeHtml(article.keyword)}, pos warga, umkm, bisnis">
+    <link rel="canonical" href="${escapeHtml(canonicalUrl || `https://poswarga.id/artikel/${article.slug}`)}">
+    
+    <meta property="og:title" content="${escapeHtml(metaTitle)}">
+    <meta property="og:description" content="${escapeHtml(metaDescription.substring(0, 160))}">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="POS WARGA">
+    ${imageHtml}
+    
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <script type="application/ld+json">
+    ${JSON.stringify(schemaJson, null, 2)}
+    <\/script>
+    
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: system-ui, sans-serif; background: #f9fafb; line-height: 1.6; }
+        .article-content h2 { font-size: 1.5rem; font-weight: 700; color: #1f2937; margin-top: 2rem; border-left: 4px solid #8b5cf6; padding-left: 1rem; }
+        .article-content h3 { font-size: 1.25rem; font-weight: 600; color: #8b5cf6; margin-top: 1.5rem; }
+        .article-content p { margin-bottom: 1rem; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="text-sm text-gray-500 mb-4">
+            <a href="/" class="text-purple-600">Beranda</a> &raquo; <span>${escapeHtml(article.title.substring(0, 40))}</span>
+        </div>
+        
+        <article class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">${escapeHtml(metaTitle)}</h1>
+            
+            <div class="flex flex-wrap gap-4 text-sm text-gray-500 mb-6 pb-4 border-b">
+                <span><i class="fas fa-tag mr-1"></i>${escapeHtml(article.keyword)}</span>
+                <span><i class="far fa-calendar-alt mr-1"></i>${article.date}</span>
+                <span><i class="fas fa-clock mr-1"></i>${article.readingTime} menit</span>
+            </div>
+            
+            ${imageInContent}
+            
+            <div class="article-content text-gray-700">
+                ${article.content}
+            </div>
+            
+            <div class="mt-8 pt-6 border-t text-center text-gray-500 text-sm">
+                © ${currentYear} POS WARGA - Warga Berkarya, Warga Berdaya
+            </div>
+        </article>
+    </div>
+</body>
+</html>`;
+        }
+        
+        window.addToCart = function() {
+            if (!currentGeneratedArticle) { showToast('Generate artikel dulu!', true); return; }
+            const metaTitle = document.getElementById('metaTitle').value;
+            const metaDescription = document.getElementById('metaDescription').value;
+            const canonicalUrl = document.getElementById('canonicalUrl').value;
+            const schemaType = document.getElementById('schemaType').value;
+            
+            if (!metaTitle || !metaDescription) { showToast('Meta Title dan Description wajib diisi!', true); return; }
+            if (cart.some(item => item.article.slug === currentGeneratedArticle.slug)) { 
+                showToast('Artikel dengan keyword ini sudah ada di keranjang!', true); 
+                return; 
+            }
+            
+            const updatedArticle = { ...currentGeneratedArticle, metaTitle, metaDescription, canonicalUrl, schemaType };
+            const updatedSchema = generateSchema(updatedArticle, schemaType, currentImageData?.url);
+            const fileName = `${currentGeneratedArticle.slug}_${currentGeneratedArticle.fileDate}.html`;
+            const htmlContent = generateHtmlFile(updatedArticle, metaTitle, metaDescription, canonicalUrl, updatedSchema, currentImageData);
+            
+            cart.push({ article: updatedArticle, schema: updatedSchema, fileName, htmlContent });
+            renderCart();
+            showToast(`✅ "${metaTitle.substring(0, 40)}..." ditambahkan (${cart.length} artikel)`);
+            
+            document.getElementById('keywordInput').value = '';
+            document.getElementById('resultBox').classList.add('hidden');
+            document.getElementById('contentPreviewBox').classList.add('hidden');
+            currentGeneratedArticle = null;
+        };
+        
+        function renderCart() {
+            const container = document.getElementById('cartList');
+            document.getElementById('cartCount').textContent = cart.length;
+            document.getElementById('zipInfo').textContent = cart.length > 0 ? `${cart.length} artikel siap` : '';
+            
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="text-center text-gray-400 py-8"><i class="fas fa-inbox text-5xl mb-3 opacity-50"></i><p>Keranjang kosong</p></div>`;
+                return;
+            }
+            
+            container.innerHTML = cart.map((item, idx) => `
+                <div class="cart-item bg-white border border-gray-200 rounded-xl p-3 mb-2 flex justify-between items-center shadow-sm">
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-purple-600 truncate">${escapeHtml(item.article.metaTitle.substring(0, 50))}</div>
+                        <div class="text-xs text-gray-400 flex gap-2 mt-1 flex-wrap">
+                            <span><i class="fas fa-tag mr-1"></i>${escapeHtml(item.article.keyword)}</span>
+                            <span class="schema-badge">${item.article.schemaType || 'Article'}</span>
+                        </div>
+                    </div>
+                    <button onclick="removeFromCart(${idx})" class="text-red-500 hover:text-red-700 p-2">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        window.removeFromCart = function(index) { 
+            cart.splice(index, 1); 
+            renderCart(); 
+            showToast('Artikel dihapus dari keranjang'); 
+        };
+        
+        window.clearCart = function() { 
+            if (cart.length && confirm('Hapus semua artikel dari keranjang?')) { 
+                cart = []; 
+                renderCart(); 
+                showToast('Keranjang dikosongkan'); 
+            } 
+        };
+        
+        window.generateSitemap = function() {
+            if (cart.length === 0) { showToast('Keranjang kosong!', true); return; }
+            const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${cart.map(item => `    <url>\n        <loc>${item.article.canonicalUrl || `https://poswarga.id/artikel/${item.article.slug}`}</loc>\n        <lastmod>${item.article.isoDate}</lastmod>\n        <changefreq>weekly</changefreq>\n        <priority>0.7</priority>\n    </url>`).join('\n')}\n</urlset>`;
+            const blob = new Blob([sitemapXml], { type: 'application/xml' });
+            saveAs(blob, `sitemap-${getISODate()}.xml`);
+            showToast(`Sitemap untuk ${cart.length} artikel didownload!`);
+        };
+        
+        window.generateCombinedSchema = function() {
+            if (cart.length === 0) { showToast('Keranjang kosong!', true); return; }
+            const allSchemas = cart.map(item => item.schema);
+            const blob = new Blob([JSON.stringify(allSchemas, null, 2)], { type: 'application/json' });
+            saveAs(blob, `schema-${getISODate()}.json`);
+            showToast(`Schema untuk ${cart.length} artikel didownload!`);
+        };
+        
+        window.downloadAsZip = async function() {
+            if (cart.length === 0) { showToast('Keranjang kosong!', true); return; }
+            showToast('📦 Membuat ZIP file...');
+            const zip = new JSZip();
+            const artikelFolder = zip.folder("artikel");
+            cart.forEach(item => artikelFolder.file(item.fileName, item.htmlContent));
+            
+            const jsonData = cart.map(item => ({
+                title: item.article.metaTitle,
+                file_path: `/artikel/${item.fileName}`,
+                description: item.article.metaDescription,
+                keyword: item.article.keyword,
+                slug: item.article.slug,
+                date: item.article.isoDate
+            }));
+            zip.file('articles-list.json', JSON.stringify(jsonData, null, 2));
+            zip.file('schemas.json', JSON.stringify(cart.map(item => item.schema), null, 2));
+            
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            saveAs(zipBlob, `poswarga-artikel-${getISODate()}.zip`);
+            showToast(`✅ ZIP berhasil! ${cart.length} artikel siap diupload.`);
+            cart = [];
+            renderCart();
+        };
+        
+        // Start
+        checkAccess();
+    </script>
+</body>
+</html>

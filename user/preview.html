@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Preview Artikel - User POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .article-content { font-family: 'Inter', system-ui, sans-serif; line-height: 1.8; color: #374151; }
+        .article-content h1 { font-size: 2rem; font-weight: 700; margin: 1.5rem 0 1rem; color: #1f2937; }
+        .article-content h2 { font-size: 1.75rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: #1f2937; }
+        .article-content h3 { font-size: 1.5rem; font-weight: 600; margin: 1.25rem 0 0.75rem; color: #1f2937; }
+        
+        /* ===== SPACING SYNC dengan Editor Quill ===== */
+        .article-content p { margin-bottom: 1.25em; line-height: 1.8; }
+        .article-content p:last-child { margin-bottom: 0; }
+        .article-content br + br { display: none; }
+        
+        .article-content img { max-width: 100%; height: auto; border-radius: 12px; margin: 1.25em 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .article-content blockquote { 
+            border-left: 4px solid #eab308; 
+            padding: 0.75em 1.25em; 
+            margin: 1.25em 0; 
+            font-style: italic; 
+            color: #6b7280; 
+            background: #fef9e7;
+            border-radius: 0 8px 8px 0;
+        }
+        .article-content ul, .article-content ol { margin: 0 0 1.25em 2em; padding-left: 0; }
+        .article-content li { margin-bottom: 0.5em; line-height: 1.7; }
+        .article-content li:last-child { margin-bottom: 0; }
+        .article-content a { color: #ca8a04; text-decoration: underline; }
+        .article-content pre {
+            margin: 1.25em 0;
+            padding: 1em;
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        
+        .preview-banner { background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); }
+        .action-bar { backdrop-filter: blur(8px); background: rgba(255, 255, 255, 0.95); }
+        .image-caption { text-align: center; font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem; font-style: italic; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Preview Banner -->
+    <div class="preview-banner text-white px-4 py-2 text-center text-sm sticky top-0 z-30 shadow-md">
+        <i class="fas fa-eye mr-2"></i>
+        <span id="previewStatus">PREVIEW MODE</span> - Ini adalah tampilan preview artikel Anda
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar sticky top-8 z-20 border-b border-gray-200 shadow-sm">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <button onclick="window.close()" class="text-gray-600 hover:text-yellow-600 transition p-2 rounded-lg hover:bg-yellow-50">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div>
+                        <h2 class="font-semibold text-gray-800">Preview Artikel</h2>
+                        <p class="text-xs text-gray-500" id="articleMeta">-</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-print mr-1"></i>Print
+                    </button>
+                    <button onclick="window.close()" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-check mr-1"></i>Selesai Preview
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto">
+            <!-- Article Card -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8 border border-gray-100">
+                <!-- Featured Image dengan Caption -->
+                <div id="featuredImageContainer" class="hidden">
+                    <figure>
+                        <img id="featuredImage" class="w-full h-64 md:h-96 object-cover" src="" alt="Gambar Utama Artikel">
+                        <figcaption id="featuredImageCaption" class="image-caption py-2 px-4 bg-gray-50 border-t border-gray-100"></figcaption>
+                    </figure>
+                </div>
+                <div class="p-6 md:p-8">
+                    <h1 id="articleTitle" class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">-</h1>
+                    
+                    <!-- Article Meta -->
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-6 pb-6 border-b border-gray-200">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="authorName">-</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">User</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-calendar"></i>
+                            <span id="articleDate">-</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-tag"></i>
+                            <span id="statusBadge">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Excerpt -->
+                    <div id="excerptContainer" class="bg-gray-50 rounded-xl p-4 mb-6 hidden border border-gray-200">
+                        <p id="articleExcerpt" class="text-gray-600 italic"></p>
+                    </div>
+                    
+                    <!-- Sumber Artikel -->
+                    <div id="sourceContainer" class="mb-6 hidden">
+                        <p class="text-xs text-gray-500 flex items-center gap-1">
+                            <i class="fas fa-link"></i>
+                            <span>Sumber: </span>
+                            <a id="articleSourceLink" href="#" target="_blank" class="text-yellow-600 hover:underline"></a>
+                        </p>
+                    </div>
+                    
+                    <!-- Article Content -->
+                    <div id="articleContent" class="article-content">
+                        <div class="text-center py-12">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
+                            <p class="mt-4 text-gray-500">Memuat konten...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tips Box -->
+            <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-5 border border-yellow-100 shadow-sm">
+                <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-lightbulb text-yellow-500"></i>
+                    Tips Sebelum Submit
+                </h3>
+                <ul class="text-sm text-gray-600 space-y-2">
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check-circle text-yellow-500 mt-1"></i>
+                        <span>Pastikan judul menarik dan tidak lebih dari 70 karakter</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check-circle text-yellow-500 mt-1"></i>
+                        <span>Konten bebas, tidak ada batasan minimal kata</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check-circle text-yellow-500 mt-1"></i>
+                        <span>Gunakan gambar yang relevan dan bebas hak cipta</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fas fa-check-circle text-yellow-500 mt-1"></i>
+                        <span>Periksa kembali ejaan dan tata bahasa</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let cachedConfig = null, supabase = null;
+        async function loadConfig() { 
+            if (cachedConfig) return cachedConfig; 
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`Server error (${r.status})`);
+            cachedConfig = await r.json();
+            if (!cachedConfig.SUPABASE_URL || !cachedConfig.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            return cachedConfig; 
+        }
+        
+        async function initSupabase() { 
+            try { const c = await loadConfig(); supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); } 
+            catch (e) { supabase = null; } 
+        }
+        
+        let userId = null, articleId = null, articleData = null;
+        let previewCaption = null;
+        
+        async function checkUser() {
+            if(!supabase) return;
+            const { data: { session } } = await supabase.auth.getSession();
+            if(!session) { window.location.href = '../auth/login.html'; return; }
+            const { data: profile } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if(profile?.role === 'admin') { window.location.href = '../admin/dashboard.html'; return; }
+            else if(profile?.role === 'editor') { window.location.href = '../editor/dashboard.html'; return; }
+            else if(profile?.role === 'member') { window.location.href = '../member/dashboard.html'; return; }
+            userId = session.user.id;
+            document.getElementById('authorName').textContent = profile?.full_name || session.user.email;
+            const p = new URLSearchParams(window.location.search); articleId = p.get('id');
+            if(articleId) { loadArticleFromDB(); } else { loadArticleFromStorage(); }
+        }
+        
+        async function loadArticleFromDB() {
+            const { data, error } = await supabase
+                .from('article_index')
+                .select('*')
+                .eq('id', articleId)
+                .eq('author_id', userId)
+                .single();
+            if(error || !data) { 
+                document.getElementById('articleContent').innerHTML = `<div class="text-center py-12"><i class="fas fa-exclamation-circle text-4xl mb-3 text-red-400"></i><p class="text-gray-600">Artikel tidak ditemukan</p><button onclick="window.close()" class="mt-4 text-yellow-600 hover:underline">Tutup</button></div>`; 
+                return; 
+            }
+            articleData = data; renderArticle(data);
+        }
+        
+        function loadArticleFromStorage() {
+            const s = localStorage.getItem('preview_article');
+            if(!s) { 
+                document.getElementById('articleContent').innerHTML = `<div class="text-center py-12"><i class="fas fa-exclamation-circle text-4xl mb-3 text-red-400"></i><p class="text-gray-600">Tidak ada data preview</p><button onclick="window.close()" class="mt-4 text-yellow-600 hover:underline">Tutup</button></div>`; 
+                return; 
+            }
+            try { 
+                const d = JSON.parse(s); localStorage.removeItem('preview_article');
+                previewCaption = d.caption || null;
+                let imageUrl = d.image || null;
+                if (imageUrl && imageUrl.startsWith('blob:')) { imageUrl = null; }
+                renderArticle({ 
+                    title: d.title || 'Tanpa Judul', content: d.content || '<p>Tidak ada konten</p>', excerpt: d.excerpt || null,
+                    featured_image: imageUrl, image_caption: previewCaption, source_url: d.sourceUrl || null,
+                    status: 'draft', created_at: new Date().toISOString(), slug: 'draft'
+                }); 
+                document.getElementById('previewStatus').textContent = 'DRAFT PREVIEW'; 
+                document.getElementById('articleMeta').textContent = 'Preview dari editor'; 
+                document.getElementById('statusBadge').innerHTML = '<span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs font-medium">Draft</span>'; 
+            } catch(e) { 
+                document.getElementById('articleContent').innerHTML = `<div class="text-center py-12"><i class="fas fa-exclamation-circle text-4xl mb-3 text-red-400"></i><p class="text-gray-600">Gagal memuat preview</p></div>`; 
+            }
+        }
+        
+        function renderArticle(d) {
+            document.getElementById('articleTitle').textContent = d.title || 'Tanpa Judul';
+            document.title = `Preview: ${d.title || 'Artikel'} - POS WARGA`;
+            document.getElementById('articleDate').textContent = d.created_at ? new Date(d.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('statusBadge').innerHTML = getStatusBadge(d.status);
+            document.getElementById('previewStatus').textContent = { draft: 'DRAFT PREVIEW', pending_editor: 'PENDING EDITOR', published: 'PUBLISHED', rejected: 'DITOLAK' }[d.status] || 'PREVIEW MODE';
+            document.getElementById('articleMeta').textContent = `ID: ${d.id?.slice(0,8) || 'DRAFT'} | Slug: ${d.slug || 'draft'}`;
+            if(d.featured_image && !d.featured_image.startsWith('blob:')) { 
+                document.getElementById('featuredImage').src = d.featured_image;
+                const caption = d.image_caption || previewCaption;
+                document.getElementById('featuredImageCaption').textContent = caption || '';
+                document.getElementById('featuredImageContainer').classList.remove('hidden');
+            } else { document.getElementById('featuredImageContainer').classList.add('hidden'); }
+            if(d.excerpt) { document.getElementById('articleExcerpt').textContent = d.excerpt; document.getElementById('excerptContainer').classList.remove('hidden'); }
+            else { document.getElementById('excerptContainer').classList.add('hidden'); }
+            if(d.source_url) { document.getElementById('articleSourceLink').href = d.source_url; document.getElementById('articleSourceLink').textContent = d.source_url; document.getElementById('sourceContainer').classList.remove('hidden'); }
+            else { document.getElementById('sourceContainer').classList.add('hidden'); }
+            document.getElementById('articleContent').innerHTML = d.content || '<p class="text-gray-400 italic text-center py-8">Tidak ada konten</p>';
+        }
+        
+        function getStatusBadge(s) { 
+            const b = { draft: 'bg-gray-100 text-gray-800', pending_editor: 'bg-yellow-100 text-yellow-800', published: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800' };
+            const l = { draft: 'Draft', pending_editor: 'Pending Editor', published: 'Published', rejected: 'Ditolak' }; 
+            return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${b[s]||b.draft}">${l[s]||'Draft'}</span>`; 
+        }
+        
+        (async () => { 
+            try { await initSupabase(); } catch(e) { window.location.href = '../auth/login.html'; return; }
+            if(supabase) { await checkUser(); } else { window.location.href = '../auth/login.html'; }
+        })();
+    </script>
+</body>
+</html>

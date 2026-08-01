@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Kelola Info POS WARGA - Admin</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .badge-admin { background:#dc2626;color:white;font-size:10px;padding:2px 8px;border-radius:20px; }
+        .badge-editor { background:#2563eb;color:white;font-size:10px;padding:2px 8px;border-radius:20px; }
+        .badge-member { background:#16a34a;color:white;font-size:10px;padding:2px 8px;border-radius:20px; }
+        .badge-user { background:#6b7280;color:white;font-size:10px;padding:2px 8px;border-radius:20px; }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+<nav class="bg-white shadow sticky top-0 z-20 border-b">
+    <div class="px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center">
+                <i class="fas fa-bullhorn text-white"></i>
+            </div>
+            <h1 class="text-lg font-bold">Kelola Info POS WARGA</h1>
+        </div>
+
+        <div class="flex gap-2">
+            <a href="dashboard.html" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-xs">
+                <i class="fas fa-tachometer-alt"></i>
+            </a>
+            <button onclick="window._logout()" class="bg-red-500 text-white px-3 py-2 rounded-lg text-xs">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="px-4 py-6 max-w-2xl mx-auto">
+
+    <div id="messageList" class="space-y-3">
+        <div class="text-center py-12 text-gray-400">Memuat...</div>
+    </div>
+
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const API_URL = 'https://api.poswarga.com/api/config';
+
+let supabase = null;
+let all = [];
+
+async function init() {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 5000);
+
+    const r = await fetch(API_URL, { signal: ctrl.signal });
+    const c = await r.json();
+    supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY);
+
+    clearTimeout(t);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) location.href = '../auth/login.html';
+
+    const { data: prof } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+    if (!prof || prof.role !== 'admin') {
+        await supabase.auth.signOut();
+        location.href = '../index.html';
+        return;
+    }
+
+    loadData();
+}
+
+async function loadData() {
+    const { data } = await supabase
+        .from('info_board')
+        .select('*')
+        .order('created_at', { ascending:false });
+
+    all = data || [];
+    render();
+}
+
+function render() {
+    const c = document.getElementById('messageList');
+
+    if (all.length === 0) {
+        c.innerHTML = `<div class="text-center py-12 text-gray-400">Tidak ada data</div>`;
+        return;
+    }
+
+    c.innerHTML = all.map(m => {
+        const active = m.is_active === true;
+        const icon = {
+            admin:'👑',
+            editor:'✏️',
+            member:'⭐',
+            user:'👤'
+        }[m.sender_role] || '👤';
+
+        return `
+        <div style="background:white;padding:16px;border-radius:12px;opacity:${active?1:0.5}">
+            
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+                <b>${esc(m.sender_name||'Unknown')}</b>
+                <span class="badge-${m.sender_role||'user'}">${icon}</span>
+            </div>
+
+            <p style="margin-bottom:12px">${esc(m.message)}</p>
+
+            <!-- TOGGLE -->
+            <button
+                onclick="window._toggle('${m.id}', ${active})"
+                style="width:100%;padding:10px;border-radius:8px;
+                background:${active?'#fef3c7':'#dcfce7'};
+                color:${active?'#92400e':'#166534'};margin-bottom:8px">
+                ${active?'🔇 Nonaktifkan':'🔊 Aktifkan'}
+            </button>
+
+            <!-- DELETE -->
+            <button
+                onclick="window._delete('${m.id}')"
+                style="width:100%;padding:10px;border-radius:8px;
+                background:#fee2e2;color:#991b1b;border:1px solid #fecaca">
+                🗑 Hapus
+            </button>
+
+        </div>`;
+    }).join('');
+}
+
+function esc(s){
+    const d=document.createElement('div');
+    d.textContent=s||'';
+    return d.innerHTML;
+}
+
+/* ================= TOGGLE ================= */
+window._toggle = async function(id,current){
+    const baru = !current;
+
+    const ok = await Swal.fire({
+        title: baru?'Aktifkan?':'Nonaktifkan?',
+        icon:'question',
+        showCancelButton:true
+    });
+
+    if(!ok.isConfirmed) return;
+
+    const { error } = await supabase
+        .from('info_board')
+        .update({ is_active: baru })
+        .eq('id', id);
+
+    if(error){
+        Swal.fire('Error',error.message,'error');
+        return;
+    }
+
+    loadData();
+};
+
+/* ================= DELETE ================= */
+window._delete = async function(id){
+
+    const ok = await Swal.fire({
+        title:'Hapus data ini?',
+        text:'Data tidak bisa dikembalikan!',
+        icon:'warning',
+        showCancelButton:true,
+        confirmButtonColor:'#dc2626'
+    });
+
+    if(!ok.isConfirmed) return;
+
+    const { error } = await supabase
+        .from('info_board')
+        .delete()
+        .eq('id', id);
+
+    if(error){
+        Swal.fire('Error',error.message,'error');
+        return;
+    }
+
+    loadData();
+
+    Swal.fire({
+        icon:'success',
+        title:'Terhapus',
+        timer:1000,
+        showConfirmButton:false
+    });
+};
+
+/* ================= UTIL ================= */
+window._logout = async function(){
+    await supabase.auth.signOut();
+    location.href='../auth/login.html';
+};
+
+init();
+</script>
+
+</body>
+</html>

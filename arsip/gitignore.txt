@@ -1,0 +1,11 @@
+# Environment files (sensitif)
+.env
+.env.local
+.env.*.local
+
+# Local config (jika ada)
+js/config.local.js
+
+# OS files
+.DS_Store
+Thumbs.db

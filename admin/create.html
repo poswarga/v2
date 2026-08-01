@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Tulis Artikel - Admin POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Rich Text Editor (Quill) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .ql-editor { min-height: 350px; font-size: 16px; }
+        .ql-container { font-size: 16px; }
+        .ql-toolbar { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; }
+        .ql-container { border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+        .action-btn { transition: all 0.2s ease; }
+        .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="index.html" class="text-gray-600 hover:text-purple-600 transition p-2 rounded-lg hover:bg-purple-50" title="Kembali">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-purple-500 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-plus-circle text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-purple-500 bg-clip-text text-transparent">Tulis Artikel</h1>
+                        <p class="text-xs text-gray-400 hidden sm:block">Admin - Publish langsung atau simpan draft</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <a href="index.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-list mr-1"></i> Semua Artikel
+                    </a>
+                    <div class="text-right hidden sm:block">
+                        <p id="userName" class="text-sm font-semibold text-gray-800">Admin</p>
+                        <p id="userEmail" class="text-xs text-gray-500">-</p>
+                    </div>
+                    <button onclick="logout()" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm transition shadow-md flex items-center gap-1">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="hidden sm:inline">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column - Editor (2/3) -->
+            <div class="lg:col-span-2 space-y-4">
+                <!-- Judul & Slug -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Judul Artikel <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="articleTitle" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" placeholder="Masukkan judul artikel yang menarik...">
+                    
+                    <div class="flex items-center justify-between mt-4">
+                        <label class="block text-sm font-medium text-gray-700">Slug URL</label>
+                        <span class="text-xs text-gray-400">Otomatis dari judul</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="articleSlug" class="flex-1 border border-gray-200 rounded-lg px-4 py-2 bg-gray-50" placeholder="slug-artikel">
+                        <button onclick="copySlug()" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition" title="Copy Slug">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button onclick="generateSlug()" class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg transition" title="Generate Ulang">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Slug digunakan sebagai URL artikel. Maksimal 150 karakter.</p>
+                </div>
+
+                <!-- Kategori Artikel -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Artikel <span class="text-red-500">*</span></label>
+                    <select id="articleCategory" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition bg-white">
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="Ekbis & Investasi">💰 Ekbis & Investasi</option>
+                        <option value="Teknologi">💻 Teknologi</option>
+                        <option value="Hukum">⚖️ Hukum</option>
+                        <option value="Humaniora">👥 Humaniora</option>
+                        <option value="Olahraga">⚽ Olahraga</option>
+                        <option value="Gaya Hidup">❤️ Gaya Hidup</option>
+                        <option value="Tamasya">🏖️ Tamasya</option>
+                        <option value="Internasional">🌏 Internasional</option>
+                        <option value="Politik">🏛️ Politik</option>
+                        <option value="Otoritas">🏢 Otoritas</option>
+                        <option value="Editorial">✒️ Editorial</option>
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Pilih kategori yang sesuai dengan isi artikel.</p>
+                </div>
+
+                <!-- Rich Text Editor -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            Konten Artikel <span class="text-red-500">*</span>
+                        </label>
+                        <button onclick="pasteFromClipboard()" class="text-xs text-purple-600 hover:text-purple-800 transition">
+                            <i class="fas fa-paste mr-1"></i>Paste dari Clipboard
+                        </button>
+                    </div>
+                    <div id="editorContainer"><div id="editor"></div></div>
+                    <p class="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                        <i class="fas fa-info-circle"></i> 
+                        <span id="wordCountDisplay">0 kata</span> - Tidak ada batasan minimal kata
+                    </p>
+                </div>
+
+                <!-- Excerpt -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            Excerpt (Ringkasan) <span class="text-red-500">*</span>
+                        </label>
+                        <span class="text-xs" id="excerptCount">0/160</span>
+                    </div>
+                    <textarea id="articleExcerpt" rows="3" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" placeholder="Ringkasan singkat artikel (maksimal 160 karakter)..."></textarea>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Ringkasan akan tampil di halaman daftar artikel dan SEO.</p>
+                </div>
+                
+                <!-- Sumber Artikel -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Sumber Artikel</label>
+                        <span class="text-xs text-gray-400">Opsional</span>
+                    </div>
+                    <div class="relative">
+                        <i class="fas fa-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="url" id="sourceUrl" class="w-full border border-gray-200 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" placeholder="https://... (opsional)">
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Cantumkan URL sumber jika artikel mengutip atau merujuk dari sumber lain.</p>
+                </div>
+            </div>
+
+            <!-- Right Column - Sidebar (1/3) -->
+            <div class="space-y-4">
+                <!-- Info Alur Admin -->
+                <div class="bg-gradient-to-r from-purple-600 to-purple-500 rounded-xl shadow-md p-5 text-white">
+                    <h3 class="font-semibold mb-2 flex items-center gap-2">
+                        <i class="fas fa-info-circle"></i> Alur Publikasi (Admin)
+                    </h3>
+                    <div class="space-y-2 text-sm text-purple-50">
+                        <div class="flex items-center gap-2"><span class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs">1</span><span>Tulis artikel</span></div>
+                        <div class="flex items-center gap-2"><span class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs">2</span><span>Pilih kategori</span></div>
+                        <div class="flex items-center gap-2"><span class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs">3</span><span>Publish langsung atau Draft</span></div>
+                        <div class="flex items-center gap-2"><span class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs">4</span><span>Artikel langsung tayang</span></div>
+                    </div>
+                </div>
+
+                <!-- Featured Image dengan Caption -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-image text-purple-600"></i> Gambar Utama
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <!-- Tab Pilihan Upload -->
+                        <div class="flex border-b border-gray-200">
+                            <button id="tabFile" class="flex-1 py-2 text-sm font-medium text-purple-600 border-b-2 border-purple-600 transition" onclick="switchImageTab('file')">
+                                <i class="fas fa-upload mr-1"></i>Upload File
+                            </button>
+                            <button id="tabUrl" class="flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-purple-600 transition" onclick="switchImageTab('url')">
+                                <i class="fas fa-link mr-1"></i>URL Gambar
+                            </button>
+                        </div>
+                        
+                        <!-- Upload File -->
+                        <div id="uploadFileSection">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Pilih file gambar:</label>
+                            <input type="file" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="w-full border border-gray-200 rounded-lg p-2 text-sm">
+                            <p class="text-xs text-gray-400 mt-1">Format: JPG, PNG, GIF, WebP. Maks 5MB. (Otomatis dikonversi ke WebP)</p>
+                            <div id="uploadProgress" class="mt-2 hidden">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2"><div id="progressBar" class="bg-purple-600 h-2 rounded-full" style="width: 0%"></div></div>
+                                    <span id="progressText" class="text-xs text-gray-500">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Upload URL -->
+                        <div id="uploadUrlSection" class="hidden">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">URL Gambar</label>
+                            <input type="text" id="featuredImage" class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" placeholder="https://...">
+                            <p class="text-xs text-gray-400 mt-1">Masukkan URL gambar dari internet</p>
+                        </div>
+                        
+                        <!-- Caption -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Keterangan Gambar (Caption / Alt Text)</label>
+                            <input type="text" id="imageCaption" class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" placeholder="Contoh: Ilustrasi berita terkini (opsional)">
+                            <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Keterangan akan ditampilkan di bawah gambar dan untuk SEO.</p>
+                        </div>
+                        
+                        <!-- Preview -->
+                        <div id="imagePreview" class="mt-3 hidden">
+                            <img id="previewImg" class="w-full h-32 object-cover rounded-lg border border-gray-200" src="" alt="Preview">
+                            <p id="previewCaption" class="text-xs text-gray-500 mt-1 text-center italic"></p>
+                            <button onclick="removeImage()" class="text-red-500 text-xs mt-2 hover:text-red-700 transition">
+                                <i class="fas fa-trash"></i> Hapus Gambar
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3"><i class="fas fa-lightbulb"></i> Gambar yang menarik akan meningkatkan pembaca.</p>
+                </div>
+
+                <!-- Featured Checkbox -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="isFeatured" class="w-5 h-5 text-yellow-500 rounded focus:ring-yellow-500">
+                        <span class="font-medium text-gray-800">
+                            <i class="fas fa-star text-yellow-500 mr-2"></i>Jadikan Featured Article
+                        </span>
+                    </label>
+                    <p class="text-xs text-gray-400 mt-2 ml-8">Artikel featured akan tampil di halaman utama dengan badge "Pilihan Editor".</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-paper-plane text-purple-600"></i> Publikasi
+                    </h3>
+                    
+                    <div class="space-y-2">
+                        <button onclick="publishArticle()" id="publishBtn" class="action-btn w-full bg-green-600 hover:bg-green-700 text-white justify-center shadow-md py-2.5 rounded-lg font-medium flex items-center gap-2">
+                            <i class="fas fa-globe"></i> Publish Sekarang
+                        </button>
+                        
+                        <button onclick="saveAsDraft()" id="draftBtn" class="action-btn w-full bg-gray-100 hover:bg-gray-200 text-gray-700 justify-center border border-gray-200 py-2.5 rounded-lg font-medium flex items-center gap-2">
+                            <i class="fas fa-save"></i> Simpan sebagai Draft
+                        </button>
+                        
+                        <hr class="my-3 border-gray-200">
+                        
+                        <button onclick="previewArticle()" class="action-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-700 justify-center border border-blue-200 py-2.5 rounded-lg font-medium flex items-center gap-2">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                        
+                        <a href="index.html" class="action-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-600 justify-center border border-gray-200 py-2.5 rounded-lg font-medium flex items-center gap-2">
+                            <i class="fas fa-times"></i> Batal
+                        </a>
+                    </div>
+                    
+                    <!-- Status Auto-save -->
+                    <div id="autoSaveStatus" class="mt-3 text-xs text-gray-400 text-center">
+                        <i class="fas fa-check-circle text-green-500"></i> Siap menulis
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <h4 class="font-medium text-blue-800 mb-2 flex items-center gap-2">
+                        <i class="fas fa-lightbulb text-yellow-500"></i> Tips Admin
+                    </h4>
+                    <ul class="text-xs text-blue-700 space-y-1">
+                        <li>• Judul maksimal 150 karakter</li>
+                        <li>• Pilih kategori yang sesuai</li>
+                        <li>• Konten bebas, tidak ada batasan minimal kata</li>
+                        <li>• Admin bisa langsung publish tanpa review</li>
+                        <li>• Gunakan gambar original/bebas hak cipta</li>
+                        <li>• Isi keterangan gambar untuk SEO</li>
+                        <li>• Cantumkan sumber jika mengutip</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden transition-all">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        // ==================== CONFIG LOADER ====================
+        let cachedConfig = null;
+        let supabase = null;
+        
+        async function loadConfig() {
+            if (cachedConfig) return cachedConfig;
+            try {
+                const response = await fetch('/api/config');
+                if (response.ok) { cachedConfig = await response.json(); console.log('✅ Config loaded'); return cachedConfig; }
+            } catch (error) { console.warn('⚠️ Gagal load /api/config, pakai fallback'); }
+            cachedConfig = { SUPABASE_URL: 'https://oavxhkpdqgqnagblxhki.supabase.co', SUPABASE_ANON_KEY: 'sb_publishable_18LyL-W_22mu1PyrQ3Eu4g_D2nCMsWT' };
+            return cachedConfig;
+        }
+        
+        async function initSupabase() {
+            try { const config = await loadConfig(); supabase = createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY); console.log("✅ Supabase connected"); return supabase; }
+            catch (err) { console.warn("⚠️ Supabase gagal:", err.message); supabase = null; return null; }
+        }
+        
+        // ==================== VARIABEL GLOBAL ====================
+        let convertedImageBase64 = null;
+        let tempWebPFile = null;
+        let currentImageTab = 'file';
+        let userId = null;
+        let userName = null;
+        let quill;
+        let isSubmitting = false;
+        let hasChanges = false;
+        let autoSaveTimer = null;
+        let currentDraftId = null;
+        let lastSavedContent = '';
+        
+        // ==================== KONVERSI WEBP ====================
+        async function convertToWebP(file, quality = 0.85) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const reader = new FileReader();
+                reader.onload = e => img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxWidth = 1200;
+                    let width = img.width, height = img.height;
+                    if (width > maxWidth) { height = height * (maxWidth / width); width = maxWidth; }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    convertedImageBase64 = canvas.toDataURL('image/webp', quality);
+                    document.getElementById('previewImg').src = convertedImageBase64;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    
+                    canvas.toBlob(blob => {
+                        if (!blob) return reject('Gagal convert ke WebP');
+                        const newFileName = file.name.replace(/\.\w+$/, '.webp');
+                        const webpFile = new File([blob], newFileName, { type: 'image/webp' });
+                        tempWebPFile = webpFile;
+                        resolve(webpFile);
+                    }, 'image/webp', quality);
+                };
+                img.onerror = () => reject('Gagal memuat gambar');
+                reader.onerror = () => reject('Gagal membaca file');
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        async function uploadImageToStorage(file) {
+            const fileName = `article-images/${userId}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+            const { data, error } = await supabase.storage.from('articles').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) throw error;
+            const { data: urlData } = supabase.storage.from('articles').getPublicUrl(fileName);
+            return urlData.publicUrl;
+        }
+        
+        // ==================== CHECK USER (ADMIN) ====================
+        async function checkUser() {
+            if (!supabase) return false;
+            
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            if (sessionError || !session) { window.location.href = '../../../auth/login.html'; return false; }
+            
+            const { data: profile, error } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if (error || profile?.role !== 'admin') { window.location.href = '../../../auth/login.html'; return false; }
+            
+            userId = session.user.id;
+            userName = profile?.full_name || session.user.email?.split('@')[0] || 'Admin';
+            
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userEmail').textContent = session.user.email;
+            
+            console.log('✅ Admin access granted, userId:', userId);
+            return true;
+        }
+        
+        // ==================== INIT QUILL ====================
+        function initQuill() {
+            if (quill) return;
+            quill = new Quill('#editor', {
+                theme: 'snow',
+                placeholder: 'Tulis konten artikel Anda di sini...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'header': 1 }, { 'header': 2 }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],
+                        [{ 'size': ['small', false, 'large', 'huge'] }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'align': [] }],
+                        ['clean'],
+                        ['link', 'image']
+                    ]
+                }
+            });
+            
+            quill.on('text-change', () => {
+                updateWordCount();
+                hasChanges = true;
+                updateAutoSaveStatus('Menyimpan...', 'text-gray-400');
+            });
+            
+            updateWordCount();
+        }
+        
+        function updateWordCount() {
+            if (!quill) return;
+            const text = quill.getText().trim();
+            const count = text ? text.split(/\s+/).filter(w => w.length > 0).length : 0;
+            document.getElementById('wordCountDisplay').textContent = `${count} kata`;
+        }
+        
+        // ==================== AUTO-SAVE DRAFT ====================
+        function startAutoSave() {
+            if (autoSaveTimer) clearInterval(autoSaveTimer);
+            autoSaveTimer = setInterval(async () => {
+                const title = document.getElementById('articleTitle').value.trim();
+                const content = quill?.root.innerHTML || '';
+                const currentContent = title + content;
+                
+                if (!hasChanges || currentContent === lastSavedContent) return;
+                if (!title && !content.replace(/<[^>]*>/g, '').trim()) return;
+                
+                await performAutoSave();
+            }, 30000);
+        }
+        
+        async function performAutoSave() {
+            try {
+                const title = document.getElementById('articleTitle').value.trim() || 'Draft Tanpa Judul';
+                const content = quill?.root.innerHTML || '';
+                const excerpt = document.getElementById('articleExcerpt').value.trim() || null;
+                const category = document.getElementById('articleCategory').value || 'Ekbis & Investasi';
+                
+                const articleData = {
+                    title: title,
+                    content: content,
+                    excerpt: excerpt,
+                    category: category,
+                    status: 'draft',
+                    author_id: userId,
+                    author_role: 'admin',
+                    author_name: userName,
+                    updated_at: new Date().toISOString()
+                };
+                
+                if (!document.getElementById('articleSlug').value) generateSlug();
+                articleData.slug = document.getElementById('articleSlug').value || title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+                
+                if (currentDraftId) {
+                    const { error } = await supabase.from('article_index').update(articleData).eq('id', currentDraftId);
+                    if (!error) {
+                        lastSavedContent = title + content;
+                        updateAutoSaveStatus('✅ Draft tersimpan', 'text-green-500');
+                        hasChanges = false;
+                    }
+                } else {
+                    articleData.created_at = new Date().toISOString();
+                    const { data, error } = await supabase.from('article_index').insert(articleData).select('id').single();
+                    if (!error && data) {
+                        currentDraftId = data.id;
+                        lastSavedContent = title + content;
+                        updateAutoSaveStatus('✅ Draft tersimpan', 'text-green-500');
+                        hasChanges = false;
+                    }
+                }
+            } catch (error) {
+                console.error('Auto-save error:', error);
+                updateAutoSaveStatus('❌ Gagal menyimpan', 'text-red-500');
+            }
+        }
+        
+        function updateAutoSaveStatus(text, colorClass) {
+            const statusEl = document.getElementById('autoSaveStatus');
+            if (statusEl) {
+                const icon = colorClass === 'text-green-500' ? 'fa-check-circle' : (colorClass === 'text-red-500' ? 'fa-exclamation-circle' : 'fa-clock');
+                statusEl.innerHTML = `<i class="fas ${icon} ${colorClass}"></i> ${text}`;
+            }
+        }
+        
+        // ==================== KONFIRMASI SEBELUM MENINGGALKAN ====================
+        window.addEventListener('beforeunload', (e) => {
+            if (hasChanges) {
+                e.preventDefault();
+                e.returnValue = 'Anda memiliki perubahan yang belum disimpan. Yakin ingin meninggalkan halaman?';
+            }
+        });
+        
+        // ==================== SWITCH TAB GAMBAR ====================
+        window.switchImageTab = function(tab) {
+            currentImageTab = tab;
+            document.getElementById('tabFile').className = tab === 'file' 
+                ? 'flex-1 py-2 text-sm font-medium text-purple-600 border-b-2 border-purple-600 transition' 
+                : 'flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-purple-600 transition';
+            document.getElementById('tabUrl').className = tab === 'url' 
+                ? 'flex-1 py-2 text-sm font-medium text-purple-600 border-b-2 border-purple-600 transition' 
+                : 'flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-purple-600 transition';
+            
+            document.getElementById('uploadFileSection').classList.toggle('hidden', tab !== 'file');
+            document.getElementById('uploadUrlSection').classList.toggle('hidden', tab !== 'url');
+        };
+        
+        // ==================== IMAGE FILE UPLOAD ====================
+        document.getElementById('imageFile')?.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                try {
+                    showToast('🔄 Mengkonversi gambar ke WebP...', 'info');
+                    await convertToWebP(file, 0.85);
+                    showToast('✅ Gambar siap (WebP)', 'success');
+                    hasChanges = true;
+                } catch (error) {
+                    showToast('❌ Gagal konversi: ' + error.message, 'error');
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        convertedImageBase64 = e.target.result;
+                        document.getElementById('previewImg').src = e.target.result;
+                        document.getElementById('imagePreview').classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                    tempWebPFile = file;
+                }
+            }
+        });
+        
+        // ==================== PASTE FROM CLIPBOARD ====================
+        window.pasteFromClipboard = async function() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    if (text.includes('<') && text.includes('>')) {
+                        quill.root.innerHTML = text;
+                    } else {
+                        const paragraphs = text.split('\n').filter(p => p.trim());
+                        const html = paragraphs.map(p => `<p>${p}</p>`).join('');
+                        quill.root.innerHTML = html;
+                    }
+                    updateWordCount();
+                    showToast('✅ Konten ditempel dari clipboard', 'success');
+                    hasChanges = true;
+                }
+            } catch (error) {
+                showToast('❌ Gagal paste. Gunakan Ctrl+V di editor.', 'error');
+            }
+        };
+        
+        // ==================== SLUG ====================
+        window.generateSlug = function() {
+            const title = document.getElementById('articleTitle').value;
+            if (!title) return;
+            const slug = title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+            document.getElementById('articleSlug').value = slug;
+            hasChanges = true;
+        };
+        
+        window.copySlug = function() {
+            const slug = document.getElementById('articleSlug');
+            if (!slug.value) generateSlug();
+            slug.select();
+            navigator.clipboard?.writeText(slug.value) || document.execCommand('copy');
+            showToast('📋 Slug disalin!');
+        };
+        
+        // ==================== EVENT LISTENERS ====================
+        document.getElementById('articleTitle')?.addEventListener('input', () => { generateSlug(); hasChanges = true; });
+        document.getElementById('articleCategory')?.addEventListener('change', () => { hasChanges = true; });
+        document.getElementById('articleExcerpt')?.addEventListener('input', function() {
+            const len = this.value.length;
+            document.getElementById('excerptCount').textContent = `${len}/160`;
+            document.getElementById('excerptCount').classList.toggle('text-red-500', len > 160);
+            hasChanges = true;
+        });
+        document.getElementById('featuredImage')?.addEventListener('input', function() {
+            if (this.value) {
+                document.getElementById('previewImg').src = this.value;
+                document.getElementById('imagePreview').classList.remove('hidden');
+            } else {
+                document.getElementById('imagePreview').classList.add('hidden');
+            }
+            hasChanges = true;
+        });
+        document.getElementById('imageCaption')?.addEventListener('input', function() {
+            document.getElementById('previewCaption').textContent = this.value || 'Gambar utama artikel';
+            hasChanges = true;
+        });
+        
+        window.removeImage = function() {
+            document.getElementById('featuredImage').value = '';
+            document.getElementById('imageFile').value = '';
+            document.getElementById('imageCaption').value = '';
+            document.getElementById('imagePreview').classList.add('hidden');
+            convertedImageBase64 = null;
+            tempWebPFile = null;
+            hasChanges = true;
+        };
+        
+        // ==================== VALIDATION ====================
+        function validateForm() {
+            const title = document.getElementById('articleTitle').value.trim();
+            const content = quill?.root.innerHTML.trim() || '';
+            const excerpt = document.getElementById('articleExcerpt').value.trim();
+            const category = document.getElementById('articleCategory').value;
+            
+            if (!title) { showToast('❌ Judul artikel harus diisi', 'error'); return false; }
+            if (title.length > 150) { showToast('❌ Judul maksimal 150 karakter', 'error'); return false; }
+            if (!category) { showToast('❌ Kategori artikel harus dipilih', 'error'); return false; }
+            if (!content || content === '<p><br></p>') { showToast('❌ Konten artikel harus diisi', 'error'); return false; }
+            if (!excerpt) { showToast('❌ Excerpt harus diisi', 'error'); return false; }
+            if (excerpt.length > 160) { showToast('❌ Excerpt maksimal 160 karakter', 'error'); return false; }
+            
+            return true;
+        }
+        
+        // ==================== GET FORM DATA ====================
+        async function getFormData() {
+            if (!document.getElementById('articleSlug').value) generateSlug();
+            
+            let imageUrl = null;
+            
+            if (currentImageTab === 'file') {
+                let file = tempWebPFile || document.getElementById('imageFile').files[0];
+                if (file) {
+                    try {
+                        document.getElementById('uploadProgress').classList.remove('hidden');
+                        if (!tempWebPFile) {
+                            document.getElementById('progressText').textContent = 'Konversi...';
+                            document.getElementById('progressBar').style.width = '30%';
+                            file = await convertToWebP(file, 0.85);
+                        }
+                        document.getElementById('progressText').textContent = 'Upload...';
+                        document.getElementById('progressBar').style.width = '70%';
+                        imageUrl = await uploadImageToStorage(file);
+                        document.getElementById('progressBar').style.width = '100%';
+                        document.getElementById('uploadProgress').classList.add('hidden');
+                        showToast('✅ Gambar berhasil diupload (WebP)', 'success');
+                    } catch (error) {
+                        document.getElementById('uploadProgress').classList.add('hidden');
+                        throw new Error('Gagal upload gambar: ' + error.message);
+                    }
+                }
+            } else {
+                imageUrl = document.getElementById('featuredImage').value || null;
+            }
+            
+            const imageCaption = document.getElementById('imageCaption').value || null;
+            const sourceUrl = document.getElementById('sourceUrl').value || null;
+            const isFeatured = document.getElementById('isFeatured').checked || false;
+            const category = document.getElementById('articleCategory').value;
+            
+            return {
+                title: document.getElementById('articleTitle').value.trim(),
+                slug: document.getElementById('articleSlug').value,
+                excerpt: document.getElementById('articleExcerpt').value.trim(),
+                content: quill ? quill.root.innerHTML : '',
+                category: category,
+                featured_image: imageUrl,
+                image_caption: imageCaption,
+                file_path: imageUrl,
+                source_url: sourceUrl,
+                is_featured: isFeatured,
+                author_id: userId,
+                author_role: 'admin',
+                author_name: userName
+            };
+        }
+        
+        // ==================== TOAST ====================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-blue-500', 'bg-yellow-500');
+            if (type === 'error') toast.classList.add('bg-red-500');
+            else if (type === 'info') toast.classList.add('bg-blue-500');
+            else if (type === 'warning') toast.classList.add('bg-yellow-500');
+            else toast.classList.add('bg-green-500');
+            
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => { toast.classList.add('hidden'); }, 4000);
+        }
+        
+        // ==================== SAVE AS DRAFT ====================
+        window.saveAsDraft = async function() {
+            const title = document.getElementById('articleTitle').value.trim();
+            if (!title) { showToast('❌ Minimal isi judul untuk menyimpan draft', 'error'); return; }
+            
+            if (isSubmitting) return;
+            isSubmitting = true;
+            
+            const btn = document.getElementById('draftBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
+            
+            try {
+                const formData = await getFormData();
+                formData.status = 'draft';
+                if (!formData.category) formData.category = 'Ekbis & Investasi';
+                
+                let result;
+                if (currentDraftId) {
+                    result = await supabase.from('article_index').update(formData).eq('id', currentDraftId);
+                } else {
+                    formData.created_at = new Date().toISOString();
+                    result = await supabase.from('article_index').insert(formData).select().single();
+                    if (result.data) currentDraftId = result.data.id;
+                }
+                
+                if (result.error) throw result.error;
+                
+                hasChanges = false;
+                lastSavedContent = formData.title + formData.content;
+                updateAutoSaveStatus('✅ Draft tersimpan', 'text-green-500');
+                
+                showToast('✅ Draft berhasil disimpan!');
+                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+            } catch (err) {
+                console.error('Error:', err);
+                showToast('❌ Gagal menyimpan: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan sebagai Draft';
+                isSubmitting = false;
+            }
+        };
+        
+        // ==================== PUBLISH ARTICLE ====================
+        window.publishArticle = async function() {
+            if (!validateForm()) return;
+            
+            const result = await Swal.fire({
+                title: 'Publish Artikel?',
+                text: 'Artikel akan langsung tayang di website.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '✅ Ya, Publish!',
+                cancelButtonText: '❌ Batal'
+            });
+            
+            if (!result.isConfirmed) return;
+            if (isSubmitting) return;
+            isSubmitting = true;
+            
+            const btn = document.getElementById('publishBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+            
+            try {
+                const formData = await getFormData();
+                formData.status = 'published';
+                formData.published_at = new Date().toISOString();
+                
+                let result;
+                if (currentDraftId) {
+                    result = await supabase.from('article_index').update(formData).eq('id', currentDraftId);
+                } else {
+                    formData.created_at = new Date().toISOString();
+                    result = await supabase.from('article_index').insert(formData);
+                }
+                
+                if (result.error) throw result.error;
+                
+                hasChanges = false;
+                
+                await Swal.fire({
+                    icon: 'success',
+                    title: '🎉 Berhasil!',
+                    text: 'Artikel berhasil dipublish!',
+                    confirmButtonColor: '#16a34a',
+                    timer: 2000
+                });
+                
+                setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+            } catch (err) {
+                console.error('Publish error:', err);
+                let errorMsg = err.message;
+                if (err.code === '42501') errorMsg = 'Tidak memiliki izin (RLS).';
+                else if (err.code === '23505') errorMsg = 'Slug sudah digunakan. Ganti judul.';
+                else if (err.code === '23502') errorMsg = 'Data tidak lengkap: ' + err.message;
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Gagal Publish',
+                    text: errorMsg,
+                    confirmButtonColor: '#dc2626'
+                });
+                
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-globe mr-1"></i> Publish Sekarang';
+                isSubmitting = false;
+            }
+        };
+        
+        // ==================== PREVIEW ====================
+        window.previewArticle = function() {
+            let img = null;
+            if (currentImageTab === 'file') {
+                img = convertedImageBase64;
+                if (!img) {
+                    const fileInput = document.getElementById('imageFile');
+                    if (fileInput.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => { img = e.target.result; };
+                        reader.readAsDataURL(fileInput.files[0]);
+                    }
+                }
+            } else {
+                img = document.getElementById('featuredImage').value || null;
+            }
+            
+            const previewData = {
+                title: document.getElementById('articleTitle').value || 'Tanpa Judul',
+                content: quill ? quill.root.innerHTML : '<p>Tidak ada konten</p>',
+                excerpt: document.getElementById('articleExcerpt').value || null,
+                category: document.getElementById('articleCategory').value || 'Ekbis & Investasi',
+                image: img,
+                caption: document.getElementById('imageCaption').value || null,
+                sourceUrl: document.getElementById('sourceUrl').value || null,
+                author: userName
+            };
+            
+            localStorage.setItem('preview_article', JSON.stringify(previewData));
+            window.open('preview.html', '_blank');
+        };
+        
+        // ==================== LOGOUT ====================
+        window.logout = async () => {
+            const result = await Swal.fire({
+                title: 'Logout?',
+                text: 'Anda akan keluar dari akun admin.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Logout',
+                cancelButtonText: 'Batal'
+            });
+            
+            if (result.isConfirmed) {
+                if (supabase) await supabase.auth.signOut();
+                window.location.href = '../../../auth/login.html';
+            }
+        };
+        
+        // ==================== INIT ====================
+        async function init() {
+            await initSupabase();
+            const isAdmin = await checkUser();
+            if (!isAdmin) return;
+            
+            initQuill();
+            startAutoSave();
+            
+            // Cek apakah ada draft ID di URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const draftId = urlParams.get('draft');
+            if (draftId) {
+                currentDraftId = draftId;
+                // TODO: Load draft data jika diperlukan
+            }
+            
+            lastSavedContent = document.getElementById('articleTitle').value + (quill?.root.innerHTML || '');
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Verifikasi Pembayaran - Admin POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .mobile-smooth { -webkit-tap-highlight-color: transparent; }
+        button, a { touch-action: manipulation; }
+    </style>
+</head>
+<body class="bg-gray-100 mobile-smooth">
+    <nav class="bg-white shadow-md sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <h1 class="text-lg sm:text-xl font-bold text-blue-600"><i class="fas fa-credit-card mr-2"></i>Verifikasi Pembayaran</h1>
+                <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
+                    <a href="dashboard.html" class="text-gray-600 hover:text-blue-600"><i class="fas fa-tachometer-alt mr-1"></i>Dashboard</a>
+                    <a href="orders.html" class="text-gray-600 hover:text-blue-600"><i class="fas fa-clipboard-list mr-1"></i>Semua Pesanan</a>
+                    <span id="adminEmail" class="text-gray-500 text-xs sm:text-sm hidden sm:inline"></span>
+                    <button onclick="logout()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm whitespace-nowrap"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
+                </div>
+            </div>
+            <div class="sm:hidden mt-1"><span id="adminEmailMobile" class="text-gray-500 text-xs"></span></div>
+        </div>
+    </nav>
+    
+    <div class="container mx-auto px-4 sm:px-6 py-5 sm:py-6">
+        <h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6"><i class="fas fa-check-circle text-green-600 mr-2"></i>Verifikasi Pembayaran</h2>
+        <div class="bg-blue-50 p-3 sm:p-4 rounded-xl mb-5 sm:mb-6 text-xs sm:text-sm text-blue-800">
+            <i class="fas fa-info-circle mr-1"></i><span class="font-medium">Cara kerja:</span> Customer upload bukti → Admin verifikasi → Klik "Verifikasi & Proses"
+        </div>
+        <div id="ordersContainer"><div class="text-center py-12"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div><p class="mt-2 text-gray-500 text-sm">Memuat pesanan...</p></div></div>
+    </div>
+    
+    <div id="proofModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-xl w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col shadow-xl">
+            <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10"><h3 class="font-bold"><i class="fas fa-receipt mr-2 text-blue-600"></i>Bukti Pembayaran</h3><button onclick="closeModal()" class="text-3xl leading-6 hover:text-gray-700">&times;</button></div>
+            <div id="proofContent" class="p-4 overflow-y-auto flex-1"></div>
+            <div class="p-4 border-t sticky bottom-0 bg-white flex gap-2">
+                <button onclick="closeModal()" class="flex-1 sm:flex-initial bg-gray-500 text-white px-5 py-2.5 rounded-lg hover:bg-gray-600 text-sm transition">Tutup</button>
+                <button id="modalVerifyBtn" class="flex-1 sm:flex-initial bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 text-sm transition hidden"><i class="fas fa-check-circle mr-1"></i>Verifikasi & Proses</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cancelModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-xl w-full max-w-md shadow-xl">
+            <div class="p-4 border-b"><h3 class="font-bold text-red-600"><i class="fas fa-exclamation-triangle mr-2"></i>Batalkan Pesanan</h3></div>
+            <div class="p-4"><p class="text-sm text-gray-600 mb-3">Yakin ingin membatalkan?</p><textarea id="cancelReason" class="w-full border rounded-lg p-3 text-sm" rows="3" placeholder="Alasan (opsional)..."></textarea><input type="hidden" id="cancelOrderId" value=""></div>
+            <div class="p-4 border-t flex justify-end gap-2"><button onclick="closeCancelModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Batal</button><button onclick="confirmCancel()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"><i class="fas fa-times mr-1"></i>Ya, Batalkan</button></div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden"><span id="toastMessage"></span></div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let cachedConfig = null, supabase = null, currentViewingOrderId = null;
+        async function loadConfig() {
+            if (cachedConfig) return cachedConfig;
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`Server error (${r.status})`);
+            cachedConfig = await r.json();
+            if (!cachedConfig.SUPABASE_URL || !cachedConfig.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            return cachedConfig;
+        }
+        async function initSupabase() { try { const c = await loadConfig(); supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); return supabase; } catch(e) { supabase = null; throw e; } }
+        
+        async function requireAdmin() {
+            if (!supabase) return null;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '../auth/login.html'; return null; }
+            const { data: p } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if (!p || p.role !== 'admin') { window.location.href = '../user/dashboard.html'; return null; }
+            return session;
+        }
+        
+        let orders = [], productsMap = {};
+        
+        async function init() {
+            try { await initSupabase(); } catch(e) { window.location.href = '../auth/login.html'; return; }
+            if (!supabase) { window.location.href = '../auth/login.html'; return; }
+            const session = await requireAdmin();
+            if (session) { document.getElementById('adminEmail').textContent = session.user.email; const m = document.getElementById('adminEmailMobile'); if(m) m.textContent = session.user.email; loadProducts(); subscribeToChanges(); }
+        }
+        
+        function subscribeToChanges() { if(supabase) supabase.channel('payment-verification-changes').on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders'},()=>loadOrders()).on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},()=>loadOrders()).subscribe(); }
+        
+        async function loadProducts() { const { data: p } = await supabase.from('products').select('id, name'); if(p) p.forEach(pr => { productsMap[pr.id]=pr; }); loadOrders(); }
+        
+        async function loadOrders() {
+            const { data: od, error } = await supabase.from('orders').select('*, order_items(id, quantity, price, product_id)').eq('status','pending').order('created_at',{ascending:false});
+            if (error) { document.getElementById('ordersContainer').innerHTML = `<div class="bg-red-100 p-4 rounded">Error: ${error.message}</div>`; return; }
+            orders = od || [];
+            for (let o of orders) { const { data: prof } = await supabase.from('profiles').select('full_name, email, phone, role').eq('id', o.user_id).single(); o.profile = prof || { full_name:'Unknown', email:'-', phone:'-', role:'user' }; }
+            renderOrders();
+        }
+        
+        function renderOrders() {
+            const c = document.getElementById('ordersContainer');
+            const wp = orders.filter(o=>o.payment_proof), nop = orders.filter(o=>!o.payment_proof);
+            if (!orders.length) { c.innerHTML = `<div class="bg-white rounded-xl shadow-md p-8 text-center"><div class="text-6xl mb-4">✅</div><h3 class="text-xl font-semibold">Tidak Ada Pesanan Menunggu</h3><a href="orders.html" class="mt-4 inline-block text-blue-600 hover:underline">Lihat semua pesanan →</a></div>`; return; }
+            let html = '';
+            if (nop.length) html += `<div class="mb-6"><h3 class="text-lg font-semibold mb-3 text-orange-600"><i class="fas fa-clock mr-1"></i>Menunggu Upload (${nop.length})</h3>${nop.map(o=>renderOrderCard(o,'orange')).join('')}</div>`;
+            if (wp.length) html += `<div class="mb-6"><h3 class="text-lg font-semibold mb-3 text-green-600"><i class="fas fa-check-circle mr-1"></i>Siap Diverifikasi (${wp.length})</h3>${wp.map(o=>renderOrderCard(o,'green')).join('')}</div>`;
+            c.innerHTML = html;
+        }
+        
+        function renderOrderCard(o, type) {
+            const iwp = type==='green', bc = iwp?'border-green-400':'border-orange-400';
+            const sb = iwp?'<span class="px-2.5 py-1 rounded-full text-xs bg-green-100 text-green-800"><i class="fas fa-check mr-1"></i>Siap Diverifikasi</span>':'<span class="px-2.5 py-1 rounded-full text-xs bg-orange-100 text-orange-800"><i class="fas fa-hourglass-half mr-1"></i>Menunggu Upload</span>';
+            const rb = o.profile?.role==='member'?'<span class="ml-1 text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">Member</span>':o.profile?.role==='editor'?'<span class="ml-1 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">Editor</span>':'<span class="ml-1 text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">User</span>';
+            return `<div class="bg-white rounded-xl shadow-sm overflow-hidden mb-4 border-l-4 ${bc}"><div class="p-6"><div class="flex flex-wrap justify-between items-start gap-2 mb-4"><div><span class="text-sm text-gray-500 font-mono">#${String(o.id).slice(0,8)}</span><span class="ml-2 text-sm text-gray-500">${new Date(o.created_at).toLocaleString('id-ID')}</span></div>${sb}</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4"><div><p class="text-sm text-gray-500">Customer</p><p class="font-medium">${o.profile?.full_name||'-'}${rb}</p><p class="text-sm">${o.profile?.email||'-'}</p><p class="text-sm">${o.profile?.phone||'-'}</p></div><div><p class="text-sm text-gray-500">Total</p><p class="text-2xl font-bold ${iwp?'text-green-600':'text-blue-600'}">Rp ${o.total_amount?.toLocaleString()||0}</p></div></div><div class="bg-gray-50 p-3 rounded-lg mb-4">${o.order_items?.map(i=>`<p class="text-sm">${i.quantity}x ${productsMap[i.product_id]?.name||'Produk'} - Rp ${(i.quantity*i.price).toLocaleString()}</p>`).join('')||'<p class="text-xs text-gray-400">Tidak ada item</p>'}</div>${iwp?`<div class="bg-blue-50 p-3 rounded-lg mb-4"><button onclick="viewProof('${o.id}','${(o.payment_proof||'').replace(/'/g,"\\'")}')" class="text-blue-600 text-sm hover:underline">📷 Lihat & Verifikasi Bukti →</button></div>`:`<div class="bg-yellow-50 p-3 rounded-lg mb-4"><p class="text-sm text-yellow-800"><i class="fas fa-exclamation-triangle mr-1"></i>Belum upload bukti.</p></div>`}<div class="flex gap-2.5 justify-end">${iwp?`<button onclick="verifyAndProcess('${o.id}')" class="bg-green-600 text-white px-6 py-2.5 rounded-lg text-sm hover:bg-green-700"><i class="fas fa-check-circle mr-1"></i>Verifikasi & Proses</button>`:''}<button onclick="openCancelModal('${o.id}')" class="bg-red-500 text-white px-5 py-2.5 rounded-lg text-sm hover:bg-red-600"><i class="fas fa-times mr-1"></i>Batalkan</button></div></div></div>`;
+        }
+        
+        window.verifyAndProcess = async (id) => {
+            const r = await Swal.fire({title:'Verifikasi?',text:'Pastikan bukti sudah benar.',icon:'question',showCancelButton:true,confirmButtonColor:'#16a34a',confirmButtonText:'Ya',cancelButtonText:'Batal'});
+            if(!r.isConfirmed)return;
+            try{const{data,error}=await supabase.rpc('admin_update_order_status',{p_order_id:parseInt(id),p_status:'processing'});if(error)throw error;if(!data||!data.success)throw new Error(data?.error);Swal.fire({icon:'success',title:'Berhasil!',timer:2000});loadOrders();}catch(e){Swal.fire({icon:'error',text:e.message});}
+        };
+        
+        window.confirmCancel = async () => {
+            const oid = document.getElementById('cancelOrderId').value, reason = document.getElementById('cancelReason').value.trim();
+            if(!oid){closeCancelModal();return;}
+            try{const{data,error}=await supabase.rpc('admin_update_order_status',{p_order_id:parseInt(oid),p_status:'cancelled',p_cancellation_reason:reason||'Dibatalkan Admin'});if(error)throw error;if(!data||!data.success)throw new Error(data?.error);showToast('Dibatalkan');closeCancelModal();loadOrders();}catch(e){showToast('Gagal: '+e.message,'error');}
+        };
+        
+        window.openCancelModal = (id) => { document.getElementById('cancelOrderId').value=id; document.getElementById('cancelReason').value=''; document.getElementById('cancelModal').classList.remove('hidden'); };
+        window.closeCancelModal = () => { document.getElementById('cancelModal').classList.add('hidden'); };
+        
+        window.viewProof = (orderId, proof) => {
+            currentViewingOrderId = orderId;
+            const isImg = proof.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) || proof.includes('supabase.co/storage');
+            document.getElementById('proofContent').innerHTML = `<div class="bg-gray-100 p-3 rounded-lg break-all text-xs mb-3">${proof}</div>${isImg?`<img src="${proof}" class="mt-2 max-w-full rounded-lg max-h-64 mx-auto border" onerror="this.style.display='none'">`:''}${proof.includes('http')?`<div class="mt-2 text-center"><a href="${proof}" target="_blank" class="text-blue-600 text-sm underline">🔗 Buka link</a></div>`:''}`;
+            const vb = document.getElementById('modalVerifyBtn'); vb.classList.remove('hidden'); vb.onclick = () => { closeModal(); verifyAndProcess(orderId); };
+            document.getElementById('proofModal').classList.remove('hidden'); document.body.style.overflow='hidden';
+        };
+        
+        window.closeModal = () => { document.getElementById('proofModal').classList.add('hidden'); document.body.style.overflow=''; };
+        window.logout = async () => { if(supabase) await supabase.auth.signOut(); window.location.href='../auth/login.html'; };
+        
+        function showToast(m, t='success') { const toast=document.getElementById('toast'),msg=document.getElementById('toastMessage'); toast.classList.remove('bg-green-500','bg-red-500'); toast.classList.add(t==='success'?'bg-green-500':'bg-red-500'); msg.textContent=m; toast.classList.remove('hidden'); setTimeout(()=>toast.classList.add('hidden'),3000); }
+        
+        document.getElementById('proofModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+        document.getElementById('cancelModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeCancelModal(); });
+        document.addEventListener('keydown', e => { if(e.key==='Escape'){closeModal();closeCancelModal();} });
+        
+        init();
+    </script>
+</body>
+</html>

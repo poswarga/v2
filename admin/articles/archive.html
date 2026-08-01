@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Arsip Artikel - Admin POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .status-badge { @apply px-2 py-1 rounded-full text-xs font-medium; }
+        .article-row:hover { background: linear-gradient(to right, #faf5ff, #f3e8ff); }
+        .filter-chip { @apply px-3 py-1.5 rounded-full text-xs bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-600 transition cursor-pointer; }
+        .filter-chip.active { @apply bg-purple-600 text-white; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="../dashboard.html" class="text-gray-600 hover:text-purple-600 transition p-2 rounded-lg hover:bg-purple-50"><i class="fas fa-arrow-left"></i></a>
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-purple-500 rounded-xl flex items-center justify-center shadow-md"><i class="fas fa-archive text-white text-sm"></i></div>
+                    <div><h1 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-purple-500 bg-clip-text text-transparent">Arsip Artikel</h1><p class="text-xs text-gray-400 hidden sm:block">Artikel yang diarsipkan</p></div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <a href="index.html" class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg text-sm transition"><i class="fas fa-list mr-1"></i> Semua Artikel</a>
+                    <a href="index.html" class="relative bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-4 py-2 rounded-lg text-sm transition"><i class="fas fa-inbox mr-1"></i> Inbox <span id="inboxBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center hidden">0</span></a>
+                    <div class="text-right hidden sm:block"><p id="adminName" class="text-sm font-semibold text-gray-800">Admin</p><p id="adminEmail" class="text-xs text-gray-500">-</p></div>
+                    <button onclick="logout()" class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm transition shadow-md"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <div class="bg-white rounded-xl shadow-md p-4"><p class="text-xs text-gray-500">Total Arsip</p><p class="text-2xl font-bold" id="statTotal">0</p></div>
+            <div class="bg-white rounded-xl shadow-md p-4"><p class="text-xs text-gray-500">Bulan Ini</p><p class="text-2xl font-bold text-blue-600" id="statThisMonth">0</p></div>
+            <div class="bg-white rounded-xl shadow-md p-4"><p class="text-xs text-gray-500">Bulan Lalu</p><p class="text-2xl font-bold text-green-600" id="statLastMonth">0</p></div>
+            <div class="bg-white rounded-xl shadow-md p-4"><p class="text-xs text-gray-500">Tahun Ini</p><p class="text-2xl font-bold text-purple-600" id="statThisYear">0</p></div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+            <div class="flex flex-wrap gap-3 items-center justify-between">
+                <div class="flex flex-wrap gap-2"><span class="filter-chip active" data-role="all">Semua</span><span class="filter-chip" data-role="editor">Editor</span><span class="filter-chip" data-role="member">Member</span><span class="filter-chip" data-role="user">User</span><span class="filter-chip" data-role="admin">Admin</span></div>
+                <div class="flex flex-wrap gap-2"><div class="relative"><input type="text" id="searchInput" placeholder="Cari artikel..." class="text-sm border rounded-lg px-3 py-1.5 pl-9 bg-gray-50 w-64 focus:ring-2 focus:ring-purple-500"><i class="fas fa-search absolute left-3 top-2 text-gray-400 text-sm"></i></div><button onclick="loadArchivedArticles()" class="bg-gray-100 hover:bg-gray-200 p-2 rounded-lg"><i class="fas fa-sync-alt"></i></button></div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50"><tr><th class="py-3 px-4"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Judul</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Penulis</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Role</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Diarsipkan</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th></tr></thead><tbody id="articleTableBody"><tr><td colspan="6" class="text-center py-12"><div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div></td></tr></tbody></table></div>
+            <div class="px-5 py-4 border-t bg-gray-50 flex flex-wrap justify-between items-center gap-3"><div class="text-sm">Menampilkan <span id="showingStart">0</span>-<span id="showingEnd">0</span> dari <span id="totalCount">0</span></div><div class="flex gap-2"><button id="prevPage" class="px-3 py-1.5 text-sm bg-white border rounded-lg disabled:opacity-50" disabled><i class="fas fa-chevron-left"></i></button><span class="px-3 py-1.5 text-sm bg-purple-100 text-purple-800 rounded-lg" id="currentPage">1</span><button id="nextPage" class="px-3 py-1.5 text-sm bg-white border rounded-lg disabled:opacity-50" disabled><i class="fas fa-chevron-right"></i></button></div></div>
+        </div>
+
+        <div id="bulkActions" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white shadow-2xl rounded-xl px-6 py-4 border hidden z-30"><div class="flex items-center gap-4"><span class="text-sm"><span id="selectedCount">0</span> dipilih</span><select id="bulkActionSelect" class="text-sm border rounded-lg px-3 py-1.5"><option value="">Pilih Aksi...</option><option value="restore">Kembalikan ke Draft</option><option value="publish">Publish Ulang</option><option value="delete">Hapus Permanen</option></select><button onclick="applyBulkAction()" class="bg-purple-600 text-white px-4 py-1.5 rounded-lg text-sm">Terapkan</button><button onclick="clearSelection()" class="text-gray-500"><i class="fas fa-times"></i></button></div></div>
+    </div>
+
+    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center"><div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6"><h3 class="text-lg font-bold mb-4" id="modalTitle">Konfirmasi</h3><p class="text-sm mb-4" id="modalMessage">Apakah Anda yakin?</p><div class="flex justify-end gap-2"><button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Batal</button><button onclick="confirmAction()" class="px-4 py-2 bg-purple-600 text-white rounded-lg" id="modalConfirmBtn">Ya</button></div></div></div>
+
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden"><span id="toastMessage"></span></div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let supabase = null;
+        async function initSupabase() {
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const c = await r.json();
+            if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY);
+        }
+        
+        let articles = [], filteredArticles = [], selectedArticles = new Set(), currentRole = 'all', currentSearch = '', currentPage = 1, pageSize = 20, pendingAction = null;
+        
+        async function checkAdmin() {
+            if (!supabase) return false;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '../../../auth/login.html'; return false; }
+            const { data: p } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if (!p || p.role !== 'admin') { window.location.href = '../../../auth/login.html'; return false; }
+            document.getElementById('adminName').textContent = p?.full_name || 'Admin';
+            document.getElementById('adminEmail').textContent = session.user.email;
+            await loadArchivedArticles(); await loadInboxCount(); return true;
+        }
+        
+        async function loadInboxCount() {
+            const { count } = await supabase.from('article_index').select('*', { count: 'exact', head: true }).eq('status', 'pending_editor');
+            if (count > 0) { const b = document.getElementById('inboxBadge'); b.textContent = count > 99 ? '99+' : count; b.classList.remove('hidden'); }
+        }
+        
+        window.loadArchivedArticles = async function() {
+            const { data, error } = await supabase.from('article_index').select('id, title, slug, excerpt, author_id, author_role, author_name, status, archived_at, created_at, featured_image').eq('status', 'archived').order('archived_at', { ascending: false });
+            if (error) { showToast('Gagal: ' + error.message, 'error'); return; }
+            articles = data || []; calculateStats(); applyFilters();
+        }
+        
+        function calculateStats() {
+            const now = new Date(), tm = now.getMonth(), ty = now.getFullYear(), lm = tm === 0 ? 11 : tm - 1, ly = tm === 0 ? ty - 1 : ty;
+            let tmc = 0, lmc = 0, tyc = 0;
+            articles.forEach(a => { if (!a.archived_at) return; const d = new Date(a.archived_at); if (d.getFullYear() === ty) { tyc++; if (d.getMonth() === tm) tmc++; } if (d.getFullYear() === ly && d.getMonth() === lm) lmc++; });
+            document.getElementById('statTotal').textContent = articles.length;
+            document.getElementById('statThisMonth').textContent = tmc;
+            document.getElementById('statLastMonth').textContent = lmc;
+            document.getElementById('statThisYear').textContent = tyc;
+        }
+        
+        function applyFilters() {
+            filteredArticles = articles.filter(a => { if (currentRole !== 'all' && a.author_role !== currentRole) return false; if (currentSearch && !a.title?.toLowerCase().includes(currentSearch.toLowerCase())) return false; return true; });
+            currentPage = 1; renderArticles();
+        }
+        
+        function renderArticles() {
+            const tbody = document.getElementById('articleTableBody'), start = (currentPage - 1) * pageSize, pageArticles = filteredArticles.slice(start, start + pageSize);
+            document.getElementById('showingStart').textContent = filteredArticles.length > 0 ? start + 1 : 0;
+            document.getElementById('showingEnd').textContent = Math.min(start + pageSize, filteredArticles.length);
+            document.getElementById('totalCount').textContent = filteredArticles.length;
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = start + pageSize >= filteredArticles.length;
+            if (!pageArticles.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-12"><i class="fas fa-archive text-4xl mb-3 opacity-50"></i><p>Tidak ada artikel</p></td></tr>'; return; }
+            tbody.innerHTML = pageArticles.map(a => {
+                const ad = a.archived_at ? new Date(a.archived_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+                const rb = { editor: '<span class="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Editor</span>', member: '<span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Member</span>', user: '<span class="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">User</span>', admin: '<span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Admin</span>' };
+                return `<tr class="article-row border-b hover:bg-purple-50"><td class="py-3 px-4"><input type="checkbox" class="article-checkbox rounded" data-id="${a.id}" ${selectedArticles.has(a.id)?'checked':''} onchange="toggleSelection('${a.id}')"></td><td class="py-3 px-4"><p class="font-medium">${a.title||'Tanpa Judul'}</p><p class="text-xs text-gray-400">${a.excerpt||'-'}</p></td><td class="py-3 px-4 text-sm">${a.author_name||'-'}</td><td class="py-3 px-4">${rb[a.author_role]||rb.user}</td><td class="py-3 px-4 text-sm"><i class="far fa-calendar mr-1"></i>${ad}</td><td class="py-3 px-4"><div class="flex gap-1"><a href="edit.html?id=${a.id}" class="text-blue-600 p-2"><i class="fas fa-edit"></i></a><button onclick="restoreArticle('${a.id}')" class="text-green-600 p-2"><i class="fas fa-undo"></i></button><button onclick="publishArchived('${a.id}')" class="text-purple-600 p-2"><i class="fas fa-globe"></i></button><a href="../../../postingan-detail.html?slug=${a.slug}" target="_blank" class="text-gray-600 p-2"><i class="fas fa-eye"></i></a><button onclick="deletePermanently('${a.id}','${(a.title||'Tanpa Judul').replace(/'/g,"\\'")}')" class="text-red-500 p-2"><i class="fas fa-trash"></i></button></div></td></tr>`;
+            }).join('');
+            updateSelectAll();
+        }
+        
+        function updateSelectAll() { const cbs = document.querySelectorAll('.article-checkbox'); document.getElementById('selectAll').checked = cbs.length > 0 && Array.from(cbs).every(cb => cb.checked); }
+        
+        window.toggleSelection = (id) => { selectedArticles.has(id) ? selectedArticles.delete(id) : selectedArticles.add(id); updateBulkActions(); updateSelectAll(); };
+        window.toggleSelectAll = () => { const sa = document.getElementById('selectAll'), cbs = document.querySelectorAll('.article-checkbox'); if (sa.checked) { cbs.forEach(cb => { selectedArticles.add(cb.dataset.id); cb.checked = true; }); } else { selectedArticles.clear(); cbs.forEach(cb => cb.checked = false); } updateBulkActions(); };
+        function updateBulkActions() { const c = selectedArticles.size, b = document.getElementById('bulkActions'); document.getElementById('selectedCount').textContent = c; c > 0 ? b.classList.remove('hidden') : b.classList.add('hidden'); }
+        window.clearSelection = () => { selectedArticles.clear(); document.querySelectorAll('.article-checkbox').forEach(cb => cb.checked = false); document.getElementById('selectAll').checked = false; updateBulkActions(); };
+        
+        window.applyBulkAction = async () => {
+            const action = document.getElementById('bulkActionSelect').value, ids = Array.from(selectedArticles);
+            if (!action || !ids.length) return;
+            const titles = { restore: ['Kembalikan ke Draft?', `${ids.length} artikel akan dikembalikan.`, 'bg-purple-600', 'Kembalikan'], publish: ['Publish Ulang?', `${ids.length} artikel akan dipublish.`, 'bg-purple-600', 'Publish'], delete: ['⚠️ Hapus Permanen?', `${ids.length} artikel akan dihapus PERMANEN!`, 'bg-red-600', 'Hapus'] };
+            const [mt, mm, mc, mb] = titles[action];
+            pendingAction = { type: action, ids };
+            document.getElementById('modalTitle').textContent = mt;
+            document.getElementById('modalMessage').textContent = mm;
+            document.getElementById('modalConfirmBtn').className = `px-4 py-2 ${mc} text-white rounded-lg`;
+            document.getElementById('modalConfirmBtn').innerHTML = mb;
+            document.getElementById('confirmModal').classList.remove('hidden');
+        };
+        
+        window.restoreArticle = (id) => { pendingAction = { type: 'restore', ids: [id] }; document.getElementById('modalTitle').textContent = 'Kembalikan ke Draft?'; document.getElementById('modalMessage').textContent = 'Artikel akan dikembalikan.'; document.getElementById('modalConfirmBtn').className = 'px-4 py-2 bg-purple-600 text-white rounded-lg'; document.getElementById('modalConfirmBtn').innerHTML = 'Kembalikan'; document.getElementById('confirmModal').classList.remove('hidden'); };
+        window.publishArchived = (id) => { pendingAction = { type: 'publish', ids: [id] }; document.getElementById('modalTitle').textContent = 'Publish Ulang?'; document.getElementById('modalMessage').textContent = 'Artikel akan dipublish.'; document.getElementById('modalConfirmBtn').className = 'px-4 py-2 bg-purple-600 text-white rounded-lg'; document.getElementById('modalConfirmBtn').innerHTML = 'Publish'; document.getElementById('confirmModal').classList.remove('hidden'); };
+        window.deletePermanently = (id, title) => { pendingAction = { type: 'delete', ids: [id] }; document.getElementById('modalTitle').textContent = '⚠️ Hapus Permanen?'; document.getElementById('modalMessage').textContent = `"${title}" akan dihapus PERMANEN!`; document.getElementById('modalConfirmBtn').className = 'px-4 py-2 bg-red-600 text-white rounded-lg'; document.getElementById('modalConfirmBtn').innerHTML = 'Hapus'; document.getElementById('confirmModal').classList.remove('hidden'); };
+        
+        window.confirmAction = async () => {
+            if (!pendingAction) return;
+            const { type, ids } = pendingAction;
+            try {
+                if (type === 'restore') await supabase.from('article_index').update({ status: 'draft', archived_at: null, updated_at: new Date().toISOString() }).in('id', ids);
+                else if (type === 'publish') await supabase.from('article_index').update({ status: 'published', archived_at: null, updated_at: new Date().toISOString() }).in('id', ids);
+                else if (type === 'delete') await supabase.from('article_index').delete().in('id', ids);
+                showToast(`${ids.length} artikel ${type==='restore'?'dikembalikan':type==='publish'?'dipublish':'dihapus'}`);
+                closeModal(); clearSelection(); loadArchivedArticles();
+            } catch(e) { showToast('Gagal: ' + e.message, 'error'); closeModal(); }
+        };
+        
+        window.closeModal = () => { document.getElementById('confirmModal').classList.add('hidden'); pendingAction = null; };
+        window.logout = async () => { if (supabase) await supabase.auth.signOut(); window.location.href = '../../../auth/login.html'; };
+        
+        function showToast(m, t = 'success') { const toast = document.getElementById('toast'), msg = document.getElementById('toastMessage'); toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-purple-500'); toast.classList.add(t === 'success' ? 'bg-green-500' : t === 'error' ? 'bg-red-500' : 'bg-purple-500'); msg.textContent = m; toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 3000); }
+        
+        document.querySelectorAll('[data-role]').forEach(chip => chip.addEventListener('click', function() { currentRole = this.dataset.role; document.querySelectorAll('[data-role]').forEach(c => c.classList.remove('active')); this.classList.add('active'); applyFilters(); }));
+        let st; document.getElementById('searchInput').addEventListener('input', function() { clearTimeout(st); st = setTimeout(() => { currentSearch = this.value; applyFilters(); }, 300); });
+        document.getElementById('prevPage').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderArticles(); } });
+        document.getElementById('nextPage').addEventListener('click', () => { if ((currentPage * pageSize) < filteredArticles.length) { currentPage++; renderArticles(); } });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+        document.getElementById('confirmModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+        
+        (async () => { try { await initSupabase(); } catch(e) { window.location.href = '../../../auth/login.html'; return; } if (supabase) await checkAdmin(); else window.location.href = '../../../auth/login.html'; })();
+    </script>
+</body>
+</html>

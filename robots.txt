@@ -1,0 +1,15 @@
+User-agent: *
+
+# Blokir folder role (dashboard, auth actions, preview)
+Disallow: /admin/
+Disallow: /editor/
+Disallow: /member/
+Disallow: /user/
+Disallow: /auth/
+
+# Allow sisanya (landing, artikel, aset publik)
+Allow: /
+
+# Deklarasi Sitemap Resmi Website POS WARGA
+Sitemap: https://poswarga.com/sitemap.xml
+Sitemap: https://api.poswarga.com/sitemap-posts.xml

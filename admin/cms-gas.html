@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>CMS GAS- Kelola Konten Website</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Custom styles */
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 200px);
+            min-height: 500px;
+            overflow: hidden;
+            border-radius: 16px;
+            background: white;
+        }
+        
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* Loading spinner */
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            gap: 16px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #ec4899;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background-color: #ef4444;
+        }
+        
+        /* Card hover effect */
+        .info-card {
+            transition: all 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Mobile adjustment */
+        @media (max-width: 768px) {
+            .iframe-container {
+                height: calc(100vh - 180px);
+                border-radius: 12px;
+            }
+            
+            .toast {
+                bottom: 16px;
+                right: 16px;
+                left: 16px;
+                transform: translateY(100%);
+            }
+            
+            .toast.show {
+                transform: translateY(0);
+            }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-edit text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">CMS GAS</h1>
+                        <p class="text-xs text-gray-400 hidden sm:block">Google Sheets CMS</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-3">
+                    <button onclick="refreshIframe()" id="refreshBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm transition flex items-center gap-1">
+                        <i class="fas fa-sync-alt"></i>
+                        <span class="hidden sm:inline">Refresh</span>
+                    </button>
+                    <button onclick="openGoogleSheet()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-3 py-2 rounded-lg text-sm transition flex items-center gap-1 shadow-md">
+                        <i class="fab fa-google"></i>
+                        <span class="hidden sm:inline">Buka Sheet</span>
+                    </button>
+                    <a href="dashboard.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm transition flex items-center gap-1">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="hidden sm:inline">Kembali</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Info Cards Row -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <!-- Card 1 -->
+            <div class="info-card bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-edit text-pink-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Edit Konten</h3>
+                        <p class="text-xs text-gray-500">Ubah teks & menu</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="info-card bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-sync-alt text-blue-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Auto Update</h3>
+                        <p class="text-xs text-gray-500">Cache 5 menit</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="info-card bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i class="fab fa-google text-green-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-sm">Google Sheets</h3>
+                        <p class="text-xs text-gray-500">Edit online</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner container mx-auto">
+        <div class="spinner"></div>
+        <p class="text-gray-500 text-sm">Memuat CMS Editor...</p>
+        <p class="text-xs text-gray-400">Pastikan Anda login ke Google Drive</p>
+    </div>
+
+    <!-- Iframe Container -->
+    <div id="iframeContainer" class="container mx-auto px-4 py-4" style="display: none;">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+            <div class="px-5 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                    <i class="fab fa-google text-green-600"></i>
+                    <span class="text-sm font-medium text-gray-700">Google Sheets Editor</span>
+                </div>
+                <div class="flex items-center gap-3 text-xs">
+                    <span class="text-gray-400 hidden sm:inline">
+                        <i class="fas fa-info-circle mr-1"></i>Edit langsung di sini
+                    </span>
+                    <button onclick="openGoogleSheet()" class="text-green-600 hover:text-green-800 transition">
+                        <i class="fas fa-external-link-alt"></i> Buka tab baru
+                    </button>
+                </div>
+            </div>
+            <div class="iframe-container">
+                <iframe id="cmsIframe" src="about:blank" title="Google Sheets CMS"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips Card -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-lightbulb text-blue-600 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-semibold text-gray-800 text-sm mb-2">Tips Menggunakan CMS</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-600">
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-4 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 text-[10px] font-bold">1</span>
+                            <span>Edit data di Google Sheet</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-4 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 text-[10px] font-bold">2</span>
+                            <span>Tunggu 5 menit (cache) atau refresh index.html</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-4 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 text-[10px] font-bold">3</span>
+                            <span>Pastikan login ke Google Drive untuk edit</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-4 h-4 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 text-[10px] font-bold">4</span>
+                            <span>Jangan ubah struktur sheet</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Halaman direfresh</span>
+    </div>
+
+    <script>
+        // ==================== KONFIGURASI ====================
+        // Ganti dengan URL Google Sheet CMS Anda
+        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HXTuM4ZIaKPQlPPD0UEraD-IBVLYaY8ag7gZ6eSKezU/edit?usp=sharing';
+        
+        // ==================== SHOW TOAST ====================
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            
+            if (isError) {
+                toast.classList.add('error');
+            } else {
+                toast.classList.remove('error');
+            }
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // ==================== REFRESH IFRAME ====================
+        function refreshIframe() {
+            const iframe = document.getElementById('cmsIframe');
+            const refreshBtn = document.getElementById('refreshBtn');
+            
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span class="hidden sm:inline"> Loading...</span>';
+            
+            const currentSrc = iframe.src;
+            iframe.src = 'about:blank';
+            setTimeout(() => {
+                iframe.src = currentSrc;
+            }, 100);
+            
+            setTimeout(() => {
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i><span class="hidden sm:inline"> Refresh</span>';
+                showToast('Halaman CMS direfresh');
+            }, 1500);
+        }
+        
+        // ==================== OPEN GOOGLE SHEET ====================
+        function openGoogleSheet() {
+            window.open(GOOGLE_SHEET_URL, '_blank');
+            showToast('Membuka Google Sheet di tab baru');
+        }
+        
+        // ==================== LOAD IFRAME ====================
+        function loadIframe() {
+            const spinner = document.getElementById('loadingSpinner');
+            const iframeContainer = document.getElementById('iframeContainer');
+            const iframe = document.getElementById('cmsIframe');
+            
+            spinner.style.display = 'flex';
+            iframeContainer.style.display = 'none';
+            
+            iframe.src = GOOGLE_SHEET_URL;
+            
+            iframe.onload = () => {
+                spinner.style.display = 'none';
+                iframeContainer.style.display = 'block';
+                showToast('✅ CMS Editor siap digunakan');
+            };
+            
+            iframe.onerror = () => {
+                spinner.style.display = 'none';
+                iframeContainer.style.display = 'block';
+                iframeContainer.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+                        <i class="fas fa-exclamation-triangle text-5xl text-red-500 mb-4"></i>
+                        <h3 class="text-lg font-semibold text-red-700 mb-2">Gagal Memuat Google Sheet</h3>
+                        <p class="text-gray-600 text-sm mb-6">Pastikan URL Google Sheet sudah benar dan dapat diakses.</p>
+                        <div class="flex flex-wrap gap-3 justify-center">
+                            <button onclick="openGoogleSheet()" class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+                                <i class="fab fa-google"></i> Buka di Tab Baru
+                            </button>
+                            <button onclick="loadIframe()" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+                                <i class="fas fa-sync-alt"></i> Coba Lagi
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Pastikan Anda login ke Google Drive di browser ini
+                        </p>
+                    </div>
+                `;
+            };
+        }
+        
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadIframe();
+            console.log('CMS Editor - Google Sheets Integration');
+            console.log('URL:', GOOGLE_SHEET_URL);
+        });
+        
+        // Expose functions to global
+        window.refreshIframe = refreshIframe;
+        window.openGoogleSheet = openGoogleSheet;
+        window.loadIframe = loadIframe;
+    </script>
+</body>
+</html>

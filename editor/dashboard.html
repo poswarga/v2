@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Editor Dashboard - POS WARGA</title>
+    <link href="https://ik.imagekit.io/1ctpzpi1o/icon.png" rel="icon" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif !important; }
+        .fa,.fas,.far,.fab,.fal,.fad{font-family:"Font Awesome 6 Free"!important;font-weight:900}
+        .far{font-weight:400!important}
+        .fab{font-family:"Font Awesome 6 Brands"!important}
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .menu-card { transition: all 0.3s ease; }
+        .menu-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .article-row:hover { background: linear-gradient(to right, #ecfdf5, #d1fae5); }
+        .tab-link { @apply px-4 py-2 text-sm font-medium text-gray-600 hover:text-green-600 border-b-2 border-transparent hover:border-green-300 transition; }
+        .tab-link.active { @apply text-green-600 border-b-2 border-green-600; }
+        .role-badge { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .filter-btn { @apply px-3 py-1 text-xs rounded-full transition; }
+        .filter-btn.active { @apply bg-green-100 text-green-700 font-medium; }
+        .filter-btn:not(.active) { @apply bg-gray-100 text-gray-600 hover:bg-gray-200; }
+        .tutorial-welcome-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            white-space: nowrap;
+        }
+        .tutorial-welcome-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.03);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .papan-menu-card {
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        .papan-menu-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        @keyframes papanSlideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 640px) {
+            .tutorial-welcome-btn { padding: 6px 12px; gap: 6px; }
+            .tutorial-welcome-btn span { font-size: 11px; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg flex-shrink-0">
+                        <img src="https://ik.imagekit.io/1ctpzpi1o/icon.png" alt="Icon POS WARGA" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <a href="../index.html" class="flex items-center">
+                            <img src="https://ik.imagekit.io/1ctpzpi1o/logo.png" alt="POS WARGA" class="h-7 md:h-8 w-auto object-contain">
+                        </a>
+                        <p class="text-xs text-gray-400 hidden sm:block">Editor Dashboard</p>
+                    </div>
+                    <span class="role-badge text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-sm ml-2">
+                        <i class="fas fa-pen-fancy"></i>
+                        <span class="font-medium">Editor</span>
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <a href="../index.html" class="bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-lg text-sm transition" title="Ke Beranda">
+                        <i class="fas fa-home"></i>
+                    </a>
+                    <button onclick="refreshData()" id="refreshBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg text-sm transition" title="Refresh Data">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <a href="https://postingan.poswarga.com" target="_blank" class="bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-lg text-sm transition" title="Lihat Postingan">
+                        <i class="fas fa-newspaper"></i>
+                    </a>
+                    <div class="text-right hidden sm:block">
+                        <p id="userName" class="text-sm font-semibold text-gray-800">Editor</p>
+                        <p id="userEmail" class="text-xs text-gray-500">-</p>
+                    </div>
+                    <button onclick="logout()" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm transition shadow-md flex items-center gap-1">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="hidden sm:inline">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <!-- Welcome Section -->
+        <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl text-white p-6 mb-6 shadow-lg">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                        <i class="fas fa-pen-fancy text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <h2 class="text-xl md:text-2xl font-bold">Selamat Datang, <span id="welcomeName">Editor</span>!</h2>
+                            <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">Editor</span>
+                        </div>
+                        <p class="text-green-100 text-sm mt-1">Review dan edit artikel dari user & member sebelum dipublish.</p>
+                    </div>
+                </div>
+                <a href="../tutorial.html?role=editor" class="tutorial-welcome-btn">
+                    <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-book-open text-white"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-xs">Tutorial & Info</p>
+                        <p class="text-[10px] text-green-100">Panduan & Info Editor</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-white/60 text-xs ml-1"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Kartu PERS -->
+        <div class="bg-white rounded-xl shadow-lg p-5 mb-6 border border-gray-100">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-id-card text-2xl text-red-600"></i>
+                        <span class="font-bold text-gray-800">Kartu PERS</span>
+                    </div>
+                    <p class="text-sm text-gray-600">
+                        Dapatkan kartu pers sebagai PEWARTA POS WARGA.<br>Kartu akan diverifikasi oleh admin sebelum aktif.
+                    </p>
+                    <div id="cardStatusContainer" class="mt-3"></div>
+                </div>
+                <div>
+                    <button id="requestCardBtn" class="px-6 py-3 bg-gradient-to-r from-red-600 to-green-700 text-white rounded-xl hover:from-red-700 hover:to-green-800 transition shadow-md flex items-center gap-2">
+                        <i class="fas fa-id-card"></i>
+                        <span>Ajukan Kartu PERS</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 mb-6">
+            <div class="flex gap-2 overflow-x-auto pb-1">
+                <button class="tab-link active" data-tab="overview" onclick="switchTab('overview')"><i class="fas fa-home mr-1"></i>Overview</button>
+                <button class="tab-link" data-tab="pending" onclick="switchTab('pending')"><i class="fas fa-clock mr-1"></i>Pending Review</button>
+                <button class="tab-link" data-tab="allarticles" onclick="switchTab('allarticles')"><i class="fas fa-globe mr-1"></i>Semua Artikel</button>
+                <button class="tab-link" data-tab="articles" onclick="switchTab('articles')"><i class="fas fa-newspaper mr-1"></i>Artikel Saya</button>
+                <button class="tab-link" data-tab="orders" onclick="switchTab('orders')"><i class="fas fa-shopping-cart mr-1"></i>Pesanan Saya</button>
+            </div>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overviewTab">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div class="stat-card bg-white rounded-xl shadow-md p-4 border border-gray-100"><div class="flex items-center justify-between"><div><p class="text-xs text-gray-500">Total Artikel</p><p class="text-2xl font-bold text-green-600" id="statTotalArticles">0</p></div><div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center"><i class="fas fa-newspaper text-green-600"></i></div></div></div>
+                <div class="stat-card bg-white rounded-xl shadow-md p-4 border border-gray-100"><div class="flex items-center justify-between"><div><p class="text-xs text-gray-500">Published</p><p class="text-2xl font-bold text-blue-600" id="statPublished">0</p></div><div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fas fa-globe text-blue-600"></i></div></div></div>
+                <div class="stat-card bg-white rounded-xl shadow-md p-4 border border-gray-100"><div class="flex items-center justify-between"><div><p class="text-xs text-gray-500">Pending Review</p><p class="text-2xl font-bold text-yellow-600" id="statPendingReview">0</p></div><div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center"><i class="fas fa-clock text-yellow-600"></i></div></div></div>
+                <div class="stat-card bg-white rounded-xl shadow-md p-4 border border-gray-100"><div class="flex items-center justify-between"><div><p class="text-xs text-gray-500">Total Pesanan</p><p class="text-2xl font-bold text-purple-600" id="statTotalOrders">0</p></div><div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center"><i class="fas fa-shopping-cart text-purple-600"></i></div></div></div>
+            </div>
+
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">📋 Menu Editor</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+                <a href="create-article.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-plus-circle text-green-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Tulis Artikel</h3><p class="text-xs text-gray-400 mt-1">Langsung publish</p></div></a>
+                <a href="#" onclick="switchTab('pending'); return false;" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-check-double text-yellow-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Review Artikel</h3><p class="text-xs text-gray-400 mt-1" id="pendingCount">0 menunggu</p></div></a>
+                <a href="#" onclick="switchTab('allarticles'); return false;" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-globe text-blue-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Semua Artikel</h3><p class="text-xs text-gray-400 mt-1">Lihat semua</p></div></a>
+                <a href="#" onclick="switchTab('articles'); return false;" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-list text-green-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Artikel Saya</h3><p class="text-xs text-gray-400 mt-1">Kelola artikel</p></div></a>
+                <a href="profile.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-user-circle text-purple-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Profil Saya</h3><p class="text-xs text-gray-400 mt-1">Kelola akun</p></div></a>
+                <a href="../shared/menu.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-store text-blue-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Belanja</h3><p class="text-xs text-gray-400 mt-1">Lihat produk</p></div></a>
+                <a href="../admin/cms-ik.html" target="_blank" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-cyan-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-cloud-upload-alt text-cyan-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">ImageKit</h3><p class="text-xs text-gray-400 mt-1">Upload gambar</p></div></a>
+                
+                <!-- Papan POS WARGA -->
+                <div class="menu-card papan-menu-card bg-white rounded-xl shadow-md border border-gray-100 col-span-2 sm:col-span-3 md:col-span-2">
+                    <div class="flex flex-col h-full">
+                        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                            <div class="w-8 h-8 bg-gradient-to-r from-red-600 to-red-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-bullhorn text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 text-sm">Papan POS WARGA</h4>
+                                <p class="text-[10px] text-gray-400">Kirim pesan ke papan pengumuman</p>
+                            </div>
+                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-auto flex-shrink-0" title="Live"></span>
+                        </div>
+                        
+                        <div class="flex-1 flex flex-col">
+                            <textarea 
+                                id="papanMessage" 
+                                class="w-full flex-1 p-2.5 border border-gray-200 rounded-lg resize-none text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent bg-gray-50 hover:bg-white transition"
+                                placeholder="Tulis pesan singkat (maks 280 karakter)..."
+                                maxlength="280"
+                                rows="2"
+                            ></textarea>
+                            <div class="flex justify-between items-center mt-2">
+                                <span id="papanCharCount" class="text-[10px] text-gray-400">0/280</span>
+                                <button 
+                                    id="btnKirimPapan" 
+                                    class="bg-gradient-to-r from-red-600 to-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm flex items-center gap-1"
+                                    disabled
+                                >
+                                    <i class="fas fa-paper-plane text-[10px]"></i> Kirim
+                                </button>
+                            </div>
+                            <div id="papanKirimStatus" class="mt-1 text-[10px] min-h-[16px]"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Tables -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"><div class="px-5 py-4 border-b bg-gray-50 flex justify-between"><div class="flex items-center gap-2"><i class="fas fa-clock text-yellow-600"></i><h3 class="font-semibold">Pending Review</h3></div><a href="#" onclick="switchTab('pending'); return false;" class="text-sm text-yellow-600">Lihat Semua</a></div><div class="overflow-x-auto"><table class="w-full"><tbody id="recentPendingTable"><tr><td colspan="4" class="text-center py-8">Memuat...</td></tr></tbody></table></div></div>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"><div class="px-5 py-4 border-b bg-gray-50 flex justify-between"><div class="flex items-center gap-2"><i class="fas fa-newspaper text-green-600"></i><h3 class="font-semibold">Artikel Saya Terbaru</h3></div><a href="#" onclick="switchTab('articles'); return false;" class="text-sm text-green-600">Lihat Semua</a></div><div class="overflow-x-auto"><table class="w-full"><tbody id="recentArticlesTable"><tr><td colspan="4" class="text-center py-8">Memuat...</td></tr></tbody></table></div></div>
+            </div>
+        </div>
+
+        <!-- Pending Tab -->
+        <div id="pendingTab" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"><div class="px-5 py-4 border-b bg-gray-50"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><i class="fas fa-clock text-yellow-600"></i><h3 class="font-semibold">Artikel Menunggu Review</h3></div><span class="text-sm text-gray-500" id="pendingTotalCount">0 artikel</span></div></div><div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Judul</th><th>Penulis</th><th>Role</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody id="pendingArticlesTable"><tr><td colspan="5" class="text-center py-8">Memuat...</td></tr></tbody></table></div></div>
+        </div>
+
+        <!-- All Articles Tab -->
+        <div id="allarticlesTab" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="px-5 py-4 border-b bg-gray-50">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2"><i class="fas fa-globe text-blue-600"></i><h3 class="font-semibold">Semua Artikel</h3></div>
+                        <div class="flex gap-1">
+                            <button class="filter-btn active" data-filter-all="all" onclick="filterAllArticles('all')">Semua</button>
+                            <button class="filter-btn" data-filter-all="draft" onclick="filterAllArticles('draft')">Draft</button>
+                            <button class="filter-btn" data-filter-all="pending" onclick="filterAllArticles('pending')">Pending</button>
+                            <button class="filter-btn" data-filter-all="published" onclick="filterAllArticles('published')">Published</button>
+                            <button class="filter-btn" data-filter-all="archived" onclick="filterAllArticles('archived')">Arsip</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Judul</th><th>Penulis</th><th>Role</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody id="allArticlesGlobalTable"><tr><td colspan="6" class="text-center py-8">Memuat...</td></tr></tbody></table></div>
+            </div>
+        </div>
+
+        <!-- Articles Tab -->
+        <div id="articlesTab" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="px-5 py-4 border-b bg-gray-50">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2"><i class="fas fa-newspaper text-green-600"></i><h3 class="font-semibold">Semua Artikel Saya</h3></div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="flex gap-1">
+                                <button class="filter-btn active" data-filter="all" onclick="filterArticles('all')">Semua</button>
+                                <button class="filter-btn" data-filter="draft" onclick="filterArticles('draft')">Draft</button>
+                                <button class="filter-btn" data-filter="pending" onclick="filterArticles('pending')">Pending</button>
+                                <button class="filter-btn" data-filter="published" onclick="filterArticles('published')">Published</button>
+                                <button class="filter-btn" data-filter="archived" onclick="filterArticles('archived')">Arsip</button>
+                            </div>
+                            <a href="create-article.html" class="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm"><i class="fas fa-plus mr-1"></i>Tulis Artikel</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Judul</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody id="allArticlesTable"><tr><td colspan="4" class="text-center py-8">Memuat...</td></tr></tbody></table></div>
+            </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="ordersTab" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"><div class="px-5 py-4 border-b bg-gray-50 flex justify-between"><div class="flex items-center gap-2"><i class="fas fa-shopping-cart text-purple-600"></i><h3 class="font-semibold">Semua Pesanan Saya</h3></div><a href="../shared/menu.html" class="bg-purple-500 text-white px-4 py-1.5 rounded-lg text-sm"><i class="fas fa-store mr-1"></i>Belanja Sekarang</a></div><div class="overflow-x-auto"><table class="w-full"><thead><tr><th>ID</th><th>Total</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody id="allOrdersTable"><tr><td colspan="5" class="text-center py-8">Memuat...</td></tr></tbody></table></div></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden"><span id="toastMessage"></span></div>
+
+    <!-- Audio -->
+    <audio id="papanNotificationSound" preload="auto" style="display:none;">
+        <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYAsT5sAAAAAAAAAAAAAAAAAAAA//tQZAAD8AAAaJz4gAAAAGgAn0gAAABwm0ANlREREiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIg=" type="audio/mpeg">
+    </audio>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let cachedConfig = null, supabase = null;
+        async function loadConfig() {
+            if (cachedConfig) return cachedConfig;
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`Server error (${r.status})`);
+            cachedConfig = await r.json();
+            if (!cachedConfig.SUPABASE_URL || !cachedConfig.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            return cachedConfig;
+        }
+        async function initSupabase() {
+            try { const c = await loadConfig(); supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); window.supabase = supabase; } catch (e) { supabase = null; throw e; }
+        }
+
+        let userId = null, allArticlesData = [], allGlobalArticlesData = [], currentFilter = 'all', currentFilterAll = 'all';
+        let stats = { articles: 0, published: 0, pendingReview: 0, orders: 0 };
+        
+        async function checkUser() { if(!supabase) { window.location.href = '../auth/login.html'; return; } const { data: { session } } = await supabase.auth.getSession(); if(!session) { window.location.href = '../auth/login.html'; return; } const { data: profile } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single(); const userRole = profile?.role; if(userRole === 'admin') { window.location.href = '../admin/dashboard.html'; return; } else if(userRole === 'user') { window.location.href = '../user/dashboard.html'; return; } else if(userRole === 'member') { window.location.href = '../member/dashboard.html'; return; } userId = session.user.id; document.getElementById('userName').textContent = profile?.full_name || 'Editor'; document.getElementById('userEmail').textContent = session.user.email; document.getElementById('welcomeName').textContent = profile?.full_name?.split(' ')[0] || 'Editor'; loadStats(); loadRecentPending(); loadRecentArticles(); loadPendingArticles(); loadAllArticles(); loadAllGlobalArticles(); loadAllOrders(); await checkCardRequestStatus(); const requestBtn = document.getElementById('requestCardBtn'); if (requestBtn) { requestBtn.onclick = window.requestPressCard; } initPapanInput(); }
+
+        async function loadStats() { const { data: articles } = await supabase.from('article_index').select('status').eq('author_id', userId).neq('status', 'archived'); if(articles) { stats.articles = articles.length; stats.published = articles.filter(a => a.status === 'published').length; } const { data: pending } = await supabase.from('article_index').select('id').eq('status', 'pending_editor').in('author_role', ['user','member']); if(pending) { stats.pendingReview = pending.length; document.getElementById('pendingCount').textContent = pending.length + ' menunggu'; document.getElementById('pendingTotalCount').textContent = pending.length + ' artikel'; } const { data: orders } = await supabase.from('orders').select('id').eq('user_id', userId); if(orders) stats.orders = orders.length; document.getElementById('statTotalArticles').textContent = stats.articles; document.getElementById('statPublished').textContent = stats.published; document.getElementById('statPendingReview').textContent = stats.pendingReview; document.getElementById('statTotalOrders').textContent = stats.orders; }
+        async function loadRecentPending() { const { data } = await supabase.from('article_index').select('id, title, author_name, author_role, created_at').eq('status', 'pending_editor').in('author_role', ['user','member']).order('created_at', { ascending: false }).limit(5); const tbody = document.getElementById('recentPendingTable'); if(!data?.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8">Tidak ada artikel pending</td></tr>'; return; } tbody.innerHTML = data.map(a => `<tr class="border-b hover:bg-yellow-50"><td class="py-3 px-4">${escapeHtml(a.title)}</td><td class="py-3 px-4">${escapeHtml(a.author_name)}</td><td class="py-3 px-4">${a.author_role==='member'?'Member':'User'}</td><td class="py-3 px-4"><a href="review.html?id=${a.id}" class="text-yellow-600">Review</a></td></tr>`).join(''); }
+        async function loadRecentArticles() { const { data } = await supabase.from('article_index').select('id, title, slug, status, is_featured, created_at').eq('author_id', userId).order('created_at', { ascending: false }).limit(5); const tbody = document.getElementById('recentArticlesTable'); if(!data?.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8">Belum ada artikel</td></tr>'; return; } tbody.innerHTML = data.map(a => { const statusBadge = getStatusBadge(a.status); const date = new Date(a.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }); const isDraft = a.status === 'draft', isPublished = a.status === 'published', isPending = a.status?.includes('pending'), isArchived = a.status === 'archived'; let btns = ''; if(isDraft||isPending) btns += `<a href="edit-article.html?id=${a.id}" class="text-green-600 p-2"><i class="fas fa-edit"></i></a>`; if(isArchived) { btns += `<a href="edit-article.html?id=${a.id}" class="text-green-600 p-2"><i class="fas fa-edit"></i></a>`; btns += `<button onclick="publishAgain('${a.id}')" class="text-green-600 p-2"><i class="fas fa-globe"></i></button>`; } if(isPublished) { btns += `<a href="https://postingan.poswarga.com/posts/${a.slug}" target="_blank" class="text-blue-600 p-2"><i class="fas fa-eye"></i></a>`; btns += `<button onclick="archiveArticle('${a.id}')" class="text-gray-600 p-2"><i class="fas fa-archive"></i></button>`; btns += a.is_featured ? `<button onclick="setFeatured('${a.id}', false)" class="text-yellow-500 p-2"><i class="fas fa-star"></i></button>` : `<button onclick="setFeatured('${a.id}', true)" class="text-gray-400 p-2"><i class="far fa-star"></i></button>`; } return `<tr class="border-b"> <td class="py-3 px-4">${escapeHtml(a.title)}<div class="text-xs">${statusBadge}</div></td> <td class="py-3 px-4">${date}</td> <td class="py-3 px-4"><div class="flex gap-1">${btns}</div></td> </tr>`; }).join(''); }
+        async function loadPendingArticles() { const { data } = await supabase.from('article_index').select('id, title, author_name, author_role, created_at').eq('status', 'pending_editor').in('author_role', ['user','member']).order('created_at', { ascending: false }); const tbody = document.getElementById('pendingArticlesTable'); if(!data?.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8">Tidak ada artikel</td></tr>'; return; } tbody.innerHTML = data.map(a => `<tr class="border-b hover:bg-yellow-50"><td class="py-3 px-4">${escapeHtml(a.title)}</td><td class="py-3 px-4">${escapeHtml(a.author_name)}</td><td class="py-3 px-4">${a.author_role==='member'?'Member':'User'}</td><td class="py-3 px-4">${new Date(a.created_at).toLocaleDateString()}</td><td class="py-3 px-4"><a href="review.html?id=${a.id}" class="text-yellow-600">Review</a></td></tr>`).join(''); }
+        async function loadAllArticles() { const { data } = await supabase.from('article_index').select('id, title, slug, status, is_featured, created_at').eq('author_id', userId).order('created_at', { ascending: false }); allArticlesData = data || []; renderArticlesTable(); }
+        async function loadAllGlobalArticles() { const { data } = await supabase.from('article_index').select('id, title, slug, author_name, author_role, status, is_featured, created_at').order('created_at', { ascending: false }); allGlobalArticlesData = data || []; renderAllGlobalArticlesTable(); }
+        function renderAllGlobalArticlesTable() { const tbody = document.getElementById('allArticlesGlobalTable'); let filtered = allGlobalArticlesData; if(currentFilterAll === 'draft') filtered = allGlobalArticlesData.filter(a => a.status === 'draft'); else if(currentFilterAll === 'pending') filtered = allGlobalArticlesData.filter(a => a.status?.includes('pending')); else if(currentFilterAll === 'published') filtered = allGlobalArticlesData.filter(a => a.status === 'published'); else if(currentFilterAll === 'archived') filtered = allGlobalArticlesData.filter(a => a.status === 'archived'); if(!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8">Tidak ada artikel</td></tr>'; return; } tbody.innerHTML = filtered.map(a => { const isPublished = a.status === 'published'; const isFeatured = a.is_featured === true; let actionBtns = ''; if(isPublished) { actionBtns += `<a href="https://postingan.poswarga.com/posts/${a.slug}" target="_blank" class="text-blue-600 p-2 hover:bg-blue-50 rounded" title="Lihat Artikel"><i class="fas fa-eye"></i></a>`; if(isFeatured) { actionBtns += `<button onclick="setFeaturedGlobal('${a.id}', false)" class="text-yellow-500 p-2 hover:bg-yellow-50 rounded" title="Hapus dari Pilihan Editor"><i class="fas fa-star"></i></button>`; } else { actionBtns += `<button onclick="setFeaturedGlobal('${a.id}', true)" class="text-gray-400 p-2 hover:bg-yellow-50 rounded" title="Jadikan Pilihan Editor"><i class="far fa-star"></i></button>`; } } if(!isPublished && a.status !== 'archived') { actionBtns += `<a href="review.html?id=${a.id}" class="text-yellow-600 p-2 hover:bg-yellow-50 rounded" title="Review"><i class="fas fa-edit"></i></a>`; } if(a.status === 'archived') { actionBtns += `<a href="edit-article.html?id=${a.id}" class="text-green-600 p-2 hover:bg-green-50 rounded" title="Edit"><i class="fas fa-edit"></i></a>`; } if(!actionBtns) actionBtns = '-'; return `<tr class="border-b hover:bg-gray-50"><td class="py-3 px-4">${escapeHtml(a.title)}${isFeatured ? '<span class="ml-1 text-yellow-500"><i class="fas fa-star text-xs"></i></span>' : ''}</td><td class="py-3 px-4">${escapeHtml(a.author_name||'-')}</td><td class="py-3 px-4">${a.author_role==='editor'?'Editor':a.author_role==='member'?'Member':a.author_role==='admin'?'Admin':'User'}</td><td class="py-3 px-4">${getStatusBadge(a.status)}</td><td class="py-3 px-4">${new Date(a.created_at).toLocaleDateString()}</td><td class="py-3 px-4"><div class="flex gap-1">${actionBtns}</div></td></tr>`; }).join(''); updateAllFilterButtons(); }
+        function updateAllFilterButtons() { document.querySelectorAll('[data-filter-all]').forEach(btn => { btn.classList.remove('active','bg-green-100','text-green-700'); btn.classList.add('bg-gray-100','text-gray-600'); }); const active = document.querySelector(`[data-filter-all="${currentFilterAll}"]`); if(active) { active.classList.remove('bg-gray-100','text-gray-600'); active.classList.add('active','bg-green-100','text-green-700'); } }
+        window.filterAllArticles = (f) => { currentFilterAll = f; renderAllGlobalArticlesTable(); };
+        function renderArticlesTable() { const tbody = document.getElementById('allArticlesTable'); let filtered = allArticlesData; if(currentFilter === 'draft') filtered = allArticlesData.filter(a => a.status === 'draft'); else if(currentFilter === 'pending') filtered = allArticlesData.filter(a => a.status?.includes('pending')); else if(currentFilter === 'published') filtered = allArticlesData.filter(a => a.status === 'published'); else if(currentFilter === 'archived') filtered = allArticlesData.filter(a => a.status === 'archived'); if(!filtered.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8">Tidak ada artikel</td></tr>'; return; } tbody.innerHTML = filtered.map(a => { const statusBadge = getStatusBadge(a.status); const date = new Date(a.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); const isDraft = a.status === 'draft', isPublished = a.status === 'published', isPending = a.status?.includes('pending'), isArchived = a.status === 'archived'; let btns = ''; if(isDraft||isPending) btns += `<a href="edit-article.html?id=${a.id}" class="text-green-600 p-2"><i class="fas fa-edit"></i></a>`; if(isPublished) { btns += `<a href="https://postingan.poswarga.com/posts/${a.slug}" target="_blank" class="text-blue-600 p-2"><i class="fas fa-eye"></i></a>`; btns += `<button onclick="archiveArticle('${a.id}')" class="text-gray-600 p-2"><i class="fas fa-archive"></i></button>`; btns += a.is_featured ? `<button onclick="setFeatured('${a.id}', false)" class="text-yellow-500 p-2"><i class="fas fa-star"></i></button>` : `<button onclick="setFeatured('${a.id}', true)" class="text-gray-400 p-2"><i class="far fa-star"></i></button>`; } if(isArchived) { btns += `<a href="edit-article.html?id=${a.id}" class="text-green-600 p-2"><i class="fas fa-edit"></i></a>`; btns += `<button onclick="publishAgain('${a.id}')" class="text-green-600 p-2"><i class="fas fa-globe"></i></button>`; } return `<tr class="border-b hover:bg-gray-50"><td class="py-3 px-4">${escapeHtml(a.title)}</td><td class="py-3 px-4">${statusBadge}</td><td class="py-3 px-4">${date}</td><td class="py-3 px-4"><div class="flex gap-1">${btns||'-'}</div></td></tr>`; }).join(''); updateFilterButtons(); }
+        function updateFilterButtons() { document.querySelectorAll('.filter-btn').forEach(btn => { btn.classList.remove('active','bg-green-100','text-green-700'); btn.classList.add('bg-gray-100','text-gray-600'); }); const active = document.querySelector(`[data-filter="${currentFilter}"]`); if(active) { active.classList.remove('bg-gray-100','text-gray-600'); active.classList.add('active','bg-green-100','text-green-700'); } }
+        async function loadAllOrders() { const { data } = await supabase.from('orders').select('id, total_amount, status, created_at').eq('user_id', userId).order('created_at', { ascending: false }); const tbody = document.getElementById('allOrdersTable'); if(!data?.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8">Belum ada pesanan</td></tr>'; return; } tbody.innerHTML = data.map(o => `<tr class="border-b"><td class="py-3 px-4 font-mono text-xs">#${String(o.id).slice(0,8)}</td><td class="py-3 px-4">Rp ${o.total_amount?.toLocaleString()}</td><td class="py-3 px-4">${getOrderStatusBadge(o.status)}</td><td class="py-3 px-4">${new Date(o.created_at).toLocaleDateString()}</td><td class="py-3 px-4"><a href="../shared/my-orders.html" class="text-blue-600">Detail</a></td></tr>`).join(''); }
+
+        function escapeHtml(s) { return s ? String(s).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]) : ''; }
+        function getStatusBadge(s) { const b={draft:'bg-gray-100',pending_editor:'bg-yellow-100',pending_admin:'bg-orange-100',published:'bg-green-100',rejected:'bg-red-100',archived:'bg-gray-200'}, l={draft:'Draft',pending_editor:'Pending Editor',pending_admin:'Pending Admin',published:'Published',rejected:'Ditolak',archived:'Arsip'}; return `<span class="text-xs ${b[s]||b.draft} px-1.5 py-0.5 rounded">${l[s]||'Draft'}</span>`; }
+        function getOrderStatusBadge(s) { const b={pending:'bg-yellow-100',paid:'bg-blue-100',processing:'bg-purple-100',completed:'bg-green-100',cancelled:'bg-red-100'}, l={pending:'Menunggu',paid:'Dibayar',processing:'Diproses',completed:'Selesai',cancelled:'Batal'}; return `<span class="text-xs ${b[s]||b.pending} px-1.5 py-0.5 rounded">${l[s]||'Menunggu'}</span>`; }
+
+        window.archiveArticle = async (id) => { if(!confirm('Arsipkan?')) return; await supabase.from('article_index').update({ status: 'archived', archived_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', id); showToast('Diarsipkan'); refreshData(); };
+        window.setFeatured = async (id, f) => { await supabase.from('article_index').update({ is_featured: f, updated_at: new Date().toISOString() }).eq('id', id); showToast(f ? '✅ Featured!' : '⭐ Dihapus'); refreshData(); };
+        window.setFeaturedGlobal = async (id, featured) => { try { const { error } = await supabase.from('article_index').update({ is_featured: featured, updated_at: new Date().toISOString() }).eq('id', id); if (error) throw error; showToast(featured ? '✅ Artikel ditandai Pilihan Editor!' : '⭐ Dihapus dari Pilihan Editor'); await loadAllGlobalArticles(); } catch (error) { console.error('Error setting featured:', error); showToast('Gagal mengupdate status featured', 'error'); } };
+        window.publishAgain = async (id) => { if(!confirm('Publish ulang?')) return; await supabase.from('article_index').update({ status: 'published', published_at: new Date().toISOString(), archived_at: null, updated_at: new Date().toISOString() }).eq('id', id); showToast('✅ Dipublish ulang!'); refreshData(); };
+
+        window.filterArticles = (f) => { currentFilter = f; renderArticlesTable(); };
+        window.switchTab = (t) => { document.querySelectorAll('[data-tab]').forEach(b => b.classList.remove('active')); document.querySelector(`[data-tab="${t}"]`).classList.add('active'); ['overview','pending','allarticles','articles','orders'].forEach(id => document.getElementById(id+'Tab').classList.add('hidden')); document.getElementById(t+'Tab').classList.remove('hidden'); if(t === 'allarticles') { loadAllGlobalArticles(); } };
+        window.refreshData = async () => { const b = document.getElementById('refreshBtn'); b.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; b.disabled = true; await loadStats(); await loadRecentPending(); await loadRecentArticles(); await loadPendingArticles(); await loadAllArticles(); await loadAllGlobalArticles(); await loadAllOrders(); b.innerHTML = '<i class="fas fa-sync-alt"></i>'; b.disabled = false; showToast('Data diperbarui'); };
+        function showToast(m, t='success') { const toast = document.getElementById('toast'), msg = document.getElementById('toastMessage'); toast.classList.remove('bg-green-500','bg-red-500'); toast.classList.add(t==='success'?'bg-green-500':'bg-red-500'); msg.textContent = m; toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 3000); }
+        window.logout = async () => { if(supabase) await supabase.auth.signOut(); window.location.href = '../auth/login.html'; };
+
+        async function checkCardRequestStatus() { 
+            if (!userId) return; 
+            try { 
+                const { data, error } = await supabase.from('press_card_requests').select('status, created_at, approved_at, id_no, rejection_reason, full_name, jabatan, phone, berlaku_hingga, foto_url').eq('user_id', userId).maybeSingle(); 
+                if (error && error.code !== 'PGRST116') { return; } 
+                const container = document.getElementById('cardStatusContainer'), requestBtn = document.getElementById('requestCardBtn'); 
+                if (!container || !requestBtn) return; 
+                if (data) { 
+                    const status = data.status, idNo = data.id_no || ''; 
+                    if (status === 'approved') { 
+                        container.innerHTML = `<div class="bg-green-100 border-l-4 border-green-500 p-3 rounded-r-lg"><div class="flex items-center gap-2"><i class="fas fa-check-circle text-green-600"></i><span class="font-medium text-green-800">✓ Kartu PEWARTA telah DISETUJUI</span></div><p class="text-sm text-green-700 mt-1">ID Card: ${idNo}</p><button onclick="viewMyCard()" class="mt-2 text-sm bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700"><i class="fas fa-eye"></i> Lihat Kartu Digital</button></div>`; 
+                        requestBtn.style.display = 'none'; 
+                    } else if (status === 'pending') { 
+                        container.innerHTML = `<div class="bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded-r-lg"><div class="flex items-center gap-2"><i class="fas fa-clock text-yellow-600"></i><span class="font-medium text-yellow-800">⏳ Pengajuan sedang diproses admin</span></div><p class="text-sm text-yellow-700 mt-1">Mohon tunggu verifikasi dari administrator.</p></div>`; 
+                        requestBtn.disabled = true; requestBtn.style.opacity = '0.5'; requestBtn.style.cursor = 'not-allowed'; 
+                    } else if (status === 'rejected') { 
+                        container.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 p-3 rounded-r-lg"><div class="flex items-center gap-2"><i class="fas fa-times-circle text-red-600"></i><span class="font-medium text-red-800">❌ Pengajuan ditolak</span></div><p class="text-sm text-red-700 mt-1">Alasan: ${data.rejection_reason||'Tidak memenuhi kriteria'}</p><button onclick="requestNewCard()" class="mt-2 text-sm bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700"><i class="fas fa-redo"></i> Ajukan Ulang</button></div>`; 
+                        requestBtn.style.display = 'none'; 
+                    } 
+                } else { 
+                    container.innerHTML = ''; requestBtn.style.display = 'flex'; requestBtn.disabled = false; requestBtn.style.opacity = '1'; requestBtn.style.cursor = 'pointer'; 
+                } 
+            } catch (err) {} 
+        }
+
+        window.requestPressCard = async function() { 
+            if (!userId) return; 
+            const fullName = document.getElementById('userName').textContent; 
+            const email = document.getElementById('userEmail').textContent; 
+            const confirm = await Swal.fire({ 
+                title: 'Ajukan Kartu PEWARTA?', 
+                html: `<div class="text-left"><p>Pastikan data berikut benar:</p><ul class="mt-2 text-sm text-gray-600"><li><strong>Nama:</strong> ${escapeHtml(fullName)}</li><li><strong>Email:</strong> ${escapeHtml(email)}</li><li><strong>Jabatan:</strong> Pewarta</li></ul><p class="mt-3 text-xs text-gray-500">Pengajuan akan diverifikasi oleh admin dalam 1x24 jam.</p></div>`, 
+                icon: 'question', showCancelButton: true, confirmButtonColor: '#059669', cancelButtonColor: '#d33', confirmButtonText: 'Ya, Ajukan Sekarang', cancelButtonText: 'Batal' 
+            }); 
+            if (!confirm.isConfirmed) return; 
+            const btn = document.getElementById('requestCardBtn'); 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...'; 
+            btn.disabled = true; 
+            try { 
+                const idNo = `PERS-${Date.now().toString().slice(-8)}-${Math.floor(Math.random()*1000)}`; 
+                const berlaku = new Date(); berlaku.setFullYear(berlaku.getFullYear()+1); 
+                const { data: profile } = await supabase.from('profiles').select('avatar_url, phone, address').eq('id', userId).single(); 
+                const { error } = await supabase.from('press_card_requests').insert({ 
+                    user_id: userId, full_name: fullName, email: email, 
+                    phone: profile?.phone || null, address: profile?.address || 'Jakarta, Indonesia', 
+                    jabatan: 'Pewarta', id_no: idNo, berlaku_hingga: berlaku.toLocaleDateString('id-ID'), 
+                    foto_url: profile?.avatar_url || '', status: 'pending', created_at: new Date().toISOString() 
+                }); 
+                if (error) { if (error.code === '23505') Swal.fire('Info', 'Anda sudah memiliki pengajuan kartu yang aktif', 'info'); else throw error; } 
+                else { Swal.fire({ icon: 'success', title: 'Pengajuan Terkirim!', text: 'Kartu PEWARTA Anda akan diproses oleh admin.', timer: 3000 }); } 
+                await checkCardRequestStatus(); 
+            } catch (error) { Swal.fire('Gagal', error.message || 'Gagal mengirim pengajuan', 'error'); } 
+            finally { btn.innerHTML = '<i class="fas fa-id-card"></i><span>Ajukan Kartu PEWARTA</span>'; btn.disabled = false; } 
+        };
+        
+        window.viewMyCard = async function() { if (!userId) return; const { data, error } = await supabase.from('press_card_requests').select('*').eq('user_id', userId).eq('status', 'approved').maybeSingle(); if (error || !data) { Swal.fire('Error', 'Kartu tidak ditemukan', 'error'); return; } const params = new URLSearchParams({ nama: data.full_name, jabatan: data.jabatan, id_no: data.id_no, berlaku: data.berlaku_hingga, telepon: data.phone || '', email: data.email, alamat: data.address || 'Jakarta, Indonesia', foto: data.foto_url || '', user_id: userId }); window.open(`../../digital-card-pers.html?${params.toString()}`, '_blank'); };
+        window.requestNewCard = async function() { await supabase.from('press_card_requests').delete().eq('user_id', userId).eq('status', 'rejected'); const requestBtn = document.getElementById('requestCardBtn'); requestBtn.style.display = 'flex'; requestBtn.disabled = false; requestBtn.style.opacity = '1'; requestBtn.style.cursor = 'pointer'; await checkCardRequestStatus(); window.requestPressCard(); };
+
+        // ============================================
+        // PAPAN POS WARGA — INPUT LOGIC
+        // ============================================
+        function initPapanInput() {
+            const textarea = document.getElementById('papanMessage');
+            const charCount = document.getElementById('papanCharCount');
+            const btnKirim = document.getElementById('btnKirimPapan');
+            const statusDiv = document.getElementById('papanKirimStatus');
+            
+            if (!textarea || !btnKirim) return;
+            
+            textarea.addEventListener('input', function() {
+                const count = textarea.value.length;
+                charCount.textContent = count + '/280';
+                btnKirim.disabled = count === 0 || count > 280;
+            });
+            
+            btnKirim.addEventListener('click', async function() {
+                const message = textarea.value.trim();
+                if (!message || !supabase) return;
+                
+                btnKirim.disabled = true;
+                btnKirim.innerHTML = '<i class="fas fa-spinner fa-spin text-[10px]"></i> Mengirim...';
+                
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) throw new Error('Tidak login');
+                    
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('full_name, role, avatar_url')
+                        .eq('id', user.id)
+                        .single();
+                    
+                    const { error } = await supabase
+                        .from('info_board')
+                        .insert({
+                            message: message,
+                            sender_name: profile?.full_name || user.email?.split('@')[0] || 'Editor',
+                            sender_role: profile?.role || 'editor',
+                            sender_avatar: profile?.avatar_url || null
+                        });
+                    
+                    if (error) throw error;
+                    
+                    textarea.value = '';
+                    charCount.textContent = '0/280';
+                    statusDiv.innerHTML = '<span class="text-green-600">✅ Terkirim!</span>';
+                    
+                    setTimeout(function() {
+                        statusDiv.innerHTML = '';
+                    }, 3000);
+                    
+                } catch(e) {
+                    console.error('Papan error:', e);
+                    statusDiv.innerHTML = '<span class="text-red-600">❌ Gagal</span>';
+                } finally {
+                    btnKirim.disabled = true;
+                    btnKirim.innerHTML = '<i class="fas fa-paper-plane text-[10px]"></i> Kirim';
+                }
+            });
+        }
+
+        (async () => { try { await initSupabase(); } catch(e) {} if(supabase) checkUser(); else window.location.href = '../auth/login.html'; })();
+    </script>
+</body>
+</html>

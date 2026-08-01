@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Diskusi Artikel - Admin POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/article-chat.css">
+    <style>
+        .prose img { max-width: 100%; height: auto; border-radius: 8px; margin: 16px 0; }
+        .prose h1, .prose h2, .prose h3 { margin-top: 24px; margin-bottom: 12px; font-weight: 600; }
+        .prose p { margin-bottom: 16px; line-height: 1.7; }
+        .prose ul, .prose ol { margin-left: 20px; margin-bottom: 16px; }
+        .prose blockquote { border-left: 4px solid #3b82f6; padding-left: 16px; margin: 16px 0; color: #4b5563; font-style: italic; }
+        .image-caption { font-size: 0.875rem; color: #6b7280; text-align: center; margin-top: 0.5rem; font-style: italic; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="../../index.html" class="text-gray-500 hover:text-blue-600 transition p-2 rounded-lg hover:bg-blue-50" title="Beranda">
+                        <i class="fas fa-home text-lg"></i>
+                    </a>
+                    <a href="../dashboard.html" class="text-gray-500 hover:text-blue-600 transition p-2 rounded-lg hover:bg-blue-50" title="Dashboard Admin">
+                        <i class="fas fa-tachometer-alt text-lg"></i>
+                    </a>
+                    <button onclick="refreshPage()" class="text-gray-500 hover:text-blue-600 transition p-2 rounded-lg hover:bg-blue-50" title="Refresh Halaman">
+                        <i class="fas fa-sync-alt text-lg"></i>
+                    </button>
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-comments text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">Diskusi Artikel</h1>
+                        <p class="text-xs text-gray-400 hidden sm:block">Monitoring & diskusi artikel</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="adminName" class="text-sm text-gray-600 hidden sm:inline"></span>
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition shadow-md">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Kolom Kiri - Konten Artikel -->
+            <div class="lg:col-span-2">
+                <div id="articleContent" class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                    <div class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-blue-600 text-3xl mb-3"></i>
+                        <p class="text-gray-500">Memuat artikel...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolom Kanan - Sidebar -->
+            <div class="space-y-4">
+                <!-- Informasi Artikel -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-blue-600"></i> Informasi Artikel
+                    </h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Status:</span>
+                            <span id="infoStatus" class="px-2 py-1 rounded-full text-xs font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Penulis:</span>
+                            <span id="infoAuthor" class="font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Role Penulis:</span>
+                            <span id="infoRole" class="font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Editor:</span>
+                            <span id="infoEditor" class="font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Kategori:</span>
+                            <span id="infoCategory" class="font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Dibuat:</span>
+                            <span id="infoCreated" class="font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Diupdate:</span>
+                            <span id="infoUpdated" class="font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Slug:</span>
+                            <span id="infoSlug" class="font-medium font-mono text-xs truncate max-w-[150px]">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catatan Editor (jika ada) -->
+                <div id="editorNoteCard" class="bg-blue-50 rounded-xl shadow-md p-5 border border-blue-200 hidden">
+                    <h3 class="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                        <i class="fas fa-sticky-note"></i> Catatan Editor
+                    </h3>
+                    <p id="editorNoteText" class="text-sm text-blue-700"></p>
+                </div>
+
+                <!-- Catatan Penolakan (jika ada) -->
+                <div id="rejectionNoteCard" class="bg-red-50 rounded-xl shadow-md p-5 border border-red-200 hidden">
+                    <h3 class="font-semibold text-red-800 mb-2 flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle"></i> Catatan Penolakan
+                    </h3>
+                    <p id="rejectionNoteText" class="text-sm text-red-700"></p>
+                </div>
+
+                <!-- Widget Chat -->
+                <div id="articleChatWidget">
+                    <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100 text-center text-gray-400">
+                        <i class="fas fa-spinner fa-spin text-blue-600 text-xl mb-2"></i>
+                        <p class="text-sm">Memuat percakapan...</p>
+                    </div>
+                </div>
+
+                <!-- Tombol Kembali -->
+                <a href="../dashboard.html" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-medium transition flex items-center justify-center gap-2 border border-gray-200">
+                    <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden transition-all">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let cachedConfig = null, supabase = null, realtimeChannel = null;
+        
+        async function loadConfig() {
+            if (cachedConfig) return cachedConfig;
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`Server error (${r.status})`);
+            cachedConfig = await r.json();
+            if (!cachedConfig.SUPABASE_URL || !cachedConfig.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            return cachedConfig;
+        }
+        
+        async function initSupabase() {
+            try {
+                const c = await loadConfig();
+                supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY);
+                window.supabase = supabase;
+            } catch(e) {
+                supabase = null;
+                throw e;
+            }
+        }
+
+        const articleId = new URLSearchParams(window.location.search).get('id');
+        let article = null, currentUser = null;
+
+        async function checkUser() {
+            if (!supabase) { window.location.href = '../../auth/login.html'; return false; }
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '../../auth/login.html'; return false; }
+            const { data: profile } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if (profile?.role !== 'admin') {
+                if (profile?.role === 'editor') window.location.href = '../../editor/dashboard.html';
+                else if (profile?.role === 'member') window.location.href = '../../member/dashboard.html';
+                else window.location.href = '../../user/dashboard.html';
+                return false;
+            }
+            currentUser = session.user;
+            document.getElementById('adminName').textContent = profile?.full_name || session.user.email?.split('@')[0] || 'Admin';
+            return true;
+        }
+
+        async function loadArticle() {
+            if (!articleId) {
+                document.getElementById('articleContent').innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <i class="fas fa-exclamation-circle text-3xl mb-3"></i>
+                        <p>ID artikel tidak ditemukan</p>
+                    </div>`;
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('article_index')
+                .select('*')
+                .eq('id', articleId)
+                .single();
+
+            if (error || !data) {
+                document.getElementById('articleContent').innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <i class="fas fa-exclamation-circle text-3xl mb-3"></i>
+                        <p>Artikel tidak ditemukan</p>
+                    </div>`;
+                return;
+            }
+
+            article = data;
+            renderArticle();
+            await updateSidebarInfo();
+            await initChatWidget();
+        }
+
+        function renderArticle() {
+            const d = article.created_at 
+                ? new Date(article.created_at).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) 
+                : '-';
+            
+            let img = '';
+            if (article.featured_image) {
+                img = `<figure class="mb-6">
+                    <img src="${article.featured_image}" alt="${escapeHtml(article.image_caption || '')}" class="w-full max-h-96 object-cover rounded-lg" onerror="this.style.display='none'">
+                    ${article.image_caption ? `<figcaption class="image-caption">${escapeHtml(article.image_caption)}</figcaption>` : ''}
+                </figure>`;
+            }
+
+            let src = '';
+            if (article.source_url) {
+                src = `<div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p class="text-xs text-blue-700">
+                        <i class="fas fa-link"></i> Sumber: 
+                        <a href="${article.source_url}" target="_blank" class="hover:underline">${article.source_url}</a>
+                    </p>
+                </div>`;
+            }
+
+            document.getElementById('articleContent').innerHTML = `
+                <div class="mb-4 pb-4 border-b">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-3">${escapeHtml(article.title) || 'Tanpa Judul'}</h2>
+                    <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+                        <span><i class="fas fa-user mr-1"></i>${escapeHtml(article.author_name) || 'Unknown'}</span>
+                        <span><i class="fas fa-tag mr-1"></i>${article.author_role === 'member' ? 'Member ✨' : 'User'}</span>
+                        <span><i class="fas fa-calendar mr-1"></i>${d}</span>
+                    </div>
+                </div>
+                ${img}
+                <div class="prose max-w-none">${article.content || '<p class="text-gray-500 italic">Tidak ada konten</p>'}</div>
+                ${src}
+                ${article.excerpt ? `
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
+                        <p class="text-sm font-medium">📝 Excerpt:</p>
+                        <p class="text-gray-600">${escapeHtml(article.excerpt)}</p>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        async function updateSidebarInfo() {
+            const statusMap = {
+                'draft': { class: 'bg-gray-100 text-gray-800', label: 'Draft' },
+                'pending_editor': { class: 'bg-yellow-100 text-yellow-800', label: 'Pending Editor' },
+                'rejected': { class: 'bg-red-100 text-red-800', label: 'Ditolak' },
+                'published': { class: 'bg-green-100 text-green-800', label: 'Published' }
+            };
+            const s = statusMap[article.status] || statusMap['draft'];
+            const statusEl = document.getElementById('infoStatus');
+            statusEl.className = `px-2 py-1 rounded-full text-xs font-medium ${s.class}`;
+            statusEl.textContent = s.label;
+
+            document.getElementById('infoAuthor').textContent = article.author_name || '-';
+            document.getElementById('infoRole').textContent = article.author_role === 'member' ? 'Member ✨' : 'User';
+            
+            const editorInfo = document.getElementById('infoEditor');
+            if (article.editor_id) {
+                try {
+                    const { data: editorProfile } = await supabase
+                        .from('profiles')
+                        .select('full_name')
+                        .eq('id', article.editor_id)
+                        .single();
+                    
+                    if (editorProfile?.full_name) {
+                        editorInfo.innerHTML = `<span class="text-blue-600 font-medium"><i class="fas fa-user-check mr-1"></i>${escapeHtml(editorProfile.full_name)}</span>`;
+                        editorInfo.title = 'Editor ID: ' + article.editor_id;
+                    } else {
+                        editorInfo.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle"></i> Sudah ditangani</span>';
+                        editorInfo.title = 'Editor ID: ' + article.editor_id;
+                    }
+                } catch (e) {
+                    console.warn('Gagal fetch nama editor:', e.message);
+                    editorInfo.innerHTML = `<span class="text-green-600"><i class="fas fa-check-circle"></i> Sudah ditangani</span>`;
+                    editorInfo.title = 'Editor ID: ' + article.editor_id;
+                }
+            } else {
+                editorInfo.innerHTML = '<span class="text-yellow-600"><i class="fas fa-clock"></i> Belum direview</span>';
+                editorInfo.title = '';
+            }
+            
+            document.getElementById('infoCategory').textContent = article.category || '-';
+            document.getElementById('infoCreated').textContent = article.created_at 
+                ? new Date(article.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) 
+                : '-';
+            document.getElementById('infoUpdated').textContent = article.updated_at 
+                ? new Date(article.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) 
+                : '-';
+            document.getElementById('infoSlug').textContent = article.slug || '-';
+
+            if (article.editor_note) {
+                document.getElementById('editorNoteText').textContent = article.editor_note;
+                document.getElementById('editorNoteCard').classList.remove('hidden');
+            }
+            if (article.rejection_note) {
+                document.getElementById('rejectionNoteText').textContent = article.rejection_note;
+                document.getElementById('rejectionNoteCard').classList.remove('hidden');
+            }
+        }
+
+        // ========== CHAT WIDGET ==========
+        async function initChatWidget() {
+            const widgetContainer = document.getElementById('articleChatWidget');
+            if (!widgetContainer) return;
+
+            try {
+                const response = await fetch('../../shared/article-chat-widget.html');
+                if (!response.ok) throw new Error('Gagal fetch widget template');
+                const html = await response.text();
+                
+                widgetContainer.innerHTML = html;
+                
+                // ✅ Admin bisa kirim chat — tidak ada form yang disembunyikan
+                
+                await loadChatScript();
+                subscribeRealtime();
+                
+            } catch (e) {
+                console.error('Gagal load chat widget:', e);
+                widgetContainer.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100 text-center text-red-400">
+                        <i class="fas fa-exclamation-circle text-xl mb-2"></i>
+                        <p class="text-sm">Gagal memuat percakapan</p>
+                        <button onclick="refreshPage()" class="mt-2 text-xs text-blue-600 hover:underline">Coba lagi</button>
+                    </div>`;
+            }
+        }
+
+        function loadChatScript() {
+            return new Promise((resolve) => {
+                if (document.querySelector('script[src="../../assets/js/article-chat.js?v=20260502"]')) {
+                    initArticleChatInstance();
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = '../../assets/js/article-chat.js?v=20260502';
+                script.onload = () => {
+                    initArticleChatInstance();
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.warn('Gagal load article-chat.js, fallback');
+                    loadChatsDirectly();
+                    resolve();
+                };
+                document.body.appendChild(script);
+            });
+        }
+
+        function initArticleChatInstance() {
+            if (typeof ArticleChat !== 'undefined' && articleId && currentUser) {
+                window._articleChat = new ArticleChat(articleId, currentUser.id, 'admin');
+            }
+        }
+
+        async function loadChatsDirectly() {
+            const widgetContainer = document.getElementById('articleChatWidget');
+            if (!widgetContainer || !articleId) return;
+
+            const chatContainer = widgetContainer.querySelector('#chatMessagesList');
+            const loadingEl = widgetContainer.querySelector('#chatLoading');
+            const emptyEl = widgetContainer.querySelector('#chatEmpty');
+            const errorEl = widgetContainer.querySelector('#chatError');
+
+            if (!chatContainer) return;
+
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (emptyEl) emptyEl.style.display = 'none';
+            if (errorEl) errorEl.style.display = 'none';
+
+            let chats, error;
+            
+            try {
+                const result = await supabase
+                    .from('article_chats')
+                    .select('*')
+                    .eq('article_id', articleId)
+                    .order('created_at', { ascending: true });
+                chats = result.data;
+                error = result.error;
+            } catch (e) {
+                const result = await supabase
+                    .from('article_chats')
+                    .select('*')
+                    .eq('article_id', articleId)
+                    .order('created_at', { ascending: true });
+                chats = result.data;
+                error = result.error;
+            }
+
+            if (error) {
+                console.error('Gagal load chat:', error);
+                if (errorEl) {
+                    errorEl.style.display = 'flex';
+                    const span = errorEl.querySelector('span');
+                    if (span) span.textContent = 'Gagal memuat percakapan: ' + error.message;
+                }
+                return;
+            }
+
+            if (!chats || chats.length === 0) {
+                if (emptyEl) {
+                    emptyEl.style.display = 'flex';
+                }
+                return;
+            }
+
+            let html = '';
+            let lastDate = '';
+            
+            chats.forEach(chat => {
+                const msgDate = new Date(chat.created_at).toLocaleDateString('id-ID', {
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+                });
+                
+                if (msgDate !== lastDate) {
+                    html += `<div class="chat-date-divider">${msgDate}</div>`;
+                    lastDate = msgDate;
+                }
+                
+                const isMe = chat.author_id === currentUser?.id;
+                const roleClass = chat.author_role || 'user';
+                const time = new Date(chat.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                
+                let avatarIcon = 'fa-user';
+                let avatarBg = 'bg-green-500';
+                if (roleClass === 'editor') { avatarIcon = 'fa-pen'; avatarBg = 'bg-blue-500'; }
+                if (roleClass === 'admin') { avatarIcon = 'fa-shield-alt'; avatarBg = 'bg-gray-500'; }
+                if (roleClass === 'member') { avatarIcon = 'fa-star'; avatarBg = 'bg-purple-500'; }
+                
+                let name = chat.author_name || roleClass;
+                
+                let bubbleClass = roleClass;
+                if (isMe) bubbleClass = 'user';
+                
+                html += `
+                    <div class="chat-bubble ${bubbleClass}">
+                        <div class="chat-avatar ${roleClass}" title="${escapeHtml(name)}">
+                            <i class="fas ${avatarIcon}"></i>
+                        </div>
+                        <div class="chat-bubble-content">
+                            <div class="chat-bubble-meta">
+                                <span class="chat-bubble-name">${escapeHtml(name)}</span>
+                                <span class="chat-bubble-time">${time}</span>
+                            </div>
+                            <p class="chat-message-text">${escapeHtml(chat.message || '')}</p>
+                        </div>
+                    </div>`;
+            });
+            
+            chatContainer.innerHTML = html;
+            
+            const messagesContainer = widgetContainer.querySelector('#chatMessages');
+            if (messagesContainer) {
+                setTimeout(() => { messagesContainer.scrollTop = messagesContainer.scrollHeight; }, 100);
+            }
+        }
+
+        function subscribeRealtime() {
+            if (!supabase || !articleId) return;
+            
+            if (realtimeChannel) { supabase.removeChannel(realtimeChannel); }
+            
+            realtimeChannel = supabase
+                .channel('article-chats-admin-' + articleId)
+                .on('postgres_changes', 
+                    { event: 'INSERT', schema: 'public', table: 'article_chats', filter: 'article_id=eq.' + articleId },
+                    (payload) => {
+                        if (window._articleChat && typeof window._articleChat.loadMessages === 'function') {
+                            window._articleChat.loadMessages();
+                        } else {
+                            loadChatsDirectly();
+                        }
+                    }
+                )
+                .subscribe((status) => {
+                    console.log('Realtime status:', status);
+                });
+        }
+
+        function escapeHtml(s) {
+            if (!s) return '';
+            return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]);
+        }
+
+        function showToast(m, t = 'success') {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMessage');
+            toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-yellow-500', 'bg-blue-500');
+            if (t === 'success') toast.classList.add('bg-green-500');
+            else if (t === 'error') toast.classList.add('bg-red-500');
+            else if (t === 'info') toast.classList.add('bg-blue-500');
+            else toast.classList.add('bg-yellow-500');
+            msg.textContent = m;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        window.logout = async () => {
+            if (realtimeChannel) supabase?.removeChannel(realtimeChannel);
+            if (supabase) await supabase.auth.signOut();
+            window.location.href = '../../auth/login.html';
+        };
+
+        window.refreshPage = () => {
+            if (realtimeChannel) supabase?.removeChannel(realtimeChannel);
+            window.location.reload();
+        };
+
+        window.addEventListener('beforeunload', () => {
+            if (realtimeChannel) supabase?.removeChannel(realtimeChannel);
+        });
+
+        (async () => {
+            try {
+                await initSupabase();
+            } catch(e) {
+                console.error('Gagal init Supabase:', e);
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+            if (supabase && await checkUser()) {
+                await loadArticle();
+            } else {
+                window.location.href = '../../auth/login.html';
+            }
+        })();
+    </script>
+</body>
+</html>

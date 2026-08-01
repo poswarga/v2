@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Inbox Review - Editor POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .article-row:hover { background: linear-gradient(to right, #ecfdf5, #d1fae5); }
+        .filter-chip { @apply px-3 py-1.5 rounded-full text-xs bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-600 transition cursor-pointer; }
+        .filter-chip.active { @apply bg-green-600 text-white; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="dashboard.html" class="text-gray-600 hover:text-green-600 transition p-2 rounded-lg hover:bg-green-50"><i class="fas fa-arrow-left"></i></a>
+                    <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md"><i class="fas fa-inbox text-white text-sm"></i></div>
+                    <div><h1 class="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-800 bg-clip-text text-transparent">Inbox Review</h1><p class="text-xs text-gray-400 hidden sm:block">Artikel dari User & Member</p></div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <a href="my-articles.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition border border-gray-200"><i class="fas fa-pen-fancy mr-1"></i> Artikel Saya</a>
+                    <a href="history.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition border border-gray-200"><i class="fas fa-history mr-1"></i> Riwayat</a>
+                    <div class="text-right hidden sm:block"><p id="editorName" class="text-sm font-semibold text-gray-800">Editor</p><p id="editorEmail" class="text-xs text-gray-500">-</p></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100"><div class="flex items-center justify-between"><div><p class="text-xs text-gray-500">Total Inbox</p><p class="text-2xl font-bold text-green-600" id="totalInbox">0</p></div><div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center"><i class="fas fa-inbox text-green-600"></i></div></div></div>
+            <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100"><div class="flex items-center justify-between"><div><p class="text-xs text-gray-500">Dari Member</p><p class="text-2xl font-bold text-purple-600" id="fromMember">0</p></div><div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center"><i class="fas fa-user-check text-purple-600"></i></div></div></div>
+            <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100"><div class="flex items-center justify-between"><div><p class="text-xs text-gray-500">Dari User</p><p class="text-2xl font-bold text-orange-600" id="fromUser">0</p></div><div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center"><i class="fas fa-users text-orange-600"></i></div></div></div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+            <div class="flex flex-wrap gap-3 items-center justify-between"><div class="flex flex-wrap gap-2"><span class="filter-chip active" data-filter="all">Semua</span><span class="filter-chip" data-filter="member">Member</span><span class="filter-chip" data-filter="user">User</span></div><div class="flex gap-2"><div class="relative"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i><input type="text" id="searchInput" placeholder="Cari artikel..." class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 pl-9 bg-gray-50 w-64 focus:ring-2 focus:ring-green-500"></div><button onclick="loadArticles()" class="bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition"><i class="fas fa-sync-alt"></i></button></div></div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+            <div class="px-5 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-list text-green-600"></i><h3 class="font-semibold text-gray-800">Artikel Masuk</h3><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full" id="articleCount">0</span></div><select id="sortSelect" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:ring-2 focus:ring-green-500"><option value="newest">Terbaru</option><option value="oldest">Terlama</option></select></div>
+            <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 border-b border-gray-100"><tr><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Judul</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Penulis</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Tipe</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Tanggal</th><th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th></tr></thead><tbody id="articleTableBody"><tr><td colspan="5" class="text-center py-12 text-gray-500"><i class="fas fa-spinner fa-spin text-green-600 mr-2"></i>Memuat...</td></tr></tbody></table></div>
+            <div class="px-5 py-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center"><div class="text-sm text-gray-600">Menampilkan <span id="showingStart">0</span>-<span id="showingEnd">0</span> dari <span id="totalCount">0</span></div><div class="flex gap-2"><button id="prevPage" class="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-50 transition" disabled><i class="fas fa-chevron-left"></i></button><span class="px-3 py-1.5 text-sm bg-green-100 text-green-800 rounded-lg" id="currentPage">1</span><button id="nextPage" class="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-50 transition" disabled><i class="fas fa-chevron-right"></i></button></div></div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden"><span id="toastMessage"></span></div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let cachedConfig = null, supabase = null;
+        async function loadConfig() {
+            if (cachedConfig) return cachedConfig;
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`Server error (${r.status})`);
+            cachedConfig = await r.json();
+            if (!cachedConfig.SUPABASE_URL || !cachedConfig.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            return cachedConfig;
+        }
+        async function initSupabase() { try { const c = await loadConfig(); supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); } catch(e) { supabase = null; throw e; } }
+
+        let editorId = null, articles = [], currentFilter = 'all', currentSearch = '', currentSort = 'newest', currentPage = 1, pageSize = 15, totalCount = 0;
+
+        async function checkEditor() {
+            if (!supabase) { window.location.href = '../auth/login.html'; return false; }
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '../auth/login.html'; return false; }
+            const { data: p } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if (p?.role !== 'editor') { window.location.href = p?.role === 'admin' ? '../admin/dashboard.html' : p?.role === 'member' ? '../member/dashboard.html' : '../user/dashboard.html'; return false; }
+            editorId = session.user.id;
+            document.getElementById('editorName').textContent = p?.full_name || session.user.email?.split('@')[0] || 'Editor';
+            document.getElementById('editorEmail').textContent = session.user.email;
+            await loadStats(); await loadArticles(); return true;
+        }
+
+        async function loadStats() {
+            const { count: total } = await supabase.from('article_index').select('*', { count: 'exact', head: true }).eq('status', 'pending_editor').in('author_role', ['user', 'member']);
+            const { count: member } = await supabase.from('article_index').select('*', { count: 'exact', head: true }).eq('status', 'pending_editor').eq('author_role', 'member');
+            const { count: user } = await supabase.from('article_index').select('*', { count: 'exact', head: true }).eq('status', 'pending_editor').eq('author_role', 'user');
+            document.getElementById('totalInbox').textContent = total || 0;
+            document.getElementById('fromMember').textContent = member || 0;
+            document.getElementById('fromUser').textContent = user || 0;
+        }
+
+        async function loadArticles() {
+            const start = (currentPage - 1) * pageSize, end = start + pageSize - 1;
+            let q = supabase.from('article_index').select('id, title, excerpt, author_name, author_role, created_at', { count: 'exact' }).eq('status', 'pending_editor').in('author_role', ['user', 'member']).order('created_at', { ascending: currentSort === 'oldest' }).range(start, end);
+            if (currentFilter === 'member') q = q.eq('author_role', 'member');
+            else if (currentFilter === 'user') q = q.eq('author_role', 'user');
+            if (currentSearch) q = q.ilike('title', `%${currentSearch}%`);
+            const { data, error, count } = await q;
+            if (error) { showToast('Gagal memuat', 'error'); return; }
+            articles = data || []; totalCount = count || 0; renderArticles(); updatePagination();
+        }
+
+        function renderArticles() {
+            const tbody = document.getElementById('articleTableBody');
+            document.getElementById('articleCount').textContent = totalCount;
+            if (!articles.length) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-gray-500"><i class="fas fa-inbox text-4xl mb-3 opacity-50"></i><p>Inbox kosong</p></td></tr>`; return; }
+            tbody.innerHTML = articles.map(a => {
+                const date = new Date(a.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                return `<tr class="article-row border-b border-gray-100 hover:bg-green-50"><td class="py-3 px-4"><p class="font-medium text-gray-800">${escapeHtml(a.title)||'Tanpa Judul'}</p><p class="text-xs text-gray-400">${escapeHtml(a.excerpt)||'-'}</p></td><td class="py-3 px-4 text-sm text-gray-700">${escapeHtml(a.author_name)||'-'}</td><td class="py-3 px-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${a.author_role==='member'?'bg-purple-100 text-purple-800':'bg-orange-100 text-orange-800'}">${a.author_role==='member'?'Member ✨':'User'}</span></td><td class="py-3 px-4 text-sm text-gray-500">${date}</td><td class="py-3 px-4"><a href="review.html?id=${a.id}" class="text-green-600 hover:text-green-800 text-sm font-medium"><i class="fas fa-check-double mr-1"></i>Review</a></td></tr>`;
+            }).join('');
+        }
+
+        function updatePagination() {
+            const tp = Math.ceil(totalCount / pageSize), s = (currentPage - 1) * pageSize + 1, e = Math.min(currentPage * pageSize, totalCount);
+            document.getElementById('showingStart').textContent = totalCount ? s : 0;
+            document.getElementById('showingEnd').textContent = e;
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage >= tp;
+        }
+
+        function escapeHtml(s) { return s ? String(s).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]) : ''; }
+
+        document.querySelectorAll('[data-filter]').forEach(c => c.addEventListener('click', function() { document.querySelectorAll('[data-filter]').forEach(x => x.classList.remove('active')); this.classList.add('active'); currentFilter = this.dataset.filter; currentPage = 1; loadArticles(); }));
+        document.getElementById('searchInput').addEventListener('input', function() { clearTimeout(this.timeout); this.timeout = setTimeout(() => { currentSearch = this.value; currentPage = 1; loadArticles(); }, 300); });
+        document.getElementById('sortSelect').addEventListener('change', function() { currentSort = this.value; currentPage = 1; loadArticles(); });
+        document.getElementById('prevPage').addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadArticles(); } });
+        document.getElementById('nextPage').addEventListener('click', () => { if (currentPage * pageSize < totalCount) { currentPage++; loadArticles(); } });
+
+        window.loadArticles = loadArticles;
+        window.logout = async () => { if(supabase) await supabase.auth.signOut(); window.location.href = '../auth/login.html'; };
+
+        function showToast(m, t='success') { const toast = document.getElementById('toast'), msg = document.getElementById('toastMessage'); toast.classList.remove('bg-green-500','bg-red-500','bg-yellow-500'); toast.classList.add(t==='success'?'bg-green-500':t==='error'?'bg-red-500':'bg-yellow-500'); msg.textContent = m; toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 3000); }
+
+        (async () => { try { await initSupabase(); } catch(e) { window.location.href = '../auth/login.html'; return; } if(supabase) checkEditor(); else window.location.href = '../auth/login.html'; })();
+    </script>
+</body>
+</html>

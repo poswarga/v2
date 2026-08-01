@@ -1,0 +1,11 @@
+/editor/*
+  X-Robots-Tag: noindex, nofollow
+
+/user/*
+  X-Robots-Tag: noindex, nofollow
+
+/member/*
+  X-Robots-Tag: noindex, nofollow
+
+/admin/*
+  X-Robots-Tag: noindex, nofollow

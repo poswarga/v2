@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Kelola Pesanan - Admin POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .mobile-smooth { -webkit-tap-highlight-color: transparent; }
+        button, a, .clickable { touch-action: manipulation; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-100 mobile-smooth">
+    <nav class="bg-white shadow-md sticky top-0 z-20">
+        <div class="container mx-auto px-4 py-3">
+            <div class="hidden sm:flex justify-between items-center">
+                <h1 class="text-xl font-bold text-blue-600"><i class="fas fa-clipboard-list mr-2"></i>Kelola Pesanan</h1>
+                <div class="flex items-center gap-4">
+                    <a href="dashboard.html" class="text-gray-600 hover:text-blue-600 text-sm"><i class="fas fa-tachometer-alt mr-1"></i>Dashboard</a>
+                    <button onclick="refreshOrders()" class="bg-gray-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
+                    <span id="adminEmail" class="text-gray-600 text-sm"></span>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
+                </div>
+            </div>
+            <div class="flex sm:hidden flex-col gap-2">
+                <div class="flex justify-between items-center"><h1 class="text-lg font-bold text-blue-600"><i class="fas fa-clipboard-list mr-1"></i>Kelola Pesanan</h1><button onclick="refreshOrders()" class="bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-gray-600"><i class="fas fa-sync-alt"></i></button></div>
+                <div class="flex items-center justify-between"><div class="flex gap-3"><a href="dashboard.html" class="text-gray-600 text-xs hover:text-blue-600">Dashboard</a></div><div class="flex items-center gap-2"><span id="adminEmailMobile" class="text-gray-500 text-xs"></span><button onclick="logout()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-red-600">Logout</button></div></div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mx-auto px-4 sm:px-6 py-5 sm:py-6">
+        <div class="flex justify-between items-center mb-4"><h2 class="text-xl sm:text-2xl font-bold">Manajemen Pesanan</h2><div class="flex items-center gap-2"><span id="realtimeStatus" class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full"><i class="fas fa-circle text-green-500 text-[8px] mr-1"></i>Live</span></div></div>
+        <div id="ordersContainer"><div class="text-center py-12"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div><p class="mt-2 text-gray-500 text-sm">Memuat pesanan...</p></div></div>
+    </div>
+    
+    <div id="proofModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-xl w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col shadow-xl">
+            <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10"><h3 class="font-bold text-base sm:text-lg">Bukti Pembayaran</h3><button onclick="closeModal()" class="text-3xl leading-6 hover:text-gray-700 p-1 clickable">&times;</button></div>
+            <div id="proofContent" class="p-4 overflow-y-auto flex-1"><p class="text-sm text-gray-500">Loading...</p></div>
+            <div class="p-4 border-t sticky bottom-0 bg-white flex gap-2">
+                <button onclick="closeModal()" class="flex-1 sm:flex-initial bg-gray-500 text-white px-5 py-2.5 rounded-lg hover:bg-gray-600 text-sm sm:text-base transition clickable">Tutup</button>
+                <button id="modalVerifyBtn" class="flex-1 sm:flex-initial bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 text-sm sm:text-base transition clickable hidden"><i class="fas fa-check-circle mr-1"></i>Verifikasi & Proses</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let cachedConfig = null, supabase = null, orders = [], productsMap = {}, realtimeChannel = null, currentViewingOrderId = null;
+        
+        async function loadConfig() {
+            if (cachedConfig) return cachedConfig;
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`Server error (${r.status})`);
+            cachedConfig = await r.json();
+            if (!cachedConfig.SUPABASE_URL || !cachedConfig.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            return cachedConfig;
+        }
+        async function initSupabase() { try { const c = await loadConfig(); supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); return supabase; } catch(e) { supabase = null; throw e; } }
+        
+        async function requireAdmin() {
+            if (!supabase) return null;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '../auth/login.html'; return null; }
+            const { data: p } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if (p?.role !== 'admin') { window.location.href = '../user/dashboard.html'; return null; }
+            return session;
+        }
+        
+        function subscribeToOrderChanges() {
+            if (!supabase) return;
+            if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+            realtimeChannel = supabase.channel('orders-changes')
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, () => { const s = document.getElementById('realtimeStatus'); if (s) s.innerHTML = '<i class="fas fa-circle text-green-500 text-[8px] mr-1 animate-pulse"></i>Updated'; setTimeout(() => { if (s) s.innerHTML = '<i class="fas fa-circle text-green-500 text-[8px] mr-1"></i>Live'; }, 1000); loadOrders(); })
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => { playNotificationSound(); loadOrders(); showNewOrderToast(payload.new); })
+                .subscribe((status) => { const s = document.getElementById('realtimeStatus'); if (s) s.innerHTML = status==='SUBSCRIBED'?'<i class="fas fa-circle text-green-500 text-[8px] mr-1"></i>Live':'<i class="fas fa-circle text-yellow-500 text-[8px] mr-1"></i>Connecting...'; });
+        }
+        
+        function showNewOrderToast(order) {
+            const t = document.createElement('div'); t.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-pulse';
+            t.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i> Pesanan baru! #${String(order.id).slice(0,8)} - Rp ${order.total_amount?.toLocaleString()}`;
+            document.body.appendChild(t); setTimeout(() => t.remove(), 5000);
+        }
+        
+        function playNotificationSound() { try { const a = new (window.AudioContext||window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value=880; g.gain.value=0.2; o.start(); setTimeout(()=>{o.stop();a.close()},300); } catch(e) {} }
+        
+        async function init() {
+            try { await initSupabase(); } catch(e) { window.location.href = '../auth/login.html'; return; }
+            if (!supabase) { window.location.href = '../auth/login.html'; return; }
+            const session = await requireAdmin();
+            if (session) { document.getElementById('adminEmail').textContent = session.user.email; const m = document.getElementById('adminEmailMobile'); if(m) m.textContent = session.user.email; await loadProducts(); subscribeToOrderChanges(); }
+        }
+        
+        async function loadProducts() { const { data: p } = await supabase.from('products').select('id, name, image_url'); if(p) p.forEach(pr => { productsMap[pr.id] = pr; }); loadOrders(); }
+        
+        async function loadOrders() {
+            const { data: od, error } = await supabase.from('orders').select('*, order_items(id, quantity, price, product_id)').order('created_at', { ascending: false });
+            if (error) { document.getElementById('ordersContainer').innerHTML = `<div class="bg-red-100 p-4 rounded-xl text-red-700 text-sm">Gagal: ${error.message}</div>`; return; }
+            orders = od || [];
+            for (let o of orders) { const { data: prof } = await supabase.from('profiles').select('full_name, email, phone, role').eq('id', o.user_id).single(); o.profile = prof; }
+            renderOrders();
+        }
+        
+        function renderOrders() {
+            const c = document.getElementById('ordersContainer');
+            if (!orders.length) { c.innerHTML = `<div class="bg-white rounded-xl shadow-md p-8 text-center"><div class="text-6xl mb-4">📦</div><h3 class="text-xl font-semibold mb-2">Belum Ada Pesanan</h3></div>`; return; }
+            c.innerHTML = orders.map(o => {
+                const ic = o.order_items?.reduce((s,i)=>s+i.quantity,0)||0, hp = !!o.payment_proof;
+                return `<div class="bg-white rounded-xl shadow-sm overflow-hidden mb-4"><div class="border-b bg-gray-50/80 px-6 py-3 flex flex-wrap justify-between items-center gap-2"><div class="flex flex-wrap gap-x-3"><span class="text-sm text-gray-500 font-mono">#${String(o.id).slice(0,8)}</span><span class="text-sm text-gray-500">${new Date(o.created_at).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})}</span></div><div class="flex items-center gap-3 flex-wrap"><span class="px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(o.status)}">${getStatusText(o.status)}</span><span class="text-sm font-medium">${o.profile?.full_name||'User'}</span></div></div><div class="p-6"><div class="grid grid-cols-1 sm:grid-cols-3 gap-4"><div class="bg-gray-50/80 p-4 rounded-xl"><p class="text-xs text-gray-500 mb-1">👤 Customer</p><p class="font-medium">${o.profile?.full_name||'-'}</p><p class="text-sm text-gray-600">${o.profile?.email||'-'}</p><p class="text-sm text-gray-600">${o.profile?.phone||'-'}</p></div><div class="bg-gray-50/80 p-4 rounded-xl"><p class="text-xs text-gray-500 mb-1">🛒 Produk (${ic} item)</p>${o.order_items?.map(i => { const pr = productsMap[i.product_id]; return `<div class="flex justify-between text-sm"><span>${i.quantity}x ${pr?.name||'Produk'}</span><span>Rp ${(i.quantity*i.price).toLocaleString()}</span></div>`; }).join('')||'<p class="text-xs text-gray-400">-</p>'}</div><div class="bg-gray-50/80 p-4 rounded-xl"><p class="text-xs text-gray-500 mb-1">💰 Total</p><p class="text-2xl font-bold text-blue-600">Rp ${o.total_amount.toLocaleString()}</p>${hp ? `<button onclick="viewPaymentProof('${o.id}')" class="mt-3 text-blue-600 text-sm hover:underline">📷 Lihat Bukti</button>` : '<p class="text-xs text-gray-400 mt-3 italic">Belum ada bukti</p>'}</div></div><div class="mt-5 pt-3 border-t flex flex-wrap gap-2 justify-end">${(o.status==='pending'||o.status==='paid')&&hp?`<button onclick="verifyAndProcess('${o.id}')" class="bg-green-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-green-700">✅ Verifikasi & Proses</button>`:''}${o.status==='processing'?`<button onclick="completeOrder('${o.id}','${o.user_id}')" class="bg-green-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-green-700">✅ Selesaikan</button>`:''}${o.status!=='completed'&&o.status!=='cancelled'?`<button onclick="cancelOrder('${o.id}')" class="bg-red-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-red-600">❌ Batalkan</button>`:''}${o.status==='cancelled'&&o.cancellation_reason?`<div class="w-full"><p class="text-xs text-red-500"><i class="fas fa-info-circle"></i> ${o.cancellation_reason}</p></div>`:''}</div></div></div>`;
+            }).join('');
+        }
+        
+        function escapeHtml(t) { if(!t)return''; const d=document.createElement('div');d.textContent=t;return d.innerHTML; }
+        function getStatusColor(s) { const c={pending:'bg-yellow-100 text-yellow-800',paid:'bg-blue-100 text-blue-800',processing:'bg-purple-100 text-purple-800',completed:'bg-green-100 text-green-800',cancelled:'bg-red-100 text-red-800'};return c[s]||'bg-gray-100'; }
+        function getStatusText(s) { const t={pending:'Menunggu Bayar',paid:'Dibayar',processing:'Diproses',completed:'Selesai',cancelled:'Dibatalkan'};return t[s]||s; }
+        
+        window.verifyAndProcess = async (id) => { const r=await Swal.fire({title:'Verifikasi?',text:'Pastikan bukti sudah benar.',icon:'question',showCancelButton:true,confirmButtonColor:'#16a34a',confirmButtonText:'Ya',cancelButtonText:'Batal'}); if(!r.isConfirmed)return; try{const{data,error}=await supabase.rpc('admin_update_order_status',{p_order_id:parseInt(id),p_status:'processing'});if(error)throw error;if(!data||!data.success)throw new Error(data?.error);Swal.fire({icon:'success',title:'Diproses!',timer:1500});loadOrders();}catch(e){Swal.fire({icon:'error',text:e.message});} };
+        window.completeOrder = async (id) => { const r=await Swal.fire({title:'Selesaikan?',text:'Tandai SELESAI.',icon:'question',showCancelButton:true,confirmButtonColor:'#16a34a',confirmButtonText:'Ya',cancelButtonText:'Batal'}); if(!r.isConfirmed)return; try{const{data,error}=await supabase.rpc('admin_update_order_status',{p_order_id:parseInt(id),p_status:'completed'});if(error)throw error;if(!data||!data.success)throw new Error(data?.error);Swal.fire({icon:'success',title:'Selesai!',timer:3000});loadOrders();}catch(e){Swal.fire({icon:'error',text:e.message});} };
+        window.cancelOrder = async (id) => { const r=await Swal.fire({title:'Batalkan?',icon:'warning',showCancelButton:true,confirmButtonColor:'#dc2626',confirmButtonText:'Ya',cancelButtonText:'Tidak'}); if(!r.isConfirmed)return; try{const{data,error}=await supabase.rpc('admin_update_order_status',{p_order_id:parseInt(id),p_status:'cancelled',p_cancellation_reason:'Dibatalkan Admin'});if(error)throw error;if(!data||!data.success)throw new Error(data?.error);Swal.fire({icon:'success',title:'Dibatalkan',timer:1500});loadOrders();}catch(e){Swal.fire({icon:'error',text:e.message});} };
+        
+        window.viewPaymentProof = async (id) => {
+            currentViewingOrderId = id;
+            try {
+                const { data, error } = await supabase.from('orders').select('payment_proof, status').eq('id', id).single();
+                if (error) throw error;
+                if (!data?.payment_proof) { Swal.fire({ icon: 'info', title: 'Tidak Ada', text: 'Belum ada bukti pembayaran.' }); return; }
+                const proofPath = data.payment_proof;
+                let imageUrl = proofPath;
+                if (!proofPath.startsWith('http')) {
+                    const { data: sd, error: se } = await supabase.storage.from('bukti-pembayaran').createSignedUrl(proofPath, 3600);
+                    if (se) { const { data: pd } = supabase.storage.from('bukti-pembayaran').getPublicUrl(proofPath); imageUrl = pd?.publicUrl || proofPath; }
+                    else imageUrl = sd.signedUrl;
+                }
+                const isImg = imageUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i) || !proofPath.startsWith('http');
+                document.getElementById('proofContent').innerHTML = `<p class="mb-2 font-medium">Pesanan #${String(id).slice(0,8)}</p><div class="bg-gray-100 p-3 rounded-lg break-all text-xs mb-3"><span class="text-gray-500">Path:</span> ${escapeHtml(proofPath)}</div>${isImg?`<img src="${imageUrl}" class="max-w-full rounded-lg max-h-64 mx-auto border shadow-sm" alt="Bukti" onerror="this.outerHTML='<p class=\\'text-center text-red-500 text-sm\\'>Gagal memuat</p>';">`:''}<div class="mt-3"><a href="${imageUrl}" target="_blank" class="text-blue-600 text-xs"><i class="fas fa-external-link-alt"></i> Buka di tab baru</a></div>`;
+                const vb = document.getElementById('modalVerifyBtn');
+                if (data.status==='paid'||data.status==='pending') { vb.classList.remove('hidden'); vb.innerHTML='<i class="fas fa-check-circle mr-1"></i>Verifikasi & Proses'; vb.onclick=()=>{closeModal();verifyAndProcess(id);}; }
+                else vb.classList.add('hidden');
+                document.getElementById('proofModal').classList.remove('hidden'); document.body.style.overflow='hidden';
+            } catch(e) { Swal.fire({ icon: 'error', title: 'Gagal', text: e.message }); }
+        };
+        
+        window.closeModal = () => { document.getElementById('proofModal').classList.add('hidden'); document.body.style.overflow=''; currentViewingOrderId=null; };
+        window.logout = async () => { if(supabase) await supabase.auth.signOut(); window.location.href='../auth/login.html'; };
+        window.refreshOrders = () => loadOrders();
+        
+        document.addEventListener('DOMContentLoaded', () => { const m = document.getElementById('proofModal'); if(m) m.addEventListener('click', e => { if(e.target===m) closeModal(); }); });
+        
+        const style = document.createElement('style');
+        style.textContent = '@keyframes slide-up{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}.animate-slide-up{animation:slide-up 0.3s ease-out}';
+        document.head.appendChild(style);
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Inbox Artikel - Admin POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .status-badge { @apply px-2 py-1 rounded-full text-xs font-medium; }
+        .article-row:hover { background: linear-gradient(to right, #fef3c7, #fde68a); }
+        .tab-active { @apply border-b-2 border-yellow-500 text-yellow-600 font-medium; }
+        .filter-chip { @apply px-3 py-1.5 rounded-full text-xs bg-gray-100 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600 transition cursor-pointer; }
+        .filter-chip.active { @apply bg-yellow-500 text-white; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="../dashboard.html" class="text-gray-600 hover:text-yellow-600 transition p-2 rounded-lg hover:bg-yellow-50" title="Kembali ke Dashboard">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="w-10 h-10 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-inbox text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-yellow-500 to-amber-600 bg-clip-text text-transparent">Inbox Artikel</h1>
+                        <p class="text-xs text-gray-400 hidden sm:block">Review artikel masuk</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <a href="index.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-list mr-1"></i> Semua Artikel
+                    </a>
+                    <a href="archive.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-archive mr-1"></i> Arsip
+                    </a>
+                    <div class="text-right hidden sm:block">
+                        <p id="adminName" class="text-sm font-semibold text-gray-800">Admin</p>
+                        <p id="adminEmail" class="text-xs text-gray-500">-</p>
+                    </div>
+                    <button onclick="logout()" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm transition shadow-md">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <!-- Stats Summary -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-500">Menunggu Review</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="totalPending">0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-clock text-yellow-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-500">Dari Editor</p>
+                        <p class="text-2xl font-bold text-purple-600" id="fromEditor">0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-user-edit text-purple-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-500">Dari Member</p>
+                        <p class="text-2xl font-bold text-green-600" id="fromMember">0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-user text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-500">Dari User</p>
+                        <p class="text-2xl font-bold text-orange-600" id="fromUser">0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-users text-orange-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex flex-wrap gap-2 mb-4">
+            <span class="filter-chip active" data-filter="all">Semua</span>
+            <span class="filter-chip" data-filter="editor">Dari Editor</span>
+            <span class="filter-chip" data-filter="member">Dari Member</span>
+            <span class="filter-chip" data-filter="user">Dari User</span>
+        </div>
+
+        <!-- Article List -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+            <div class="px-5 py-4 border-b bg-gray-50 flex flex-wrap justify-between items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-newspaper text-yellow-600"></i>
+                    <h3 class="font-semibold text-gray-800">Artikel Masuk</h3>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full" id="articleCount">0</span>
+                </div>
+                <button onclick="loadArticles()" class="text-sm text-yellow-600 hover:text-yellow-800 transition">
+                    <i class="fas fa-sync-alt mr-1"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Judul Artikel</th>
+                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Penulis</th>
+                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Dari</th>
+                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Editor</th>
+                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Tanggal</th>
+                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="articleTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center py-12 text-gray-500">
+                                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-500"></div>
+                                <p class="mt-2">Memuat artikel...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="px-5 py-4 border-t bg-gray-50 flex flex-wrap justify-between items-center gap-3">
+                <div class="text-sm text-gray-600">
+                    Menampilkan <span id="showingStart">0</span>-<span id="showingEnd">0</span> dari <span id="totalCount">0</span> artikel
+                </div>
+                <div class="flex gap-2">
+                    <button id="prevPage" class="px-3 py-1.5 text-sm bg-white border rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span class="px-3 py-1.5 text-sm bg-yellow-100 text-yellow-800 rounded-lg" id="currentPage">1</span>
+                    <button id="nextPage" class="px-3 py-1.5 text-sm bg-white border rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div id="bulkActions" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white shadow-2xl rounded-xl px-6 py-4 border border-gray-200 hidden z-30">
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-600"><span id="selectedCount">0</span> artikel dipilih</span>
+                <button onclick="bulkApprove()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                    <i class="fas fa-check mr-1"></i> Approve Semua
+                </button>
+                <button onclick="bulkReject()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                    <i class="fas fa-times mr-1"></i> Tolak Semua
+                </button>
+                <button onclick="clearSelection()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+            <h3 class="text-lg font-bold mb-4">Alasan Penolakan</h3>
+            <textarea id="rejectionNote" class="w-full border rounded-lg p-3 mb-4" rows="4" placeholder="Tulis alasan penolakan..."></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeRejectModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">Batal</button>
+                <button onclick="confirmReject()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Tolak</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        // ==================== CONFIG LOADER ====================
+        let cachedConfig = null;
+        let supabase = null;
+        
+        async function loadConfig() {
+            if (cachedConfig) return cachedConfig;
+            try {
+                const response = await fetch('/api/config');
+                if (response.ok) { cachedConfig = await response.json(); console.log('✅ Config loaded'); return cachedConfig; }
+            } catch (e) { console.warn('⚠️ Fallback config'); }
+            cachedConfig = { SUPABASE_URL: 'https://oavxhkpdqgqnagblxhki.supabase.co', SUPABASE_ANON_KEY: 'sb_publishable_18LyL-W_22mu1PyrQ3Eu4g_D2nCMsWT' };
+            return cachedConfig;
+        }
+        
+        async function initSupabase() {
+            try { const config = await loadConfig(); supabase = createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY); console.log("✅ Supabase connected"); return supabase; }
+            catch (err) { console.warn("⚠️ Supabase gagal:", err.message); supabase = null; return null; }
+        }
+        
+        let articles = [], selectedArticles = new Set(), currentFilter = 'all', articleToReject = null;
+        let currentPage = 1;
+        const pageSize = 15;
+        let totalCount = 0;
+        
+        // Cache untuk author dan editor
+        let authorCache = {};
+        let editorCache = {};
+        
+        // ==================== CHECK ADMIN ====================
+        async function checkAdmin() {
+            if (!supabase) return;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '../../auth/login.html'; return; }
+            const { data: profile, error } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if (error || profile?.role !== 'admin') { 
+                if (profile?.role === 'editor') window.location.href = '../../editor/dashboard.html';
+                else if (profile?.role === 'member') window.location.href = '../../member/dashboard.html';
+                else window.location.href = '../../user/dashboard.html';
+                return; 
+            }
+            document.getElementById('adminName').textContent = profile.full_name || session.user.email;
+            document.getElementById('adminEmail').textContent = session.user.email;
+            loadArticles();
+        }
+        
+        // ==================== LOAD ARTICLES (DENGAN PAGINATION) ====================
+        async function loadArticles() {
+            if (!supabase) return;
+            
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize - 1;
+            
+            // Query dengan pagination - TANPA JOIN!
+            const { data, error, count } = await supabase
+                .from('article_index')
+                .select('id, title, slug, excerpt, author_id, author_role, author_name, editor_id, editor_name, status, created_at, updated_at', { count: 'exact' })
+                .eq('status', 'pending_admin')
+                .order('created_at', { ascending: false })
+                .range(start, end);
+                
+            if (error) { 
+                console.error('Error:', error); 
+                showToast('Gagal memuat artikel', 'error'); 
+                return; 
+            }
+            
+            articles = data || [];
+            totalCount = count || 0;
+            
+            // Load author dan editor names secara terpisah (cache)
+            await loadAuthorAndEditorNames();
+            
+            updateStats();
+            renderArticles();
+            updatePagination();
+        }
+        
+        // ==================== LOAD AUTHOR & EDITOR NAMES ====================
+        async function loadAuthorAndEditorNames() {
+            const authorIds = [...new Set(articles.map(a => a.author_id).filter(id => id && !authorCache[id]))];
+            const editorIds = [...new Set(articles.map(a => a.editor_id).filter(id => id && !editorCache[id]))];
+            
+            // Load authors
+            if (authorIds.length > 0) {
+                const { data: authors } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, email')
+                    .in('id', authorIds);
+                
+                if (authors) {
+                    authors.forEach(a => { authorCache[a.id] = a; });
+                }
+            }
+            
+            // Load editors
+            if (editorIds.length > 0) {
+                const { data: editors } = await supabase
+                    .from('profiles')
+                    .select('id, full_name')
+                    .in('id', editorIds);
+                
+                if (editors) {
+                    editors.forEach(e => { editorCache[e.id] = e; });
+                }
+            }
+        }
+        
+        // ==================== LOAD STATS (OPTIMIZED) ====================
+        async function updateStats() {
+            // Gunakan count query terpisah untuk stats
+            const { count: total } = await supabase
+                .from('article_index')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'pending_admin');
+            
+            const { count: editorCount } = await supabase
+                .from('article_index')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'pending_admin')
+                .eq('author_role', 'editor');
+            
+            const { count: memberCount } = await supabase
+                .from('article_index')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'pending_admin')
+                .eq('author_role', 'member');
+            
+            const { count: userCount } = await supabase
+                .from('article_index')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'pending_admin')
+                .eq('author_role', 'user');
+            
+            document.getElementById('totalPending').textContent = total || 0;
+            document.getElementById('fromEditor').textContent = editorCount || 0;
+            document.getElementById('fromMember').textContent = memberCount || 0;
+            document.getElementById('fromUser').textContent = userCount || 0;
+            document.getElementById('articleCount').textContent = total || 0;
+        }
+        
+        function renderArticles() {
+            const tbody = document.getElementById('articleTableBody');
+            let filtered = currentFilter === 'all' ? articles : articles.filter(a => a.author_role === currentFilter);
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-gray-500"><i class="fas fa-inbox text-4xl mb-3 opacity-50"></i><p>${currentFilter === 'all' ? 'Tidak ada artikel yang menunggu review' : 'Tidak ada artikel dari ' + getRoleName(currentFilter)}</p></td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = filtered.map(article => {
+                const authorData = authorCache[article.author_id] || {};
+                const authorName = authorData.full_name || article.author_name || 'Tidak diketahui';
+                const authorEmail = authorData.email || '-';
+                
+                const editorData = editorCache[article.editor_id] || {};
+                const editorName = editorData.full_name || article.editor_name || '-';
+                
+                const date = new Date(article.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                const isChecked = selectedArticles.has(article.id) ? 'checked' : '';
+                
+                return `<tr class="article-row border-b hover:bg-yellow-50 transition">
+                    <td class="py-3 px-4"><div class="flex items-center gap-3"><input type="checkbox" class="article-checkbox rounded" data-id="${article.id}" ${isChecked} onchange="toggleSelection('${article.id}')"><div><p class="font-medium text-gray-800">${escapeHtml(article.title)}</p><p class="text-xs text-gray-400">${escapeHtml(article.excerpt || 'Tidak ada excerpt')}</p></div></div></td>
+                    <td class="py-3 px-4"><p class="text-sm font-medium">${escapeHtml(authorName)}</p><p class="text-xs text-gray-400">${escapeHtml(authorEmail)}</p></td>
+                    <td class="py-3 px-4">${getRoleBadge(article.author_role)}</td>
+                    <td class="py-3 px-4"><span class="text-sm ${article.editor_id ? 'text-gray-700' : 'text-gray-400'}"><i class="fas fa-user-check mr-1 text-xs"></i>${escapeHtml(editorName)}</span></td>
+                    <td class="py-3 px-4 text-sm text-gray-500">${date}</td>
+                    <td class="py-3 px-4"><div class="flex gap-1">
+                        <a href="edit.html?id=${article.id}" class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition" title="Review & Edit"><i class="fas fa-eye"></i></a>
+                        <button onclick="quickApprove('${article.id}')" class="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition" title="Approve Cepat"><i class="fas fa-check"></i></button>
+                        <button onclick="openRejectModal('${article.id}')" class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition" title="Tolak"><i class="fas fa-times"></i></button>
+                    </div></td>
+                </tr>`;
+            }).join('');
+            
+            updateBulkActions();
+        }
+        
+        function updatePagination() {
+            const totalPages = Math.ceil(totalCount / pageSize);
+            const start = (currentPage - 1) * pageSize + 1;
+            const end = Math.min(currentPage * pageSize, totalCount);
+            
+            document.getElementById('showingStart').textContent = totalCount > 0 ? start : 0;
+            document.getElementById('showingEnd').textContent = end;
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('currentPage').textContent = currentPage;
+            
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages;
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m] || m);
+        }
+        
+        function getRoleBadge(role) {
+            const b = { editor: 'bg-purple-100 text-purple-800', member: 'bg-green-100 text-green-800', user: 'bg-orange-100 text-orange-800', admin: 'bg-blue-100 text-blue-800' };
+            const i = { editor: 'fa-user-edit', member: 'fa-user', user: 'fa-users', admin: 'fa-crown' };
+            return `<span class="px-2 py-1 rounded-full text-xs font-medium ${b[role] || b.user}"><i class="fas ${i[role] || i.user} mr-1"></i>${getRoleName(role)}</span>`;
+        }
+        function getRoleName(role) { const n = { editor: 'Editor', member: 'Member', user: 'User', admin: 'Admin' }; return n[role] || role; }
+        
+        // ==================== FILTER ====================
+        document.querySelectorAll('.filter-chip').forEach(chip => chip.addEventListener('click', function() {
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            this.classList.add('active'); 
+            currentFilter = this.dataset.filter; 
+            currentPage = 1;
+            renderArticles();
+        }));
+        
+        // ==================== PAGINATION ====================
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadArticles();
+            }
+        });
+        
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (currentPage * pageSize < totalCount) {
+                currentPage++;
+                loadArticles();
+            }
+        });
+        
+        // ==================== SELECTION ====================
+        window.toggleSelection = function(id) { 
+            selectedArticles.has(id) ? selectedArticles.delete(id) : selectedArticles.add(id); 
+            updateBulkActions(); 
+        }
+        
+        function updateBulkActions() {
+            const c = selectedArticles.size, d = document.getElementById('bulkActions');
+            document.getElementById('selectedCount').textContent = c;
+            c > 0 ? d.classList.remove('hidden') : d.classList.add('hidden');
+        }
+        
+        window.clearSelection = function() { 
+            selectedArticles.clear(); 
+            document.querySelectorAll('.article-checkbox').forEach(cb => cb.checked = false); 
+            updateBulkActions(); 
+        }
+        
+        // ==================== APPROVE ====================
+        window.quickApprove = async function(id) {
+            if (!confirm('Approve artikel ini untuk dipublish?')) return;
+            const { error } = await supabase.from('article_index').update({ status: 'published', published_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', id);
+            if (error) { showToast('Gagal approve artikel', 'error'); return; }
+            showToast('Artikel berhasil dipublish!'); 
+            selectedArticles.delete(id);
+            loadArticles();
+        }
+        
+        window.bulkApprove = async function() {
+            if (selectedArticles.size === 0) return;
+            if (!confirm(`Approve ${selectedArticles.size} artikel untuk dipublish?`)) return;
+            const ids = Array.from(selectedArticles);
+            const { error } = await supabase.from('article_index').update({ status: 'published', published_at: new Date().toISOString(), updated_at: new Date().toISOString() }).in('id', ids);
+            if (error) { showToast('Gagal approve artikel', 'error'); return; }
+            showToast(`${ids.length} artikel berhasil dipublish!`); 
+            clearSelection(); 
+            loadArticles();
+        }
+        
+        // ==================== REJECT ====================
+        window.openRejectModal = function(id) { articleToReject = id; document.getElementById('rejectModal').classList.remove('hidden'); }
+        window.closeRejectModal = function() { articleToReject = null; document.getElementById('rejectModal').classList.add('hidden'); document.getElementById('rejectionNote').value = ''; }
+        window.confirmReject = async function() {
+            const note = document.getElementById('rejectionNote').value.trim();
+            if (!note) { alert('Harap isi alasan penolakan'); return; }
+            const { error } = await supabase.from('article_index').update({ status: 'rejected', rejection_note: note, updated_at: new Date().toISOString() }).eq('id', articleToReject);
+            if (error) { showToast('Gagal menolak artikel', 'error'); return; }
+            showToast('Artikel ditolak dan dikembalikan ke penulis'); 
+            selectedArticles.delete(articleToReject);
+            closeRejectModal(); 
+            loadArticles();
+        }
+        window.bulkReject = function() { if (selectedArticles.size === 0) return; alert('Fitur bulk reject dengan catatan akan segera hadir'); }
+        
+        // ==================== TOAST ====================
+        function showToast(m, t = 'success') { 
+            const toast = document.getElementById('toast'), msg = document.getElementById('toastMessage'); 
+            toast.classList.remove('bg-green-500', 'bg-red-500'); 
+            toast.classList.add(t === 'success' ? 'bg-green-500' : 'bg-red-500'); 
+            msg.textContent = m; 
+            toast.classList.remove('hidden'); 
+            setTimeout(() => toast.classList.add('hidden'), 3000); 
+        }
+        
+        // ==================== LOGOUT ====================
+        window.logout = async () => { if (supabase) await supabase.auth.signOut(); window.location.href = '../../auth/login.html'; }
+        
+        // ==================== INIT ====================
+        async function init() { 
+            await initSupabase(); 
+            if (supabase) checkAdmin(); 
+            else window.location.href = '../../auth/login.html'; 
+        }
+        init();
+    </script>
+</body>
+</html>

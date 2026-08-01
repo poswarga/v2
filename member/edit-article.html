@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Edit Artikel - Member POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link rel="stylesheet" href="../assets/css/article-chat.css">
+    <style>
+        .ql-editor { min-height: 300px; font-size: 16px; }
+        .ql-container { font-size: 16px; }
+        .action-btn { px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2; }
+        .status-badge { px-2 py-1 rounded-full text-xs font-medium; }
+        .ql-toolbar { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; border-color: #e5e7eb; }
+        .ql-container { border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-color: #e5e7eb; }
+        
+        /* ===== ENHANCED: SPACING SYNC (Create → Edit → Preview → Publish) ===== */
+        .ql-editor p { margin-bottom: 1.25em; line-height: 1.8; }
+        .ql-editor p:last-child { margin-bottom: 0; }
+        .ql-editor br + br { display: none; }
+        .ql-editor h1 { margin: 1.5em 0 0.75em; line-height: 1.3; font-size: 1.5em; font-weight: 700; }
+        .ql-editor h2 { margin: 1.25em 0 0.5em; line-height: 1.4; font-size: 1.25em; font-weight: 600; }
+        .ql-editor ol, .ql-editor ul { margin-bottom: 1.25em; padding-left: 2em; }
+        .ql-editor li { margin-bottom: 0.5em; line-height: 1.7; }
+        .ql-editor li:last-child { margin-bottom: 0; }
+        .ql-editor blockquote { margin: 1.25em 0; padding: 0.75em 1.25em; border-left: 4px solid #7c3aed; background: #f5f3ff; border-radius: 0 8px 8px 0; }
+        .ql-editor pre.ql-syntax { margin: 1.25em 0; padding: 1em; background: #1e293b; color: #e2e8f0; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; }
+        .ql-editor img { max-width: 100%; height: auto; margin: 1.25em 0; border-radius: 8px; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="../index.html" class="text-gray-500 hover:text-purple-600 transition p-2 rounded-lg hover:bg-purple-50" title="Beranda">
+                        <i class="fas fa-home text-lg"></i>
+                    </a>
+                    <a href="dashboard.html" class="text-gray-500 hover:text-purple-600 transition p-2 rounded-lg hover:bg-purple-50" title="Dashboard Member">
+                        <i class="fas fa-tachometer-alt text-lg"></i>
+                    </a>
+                    <a href="my-articles.html" class="text-gray-500 hover:text-purple-600 transition p-2 rounded-lg hover:bg-purple-50" title="Artikel Saya">
+                        <i class="fas fa-list text-lg"></i>
+                    </a>
+                    <button onclick="window.location.reload()" class="text-gray-500 hover:text-purple-600 transition p-2 rounded-lg hover:bg-purple-50" title="Refresh Halaman">
+                        <i class="fas fa-sync-alt text-lg"></i>
+                    </button>
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-purple-500 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-edit text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-purple-500 bg-clip-text text-transparent">Edit Artikel</h1>
+                        <p class="text-xs text-gray-400 hidden sm:block" id="articleStatus">-</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <button onclick="saveDraft()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition border border-gray-200">
+                        <i class="fas fa-save mr-1"></i> Simpan
+                    </button>
+                    <div class="text-right hidden sm:block">
+                        <p id="userName" class="text-sm font-semibold text-gray-800">Member</p>
+                        <p id="userEmail" class="text-xs text-gray-500">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Kolom Kiri - Form -->
+            <div class="lg:col-span-2 space-y-4">
+                <!-- Judul & Slug -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul Artikel <span class="text-red-500">*</span></label>
+                    <input type="text" id="articleTitle" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" placeholder="Masukkan judul artikel">
+                    
+                    <div class="flex items-center justify-between mt-4">
+                        <label class="block text-sm font-medium text-gray-700">Slug URL</label>
+                        <span class="text-xs text-gray-400">Otomatis dari judul</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="articleSlug" class="flex-1 border border-gray-200 rounded-lg px-4 py-2 bg-gray-50 font-mono text-sm" placeholder="slug-artikel">
+                        <button onclick="copySlug()" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition border border-gray-200" title="Copy Slug">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button onclick="generateSlug()" class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg transition" title="Generate Ulang">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Slug otomatis dari judul. Gunakan huruf kecil, angka, dan tanda hubung.</p>
+                </div>
+
+                <!-- KATEGORI - 12 BARU -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Artikel <span class="text-red-500">*</span></label>
+                    <select id="articleCategory" class="w-full border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition bg-white">
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="Kabar Gardu">📡 Kabar Gardu</option>
+                        <option value="Jejak Lapangan">🗺️ Jejak Lapangan</option>
+                        <option value="Kisah Tetangga">👥 Kisah Tetangga</option>
+                        <option value="Obrolan Warung">☕ Obrolan Warung</option>
+                        <option value="Rembuk Warga">💬 Rembuk Warga</option>
+                        <option value="Sorot Publik">🔦 Sorot Publik</option>
+                        <option value="Balai Komunitas">🏛️ Balai Komunitas</option>
+                        <option value="Gerak Bareng">🤝 Gerak Bareng</option>
+                        <option value="Lapak Lokal">🛍️ Lapak Lokal</option>
+                        <option value="Cerita Ladang">🌱 Cerita Ladang</option>
+                        <option value="Denyut Negeri">🌏 Denyut Negeri</option>
+                        <option value="Gawe Kampung">🔨 Gawe Kampung</option>
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle"></i> Pilih kategori yang sesuai dengan isi artikel.</p>
+                </div>
+
+                <!-- Konten Artikel -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Konten Artikel <span class="text-red-500">*</span></label>
+                    <div id="editor" class="bg-white"></div>
+                    <p class="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                        <i class="fas fa-info-circle"></i> <span id="wordCountDisplay">0 kata</span> - Tidak ada batasan minimal kata
+                    </p>
+                </div>
+
+                <!-- Excerpt -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Excerpt (Ringkasan) <span class="text-red-500">*</span></label>
+                        <span class="text-xs text-gray-400" id="excerptCount">0/160</span>
+                    </div>
+                    <textarea id="articleExcerpt" rows="3" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" placeholder="Ringkasan singkat artikel..."></textarea>
+                </div>
+
+                <!-- WIDGET CHAT - DI BAWAH KONTEN -->
+                <div id="articleChatWidget"></div>
+            </div>
+
+            <!-- Kolom Kanan - Sidebar -->
+            <div class="space-y-4">
+                <!-- Info Artikel -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-purple-600"></i> Info Artikel
+                    </h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Status:</span>
+                            <span id="statusBadge" class="px-2 py-1 rounded-full text-xs font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Kategori:</span>
+                            <span id="infoCategory" class="font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Editor:</span>
+                            <span id="infoEditor" class="font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Slug:</span>
+                            <span id="infoSlug" class="font-medium font-mono text-xs truncate max-w-[120px]">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Dibuat:</span>
+                            <span id="createdDate" class="font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Update:</span>
+                            <span id="updatedDate" class="font-medium">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catatan Penolakan -->
+                <div id="rejectionNoteCard" class="bg-red-50 rounded-xl shadow-md p-5 border border-red-200 hidden">
+                    <h3 class="font-semibold text-red-800 mb-2 flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle"></i> Catatan Penolakan
+                    </h3>
+                    <p id="rejectionNoteText" class="text-sm text-red-700"></p>
+                </div>
+
+                <!-- Catatan Editor -->
+                <div id="editorNoteCard" class="bg-blue-50 rounded-xl shadow-md p-5 border border-blue-200 hidden">
+                    <h3 class="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                        <i class="fas fa-sticky-note"></i> Catatan Editor
+                    </h3>
+                    <p id="editorNoteText" class="text-sm text-blue-700"></p>
+                </div>
+
+                <!-- Gambar Utama -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-image text-purple-600"></i> Gambar Utama
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex border-b border-gray-200">
+                            <button id="tabFile" class="flex-1 py-2 text-sm font-medium text-purple-600 border-b-2 border-purple-600 transition" onclick="switchImageTab('file')">
+                                <i class="fas fa-upload mr-1"></i>Upload File
+                            </button>
+                            <button id="tabUrl" class="flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-purple-600 transition" onclick="switchImageTab('url')">
+                                <i class="fas fa-link mr-1"></i>URL Gambar
+                            </button>
+                        </div>
+                        
+                        <div id="uploadFileSection">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Pilih file gambar:</label>
+                            <input type="file" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="w-full border border-gray-200 rounded-lg p-2 text-sm">
+                            <p class="text-xs text-gray-400 mt-1">Format: JPG, PNG, GIF, WebP. Maks 5MB. (Otomatis dikonversi ke WebP)</p>
+                            <div id="uploadProgress" class="mt-2 hidden">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2"><div id="progressBar" class="bg-purple-600 h-2 rounded-full" style="width:0%"></div></div>
+                                    <span id="progressText" class="text-xs text-gray-500">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="uploadUrlSection" class="hidden">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">URL Gambar</label>
+                            <input type="text" id="featuredImage" class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" placeholder="https://...">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Keterangan Gambar (Caption / Alt Text)</label>
+                            <input type="text" id="imageCaption" class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" placeholder="Deskripsi gambar...">
+                        </div>
+                        
+                        <div id="imagePreview" class="mt-3 hidden">
+                            <img id="previewImg" class="w-full h-32 object-cover rounded-lg border border-gray-200" src="" alt="Preview" onerror="this.style.display='none'">
+                            <p id="previewCaption" class="text-xs text-gray-500 mt-1 text-center italic"></p>
+                            <button onclick="removeImage()" class="text-red-500 text-xs mt-2 hover:text-red-700 transition">
+                                <i class="fas fa-trash"></i> Hapus Gambar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sumber Artikel -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Sumber Artikel</label>
+                        <span class="text-xs text-gray-400">Opsional</span>
+                    </div>
+                    <div class="relative">
+                        <i class="fas fa-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="url" id="articleSource" class="w-full border border-gray-200 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" placeholder="https://... (opsional)">
+                    </div>
+                </div>
+
+                <!-- Aksi -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-tasks text-purple-600"></i> Aksi
+                    </h3>
+                    <div id="actionButtons" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Modal -->
+    <div id="submitModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+            <h3 class="text-lg font-bold mb-4 text-purple-600" id="submitModalTitle">Kirim Artikel?</h3>
+            <p class="text-sm text-gray-600 mb-4" id="submitModalMessage">Artikel akan dikirim ke Editor untuk direview.</p>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeSubmitModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">Batal</button>
+                <button onclick="confirmSubmit()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-md" id="submitModalBtn">Kirim</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden transition-all">
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Slug generator di root scope -->
+    <script>
+        function generateSlug() { 
+            const t = document.getElementById('articleTitle');
+            const s = document.getElementById('articleSlug');
+            if (t && s && t.value) {
+                s.value = t.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-+|-+$/g, '')
+                    .substring(0, 100);
+            }
+        }
+        function copySlug() { 
+            const s = document.getElementById('articleSlug'); 
+            if (!s.value) generateSlug(); 
+            s.select(); 
+            s.setSelectionRange(0, 99999);
+            navigator.clipboard?.writeText(s.value).catch(() => document.execCommand('copy')); 
+            if (typeof showToastGlobal === 'function') showToastGlobal('✅ Slug disalin!', 'success');
+        }
+        function showToastGlobal(m, t) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMessage');
+            if (!toast || !msg) return;
+            toast.classList.remove('bg-green-500','bg-red-500','bg-yellow-500','bg-blue-500');
+            if (t === 'success') toast.classList.add('bg-green-500');
+            else if (t === 'error') toast.classList.add('bg-red-500');
+            else toast.classList.add('bg-yellow-500');
+            msg.textContent = m;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+        window.removeImage = function() {
+            document.getElementById('featuredImage').value = '';
+            document.getElementById('imageFile').value = '';
+            document.getElementById('imageCaption').value = '';
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('previewCaption').textContent = '';
+            window._resetImageVars && window._resetImageVars();
+        };
+        document.addEventListener('DOMContentLoaded', function() {
+            const titleInput = document.getElementById('articleTitle');
+            if (titleInput) {
+                titleInput.addEventListener('input', generateSlug);
+                titleInput.addEventListener('blur', generateSlug);
+            }
+        });
+    </script>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let cachedConfig = null, supabase = null;
+        
+        async function loadConfig() { 
+            if (cachedConfig) return cachedConfig; 
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`Server error (${r.status})`);
+            cachedConfig = await r.json();
+            if (!cachedConfig.SUPABASE_URL || !cachedConfig.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            return cachedConfig; 
+        }
+        
+        async function initSupabase() { 
+            try { 
+                const c = await loadConfig(); 
+                supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); 
+                window.supabase = supabase; 
+                console.log("✅ Supabase connected (member edit)");
+            } catch (e) { 
+                supabase = null; 
+                throw e; 
+            } 
+        }
+
+        let convertedImageBase64 = null, tempWebPFile = null, currentImageTab = 'file';
+        let userId = null, userRole = 'member', memberName = '', quill = null, articleId = null, articleData = null, submitAction = 'submit';
+
+        window._resetImageVars = function() {
+            convertedImageBase64 = null;
+            tempWebPFile = null;
+        };
+
+        async function convertToWebP(file, quality = 0.85) {
+            return new Promise((resolve, reject) => {
+                const img = new Image(), reader = new FileReader();
+                reader.onload = e => img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'), maxWidth = 1200;
+                    let w = img.width, h = img.height; 
+                    if (w > maxWidth) { h = h * (maxWidth / w); w = maxWidth; }
+                    canvas.width = w; canvas.height = h; 
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    convertedImageBase64 = canvas.toDataURL('image/webp', quality);
+                    document.getElementById('previewImg').src = convertedImageBase64;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    canvas.toBlob(blob => { 
+                        if (!blob) return reject('Gagal convert ke WebP'); 
+                        const newFileName = file.name.replace(/\.\w+$/, '.webp');
+                        tempWebPFile = new File([blob], newFileName, { type: 'image/webp' }); 
+                        resolve(tempWebPFile); 
+                    }, 'image/webp', quality);
+                };
+                img.onerror = () => reject('Gagal memuat gambar'); 
+                reader.onerror = () => reject('Gagal membaca file'); 
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        async function uploadImageToStorage(file) { 
+            const fn = `article-images/${userId}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`; 
+            const { error } = await supabase.storage.from('articles').upload(fn, file, { cacheControl: '3600', upsert: false }); 
+            if (error) throw error; 
+            const { data: urlData } = supabase.storage.from('articles').getPublicUrl(fn); 
+            return urlData.publicUrl; 
+        }
+
+        async function checkUser() {
+            if (!supabase) return; 
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '../auth/login.html'; return; }
+            
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('role, full_name')
+                .eq('id', session.user.id)
+                .single();
+                
+            if (error || !profile) { 
+                console.error('Gagal load profil:', error);
+                window.location.href = '../auth/login.html'; 
+                return; 
+            }
+            
+            if (profile?.role !== 'member') { 
+                if (profile?.role === 'admin') window.location.href = '../admin/dashboard.html'; 
+                else if (profile?.role === 'editor') window.location.href = '../editor/dashboard.html'; 
+                else window.location.href = '../user/dashboard.html'; 
+                return; 
+            }
+            
+            userId = session.user.id;
+            userRole = 'member';
+            memberName = profile?.full_name || session.user.email?.split('@')[0] || 'Member';
+            
+            document.getElementById('userName').textContent = memberName;
+            document.getElementById('userEmail').textContent = session.user.email;
+            
+            const p = new URLSearchParams(window.location.search); 
+            articleId = p.get('id');
+            if (!articleId) { 
+                showToast('ID artikel tidak ditemukan', 'error'); 
+                setTimeout(() => window.location.href = 'my-articles.html', 2000); 
+                return; 
+            }
+            
+            console.log('✅ Member logged in:', memberName);
+            initQuill(); 
+            await loadArticle();
+        }
+        
+        // ===== ENHANCED QUILL INIT =====
+        function initQuill() { 
+            if (quill) return;
+            
+            // Override default tag DIV → P
+            const Block = Quill.import('blots/block');
+            Block.tagName = 'P';
+            Quill.register(Block, true);
+            
+            quill = new Quill('#editor', { 
+                theme: 'snow', 
+                placeholder: 'Tulis konten artikel...', 
+                modules: { 
+                    toolbar: [
+                        ['bold','italic','underline','strike'],
+                        ['blockquote'],
+                        [{'header':1},{'header':2}],
+                        [{'list':'ordered'},{'list':'bullet'}],
+                        [{'indent':'-1'},{'indent':'+1'}],
+                        [{'size':['small',false,'large','huge']}],
+                        [{'color':[]},{'background':[]}],
+                        [{'align':[]}],
+                        ['clean'],
+                        ['link']
+                    ] 
+                } 
+            });
+            quill.on('text-change', function() { updateWordCount(); hasChanges = true; });
+            
+            // Shift+Enter = line break, Enter = new paragraph
+            quill.keyboard.addBinding({
+                key: 13,
+                shiftKey: true
+            }, function(range, context) {
+                quill.insertText(range.index, '\n');
+                return false;
+            });
+        }
+        
+        function updateWordCount() { 
+            if (!quill) return;
+            const c = quill.getText().trim().split(/\s+/).filter(w => w.length > 0).length; 
+            document.getElementById('wordCountDisplay').textContent = `${c} kata`; 
+        }
+
+        async function loadArticle() {
+            const { data, error } = await supabase
+                .from('article_index')
+                .select('*')
+                .eq('id', articleId)
+                .eq('author_id', userId)
+                .single();
+                
+            if (error || !data) { 
+                showToast('Artikel tidak ditemukan', 'error'); 
+                setTimeout(() => window.location.href = 'my-articles.html', 2000); 
+                return; 
+            }
+            if (!['draft','rejected','pending_editor'].includes(data.status)) { 
+                showToast('Artikel tidak dapat diedit', 'error'); 
+                setTimeout(() => window.location.href = 'my-articles.html', 2000); 
+                return; 
+            }
+            
+            articleData = data;
+            document.getElementById('articleTitle').value = data.title || '';
+            document.getElementById('articleSlug').value = data.slug || '';
+            document.getElementById('articleCategory').value = data.category || 'Kabar Gardu';
+            document.getElementById('articleExcerpt').value = data.excerpt || '';
+            document.getElementById('featuredImage').value = data.featured_image || '';
+            document.getElementById('imageCaption').value = data.image_caption || '';
+            document.getElementById('articleSource').value = data.source_url || '';
+            document.getElementById('excerptCount').textContent = `${(data.excerpt||'').length}/160`;
+            
+            if (data.content) quill.root.innerHTML = data.content; 
+            updateWordCount();
+            
+            if (data.featured_image) { 
+                document.getElementById('previewImg').src = data.featured_image; 
+                document.getElementById('imagePreview').classList.remove('hidden'); 
+            }
+            if (data.image_caption) {
+                document.getElementById('previewCaption').textContent = data.image_caption;
+            }
+            
+            await updateArticleInfo(data); 
+            updateStatusBadge(data.status); 
+            renderActionButtons(data.status);
+            
+            if (['draft', 'pending_editor', 'rejected'].includes(data.status)) {
+                await initChatWidget();
+            }
+        }
+        
+        async function updateArticleInfo(d) {
+            document.getElementById('infoCategory').textContent = d.category || 'Kabar Gardu';
+            document.getElementById('infoSlug').textContent = d.slug || '-';
+            document.getElementById('createdDate').textContent = d.created_at ? new Date(d.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}) : '-';
+            document.getElementById('updatedDate').textContent = d.updated_at ? new Date(d.updated_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}) : '-';
+            
+            const editorEl = document.getElementById('infoEditor');
+            if (d.editor_id) {
+                try {
+                    const { data: editorProfile } = await supabase
+                        .from('profiles')
+                        .select('full_name')
+                        .eq('id', d.editor_id)
+                        .single();
+                    editorEl.textContent = editorProfile?.full_name || 'Editor';
+                    editorEl.className = 'font-medium text-blue-600';
+                } catch(e) {
+                    editorEl.textContent = 'Sudah ditangani';
+                    editorEl.className = 'font-medium text-green-600';
+                }
+            } else {
+                editorEl.textContent = 'Belum direview';
+                editorEl.className = 'font-medium text-gray-400';
+            }
+            
+            if (d.rejection_note) { 
+                document.getElementById('rejectionNoteText').textContent = d.rejection_note; 
+                document.getElementById('rejectionNoteCard').classList.remove('hidden'); 
+            }
+            if (d.editor_note) { 
+                document.getElementById('editorNoteText').textContent = d.editor_note; 
+                document.getElementById('editorNoteCard').classList.remove('hidden'); 
+            }
+        }
+        
+        function updateStatusBadge(s) { 
+            const b = { draft: 'bg-gray-100 text-gray-800', pending_editor: 'bg-purple-100 text-purple-800', rejected: 'bg-red-100 text-red-800' }, 
+                  l = { draft: 'Draft', pending_editor: 'Pending Editor', rejected: 'Ditolak' }; 
+            const e = document.getElementById('statusBadge'); 
+            e.className = `px-2 py-1 rounded-full text-xs font-medium ${b[s]||b.draft}`; 
+            e.textContent = l[s]||'Draft'; 
+            document.getElementById('articleStatus').textContent = `Status: ${l[s]||'Draft'}`; 
+        }
+        
+        function renderActionButtons(s) { 
+            const c = document.getElementById('actionButtons'); 
+            if (s === 'rejected') {
+                c.innerHTML = `
+                    <button onclick="openSubmitModal('resubmit')" class="action-btn w-full bg-purple-600 hover:bg-purple-700 text-white justify-center shadow-md"><i class="fas fa-paper-plane"></i> Kirim Ulang</button>
+                    <button onclick="saveDraft()" class="action-btn w-full bg-gray-100 hover:bg-gray-200 text-gray-700 justify-center border border-gray-200"><i class="fas fa-save"></i> Simpan</button>
+                    <hr class="border-gray-200">
+                    <button onclick="previewArticle()" class="action-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-700 justify-center border border-blue-200"><i class="fas fa-eye"></i> Preview</button>
+                    <a href="https://postingan.poswarga.com/posts/${articleData.slug}" target="_blank" class="action-btn w-full bg-green-100 hover:bg-green-200 text-green-700 justify-center border border-green-200"><i class="fas fa-external-link-alt"></i> Lihat di Web</a>
+                    <button onclick="window.location.href='my-articles.html'" class="action-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-600 justify-center border border-gray-200"><i class="fas fa-arrow-left"></i> Kembali</button>
+                `;
+            } else {
+                c.innerHTML = `
+                    <button onclick="openSubmitModal('submit')" class="action-btn w-full bg-purple-600 hover:bg-purple-700 text-white justify-center shadow-md"><i class="fas fa-paper-plane"></i> Kirim ke Editor</button>
+                    <button onclick="saveDraft()" class="action-btn w-full bg-gray-100 hover:bg-gray-200 text-gray-700 justify-center border border-gray-200"><i class="fas fa-save"></i> Simpan Draft</button>
+                    <hr class="border-gray-200">
+                    <button onclick="previewArticle()" class="action-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-700 justify-center border border-blue-200"><i class="fas fa-eye"></i> Preview</button>
+                    <button onclick="window.location.href='my-articles.html'" class="action-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-600 justify-center border border-gray-200"><i class="fas fa-arrow-left"></i> Kembali</button>
+                `;
+            }
+        }
+
+        // ========== CHAT WIDGET ==========
+        async function initChatWidget() {
+            if (!articleId || !userId) {
+                console.warn('initChatWidget: articleId atau userId tidak tersedia');
+                return;
+            }
+            
+            try {
+                const widgetContainer = document.getElementById('articleChatWidget');
+                if (!widgetContainer) return;
+                
+                if (widgetContainer.querySelector('#articleChat')) return;
+                
+                const response = await fetch('../shared/article-chat-widget.html');
+                if (!response.ok) throw new Error('Gagal fetch widget');
+                const html = await response.text();
+                
+                widgetContainer.innerHTML = html;
+                
+                widgetContainer.style.opacity = '0';
+                widgetContainer.style.transition = 'opacity 0.3s ease';
+                requestAnimationFrame(() => { widgetContainer.style.opacity = '1'; });
+                
+                const script = document.createElement('script');
+                script.src = '../assets/js/article-chat.js?v=20260501';
+                script.onload = () => {
+                    if (typeof ArticleChat !== 'undefined') {
+                        console.log('initChatWidget: ArticleChat untuk member');
+                        new ArticleChat(articleId, userId, 'member');
+                    }
+                };
+                script.onerror = () => console.error('Gagal load article-chat.js');
+                document.body.appendChild(script);
+            } catch (e) {
+                console.error('Gagal load chat widget:', e);
+            }
+        }
+        // ========== END CHAT WIDGET ==========
+
+        window.switchImageTab = (t) => { 
+            currentImageTab = t; 
+            document.getElementById('tabFile').className = t === 'file' 
+                ? 'flex-1 py-2 text-sm font-medium text-purple-600 border-b-2 border-purple-600 transition' 
+                : 'flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-purple-600 transition'; 
+            document.getElementById('tabUrl').className = t === 'url' 
+                ? 'flex-1 py-2 text-sm font-medium text-purple-600 border-b-2 border-purple-600 transition' 
+                : 'flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-purple-600 transition'; 
+            document.getElementById('uploadFileSection').classList.toggle('hidden', t !== 'file'); 
+            document.getElementById('uploadUrlSection').classList.toggle('hidden', t !== 'url'); 
+        };
+        
+        document.getElementById('imageFile')?.addEventListener('change', async (e) => { 
+            const f = e.target.files[0]; 
+            if (f) { 
+                try { 
+                    showToast('🔄 Mengkonversi ke WebP...', 'info'); 
+                    await convertToWebP(f, 0.85); 
+                    showToast('✅ Gambar siap (WebP)', 'success'); 
+                } catch (err) { 
+                    showToast('❌ Gagal konversi: ' + err.message, 'error'); 
+                    const reader = new FileReader();
+                    reader.onload = function(e) { 
+                        convertedImageBase64 = e.target.result; 
+                        document.getElementById('previewImg').src = e.target.result; 
+                        document.getElementById('imagePreview').classList.remove('hidden'); 
+                    }; 
+                    reader.readAsDataURL(f); 
+                    tempWebPFile = f;
+                } 
+            } 
+        });
+        
+        document.getElementById('featuredImage')?.addEventListener('input', function() { 
+            if (this.value) { 
+                document.getElementById('previewImg').src = this.value; 
+                document.getElementById('imagePreview').classList.remove('hidden'); 
+            } else { 
+                document.getElementById('imagePreview').classList.add('hidden'); 
+            }
+            hasChanges = true;
+        });
+        
+        document.getElementById('imageCaption')?.addEventListener('input', function() { 
+            document.getElementById('previewCaption').textContent = this.value || 'Gambar utama artikel'; 
+            hasChanges = true;
+        });
+        
+        function validateForm() { 
+            const t = document.getElementById('articleTitle').value.trim(), 
+                  c = quill ? quill.root.innerHTML.trim() : '', 
+                  e = document.getElementById('articleExcerpt').value.trim(), 
+                  cat = document.getElementById('articleCategory').value; 
+            if (!t) { showToast('Judul harus diisi', 'error'); return false; } 
+            if (t.length > 70) { showToast('Judul maks 70 karakter', 'error'); return false; } 
+            if (!cat) { showToast('Kategori artikel harus dipilih', 'error'); return false; } 
+            if (!c || c === '<p><br></p>') { showToast('Konten harus diisi', 'error'); return false; } 
+            if (!e) { showToast('Excerpt harus diisi', 'error'); return false; } 
+            if (e.length > 160) { showToast('Excerpt maks 160 karakter', 'error'); return false; } 
+            return true; 
+        }
+        
+        async function getFormData() { 
+            if (!document.getElementById('articleSlug').value) generateSlug(); 
+            let img = articleData?.featured_image || null; 
+            if (currentImageTab === 'file') { 
+                let file = tempWebPFile || document.getElementById('imageFile').files[0]; 
+                if (file) { 
+                    try { 
+                        document.getElementById('uploadProgress').classList.remove('hidden'); 
+                        if (!tempWebPFile) { 
+                            document.getElementById('progressText').textContent = 'Konversi...'; 
+                            document.getElementById('progressBar').style.width = '30%'; 
+                            file = await convertToWebP(file, 0.85); 
+                        } 
+                        document.getElementById('progressText').textContent = 'Upload...'; 
+                        document.getElementById('progressBar').style.width = '70%'; 
+                        img = await uploadImageToStorage(file); 
+                        document.getElementById('progressBar').style.width = '100%'; 
+                        document.getElementById('uploadProgress').classList.add('hidden'); 
+                        showToast('✅ Gambar diupload (WebP)', 'success'); 
+                    } catch(e) { 
+                        document.getElementById('uploadProgress').classList.add('hidden'); 
+                        throw new Error('Upload gagal: ' + e.message); 
+                    } 
+                } 
+            } else { 
+                img = document.getElementById('featuredImage').value || null; 
+            } 
+            return { 
+                title: document.getElementById('articleTitle').value.trim(), 
+                slug: document.getElementById('articleSlug').value, 
+                excerpt: document.getElementById('articleExcerpt').value.trim(), 
+                content: quill.root.innerHTML, 
+                category: document.getElementById('articleCategory').value, 
+                featured_image: img, 
+                image_caption: document.getElementById('imageCaption').value || null, 
+                source_url: document.getElementById('articleSource').value.trim() || null, 
+                file_path: img, 
+                updated_at: new Date().toISOString() 
+            }; 
+        }
+        
+        window.saveDraft = async function() { 
+            if (!document.getElementById('articleTitle').value.trim()) { 
+                showToast('Minimal isi judul untuk menyimpan draft', 'error'); 
+                return; 
+            } 
+            const btn = event?.target?.closest('button');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...'; }
+            
+            const fd = await getFormData(); 
+            fd.status = 'draft'; 
+            if (!fd.category) fd.category = 'Kabar Gardu'; 
+            fd.rejection_note = null; 
+            
+            const { error } = await supabase.from('article_index').update(fd).eq('id', articleId).eq('author_id', userId); 
+            
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save mr-1"></i>Simpan'; }
+            if (error) { showToast('Gagal menyimpan: ' + error.message, 'error'); return; } 
+            
+            showToast('✅ Draft disimpan'); 
+            hasChanges = false; 
+            await loadArticle();
+        };
+        
+        window.openSubmitModal = function(a) { 
+            submitAction = a; 
+            document.getElementById('submitModalTitle').textContent = a === 'resubmit' ? 'Kirim Ulang?' : 'Kirim Artikel?'; 
+            document.getElementById('submitModalMessage').textContent = a === 'resubmit' ? 'Artikel akan dikirim ulang ke Editor untuk direview.' : 'Artikel akan dikirim ke Editor untuk direview.'; 
+            document.getElementById('submitModalBtn').textContent = a === 'resubmit' ? 'Kirim Ulang' : 'Kirim'; 
+            document.getElementById('submitModal').classList.remove('hidden'); 
+        };
+        
+        window.closeSubmitModal = () => document.getElementById('submitModal').classList.add('hidden');
+        
+        window.confirmSubmit = async function() { 
+            if (!validateForm()) { closeSubmitModal(); return; } 
+            const btn = document.getElementById('submitModalBtn');
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Mengirim...';
+            
+            const fd = await getFormData(); 
+            fd.status = 'pending_editor'; 
+            fd.rejection_note = null; 
+            
+            const { error } = await supabase.from('article_index').update(fd).eq('id', articleId).eq('author_id', userId); 
+            
+            if (error) { 
+                showToast('Gagal mengirim: ' + error.message, 'error'); 
+                btn.disabled = false; 
+                btn.innerHTML = submitAction === 'resubmit' ? 'Kirim Ulang' : 'Kirim'; 
+                closeSubmitModal(); 
+                return; 
+            }
+            
+            try { 
+                await supabase.channel('editor-notifications').send({ 
+                    type: 'broadcast', 
+                    event: 'article_submitted', 
+                    payload: { 
+                        article_id: articleId, 
+                        title: fd.title, 
+                        author_name: memberName, 
+                        author_role: 'member', 
+                        is_resubmit: submitAction === 'resubmit' 
+                    } 
+                }); 
+            } catch(e) {
+                console.warn('Gagal kirim notifikasi:', e);
+            }
+            
+            showToast(submitAction === 'resubmit' ? '✅ Dikirim ulang!' : '✅ Dikirim!'); 
+            hasChanges = false; 
+            btn.disabled = false; 
+            btn.innerHTML = submitAction === 'resubmit' ? 'Kirim Ulang' : 'Kirim'; 
+            closeSubmitModal(); 
+            setTimeout(() => window.location.href = 'my-articles.html', 1500); 
+        };
+        
+        window.previewArticle = function() { 
+            let img = null; 
+            if (currentImageTab === 'file') { 
+                img = convertedImageBase64; 
+                if (!img && document.getElementById('imageFile').files[0]) { 
+                    const reader = new FileReader(); 
+                    reader.onload = e => {
+                        const previewData = JSON.parse(localStorage.getItem('preview_article') || '{}');
+                        previewData.image = e.target.result;
+                        localStorage.setItem('preview_article', JSON.stringify(previewData));
+                    };
+                    reader.readAsDataURL(document.getElementById('imageFile').files[0]); 
+                } 
+            } else { 
+                img = document.getElementById('featuredImage').value || articleData?.featured_image || null; 
+            } 
+            const previewData = { 
+                title: document.getElementById('articleTitle').value || articleData?.title || 'Tanpa Judul', 
+                content: quill ? quill.root.innerHTML : '<p>Tidak ada konten</p>', 
+                excerpt: document.getElementById('articleExcerpt').value || articleData?.excerpt || null, 
+                category: document.getElementById('articleCategory').value || articleData?.category || 'Kabar Gardu', 
+                image: img, 
+                caption: document.getElementById('imageCaption').value || articleData?.image_caption || null, 
+                sourceUrl: document.getElementById('articleSource')?.value.trim() || articleData?.source_url || null 
+            }; 
+            localStorage.setItem('preview_article', JSON.stringify(previewData)); 
+            window.open('preview.html', '_blank'); 
+        };
+        
+        function showToast(m, t = 'success') { 
+            const toast = document.getElementById('toast'), msg = document.getElementById('toastMessage'); 
+            toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-purple-500'); 
+            if (t === 'success') toast.classList.add('bg-green-500'); 
+            else if (t === 'error') toast.classList.add('bg-red-500'); 
+            else if (t === 'info') toast.classList.add('bg-blue-500'); 
+            else toast.classList.add('bg-yellow-500'); 
+            msg.textContent = m; 
+            toast.classList.remove('hidden'); 
+            setTimeout(() => toast.classList.add('hidden'), 4000); 
+        }
+        
+        window.showToastGlobal = showToast;
+        
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSubmitModal(); } });
+        document.getElementById('submitModal').addEventListener('click', e => { 
+            if (e.target === document.getElementById('submitModal')) closeSubmitModal(); 
+        });
+        
+        let hasChanges = false;
+        document.getElementById('articleTitle').addEventListener('input', () => hasChanges = true);
+        document.getElementById('articleCategory').addEventListener('change', () => hasChanges = true);
+        document.getElementById('articleExcerpt')?.addEventListener('input', function() {
+            document.getElementById('excerptCount').textContent = `${this.value.length}/160`;
+            hasChanges = true;
+        });
+        document.getElementById('articleSource')?.addEventListener('input', () => hasChanges = true);
+        
+        window.addEventListener('beforeunload', e => { 
+            if (hasChanges) { e.preventDefault(); e.returnValue = ''; } 
+        });
+        
+        (async () => { 
+            try { 
+                await initSupabase(); 
+            } catch(e) { 
+                console.error('Gagal init Supabase:', e);
+                window.location.href = '../auth/login.html'; 
+                return; 
+            } 
+            if (supabase) { 
+                await checkUser(); 
+            } else { 
+                window.location.href = '../auth/login.html'; 
+            } 
+        })();
+    </script>
+</body>
+</html>

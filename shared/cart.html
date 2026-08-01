@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Keranjang - POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @media (max-width: 768px) { 
+            button, .btn-touch { min-height: 44px; min-width: 44px; } 
+            select, input { font-size: 16px !important; } 
+            .mobile-card { display: block; } 
+            .desktop-table { display: none; } 
+        }
+        @media (min-width: 769px) { 
+            .mobile-card { display: none; } 
+            .desktop-table { display: block; } 
+        }
+        .cart-item-enter { animation: slideIn 0.3s ease; }
+        @keyframes slideIn { 
+            from { opacity: 0; transform: translateX(20px); } 
+            to { opacity: 1; transform: translateX(0); } 
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="#" id="backToMenu" class="text-gray-600 hover:text-primary transition p-2 rounded-lg hover:bg-opacity-10">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="flex items-center gap-2">
+                        <div id="logoIcon" class="w-9 h-9 bg-gradient-to-r rounded-xl flex items-center justify-center shadow-md">
+                            <i class="fas fa-shopping-cart text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r bg-clip-text text-transparent" id="logoText">
+                            Keranjang Belanja
+                        </h1>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="#" id="dashboardLink" class="text-gray-600 hover:text-primary transition flex items-center gap-1 bg-gray-50 hover:bg-opacity-20 px-3 py-2 rounded-lg">
+                        <i class="fas fa-user"></i>
+                        <span class="hidden sm:inline">Dashboard</span>
+                    </a>
+                    <span id="userRoleBadge" class="text-xs px-2 py-1 rounded-full hidden md:inline"></span>
+                    <button onclick="refreshCart()" class="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-600 transition shadow-md flex items-center gap-1">
+                        <i class="fas fa-sync-alt"></i>
+                        <span class="hidden sm:inline">Refresh</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4 md:p-6">
+        <div id="cartContainer">
+            <!-- Desktop Table -->
+            <div class="desktop-table bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-100">
+                        <tr>
+                            <th class="py-4 px-4 text-left text-sm font-semibold text-gray-600">Produk</th>
+                            <th class="py-4 px-4 text-left text-sm font-semibold text-gray-600">Harga</th>
+                            <th class="py-4 px-4 text-left text-sm font-semibold text-gray-600">Jumlah</th>
+                            <th class="py-4 px-4 text-left text-sm font-semibold text-gray-600">Subtotal</th>
+                            <th class="py-4 px-4 text-left text-sm font-semibold text-gray-600"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartItemsDesktop">
+                        <tr><td colspan="5" class="text-center py-8 text-gray-500">Memuat keranjang...</td></tr>
+                    </tbody>
+                    <tfoot class="bg-gray-50 border-t border-gray-100">
+                        <tr>
+                            <td colspan="3" class="py-4 px-4 text-right font-bold text-gray-700">Total:</td>
+                            <td class="py-4 px-4 font-bold text-lg" id="totalAmount">Rp 0</td>
+                            <td class="py-4 px-4"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <!-- Mobile Cards -->
+            <div class="mobile-card space-y-3" id="cartItemsMobile">
+                <div class="text-center py-8 text-gray-500">Memuat keranjang...</div>
+            </div>
+            
+            <!-- Empty Cart Message -->
+            <div id="emptyCartMessage" class="hidden bg-white rounded-xl shadow-md p-8 text-center border border-gray-100">
+                <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">Keranjang Kosong</h3>
+                <p class="text-gray-500 mb-6">Yuk, mulai belanja produk UMKM berkualitas!</p>
+                <a href="menu.html" class="inline-block bg-gradient-to-r text-white px-6 py-3 rounded-xl font-medium transition shadow-md" id="shopNowBtn">
+                    <i class="fas fa-store mr-2"></i>Belanja Sekarang
+                </a>
+            </div>
+        </div>
+        
+        <!-- Checkout Section -->
+        <div id="checkoutSection" class="mt-6 bg-white rounded-xl shadow-md p-6 hidden border border-gray-100">
+            <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-credit-card" id="paymentIcon"></i>Metode Pembayaran
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <label class="relative border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-opacity-10" id="paymentTransfer">
+                    <input type="radio" name="paymentMethod" value="transfer" class="absolute opacity-0">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-university text-2xl text-blue-600"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Transfer Bank</p>
+                            <p class="text-xs text-gray-500">BCA, Mandiri, BRI, BNI</p>
+                        </div>
+                    </div>
+                </label>
+                <label class="relative border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-opacity-10" id="paymentQris">
+                    <input type="radio" name="paymentMethod" value="qris" class="absolute opacity-0">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-qrcode text-2xl text-green-600"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">QRIS</p>
+                            <p class="text-xs text-gray-500">GoPay, OVO, Dana, ShopeePay</p>
+                        </div>
+                    </div>
+                </label>
+                <label class="relative border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-primary transition has-[:checked]:border-primary has-[:checked]:bg-opacity-10" id="paymentWhatsapp">
+                    <input type="radio" name="paymentMethod" value="whatsapp" class="absolute opacity-0">
+                    <div class="flex items-center gap-3">
+                        <i class="fab fa-whatsapp text-2xl text-green-500"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">WhatsApp</p>
+                            <p class="text-xs text-gray-500">Kirim bukti pembayaran manual</p>
+                        </div>
+                    </div>
+                </label>
+            </div>
+            <div class="border-t border-gray-100 pt-4">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-600">Total Belanja:</span>
+                    <span class="text-2xl font-bold" id="checkoutTotal">Rp 0</span>
+                </div>
+                <input type="hidden" id="totalHidden" value="0">
+                <input type="hidden" id="selectedPayment" value="">
+                <button id="checkoutBtn" onclick="checkout()" class="w-full bg-gradient-to-r text-white px-8 py-4 rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2 disabled:opacity-50">
+                    <i class="fas fa-lock"></i>Proses Pesanan
+                </button>
+                <p class="text-xs text-gray-500 text-center mt-3">
+                    <i class="fas fa-shield-alt mr-1"></i>Segera informasikan ke admin setelah Anda melakukan pembayaran
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden transition-all">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script type="module">
+        import { 
+            getSupabase, 
+            checkSession, 
+            getThemeColors, 
+            showToast, 
+            formatRupiah,
+            getPaymentMethodText,
+            redirectToLogin 
+        } from '../js/shared-theme.js';
+        
+        let supabase = null;
+        let sessionData = null;
+        let theme = null;
+        let cart = [];
+        
+        // =====================================================
+        // INITIALIZATION
+        // =====================================================
+        async function init() {
+            supabase = await getSupabase();
+            
+            if (!supabase) {
+                showToast('Gagal menghubungkan ke database', 'error');
+                return;
+            }
+            
+            sessionData = await checkSession(supabase);
+            
+            if (!sessionData.isLoggedIn) {
+                redirectToLogin();
+                return;
+            }
+            
+            theme = sessionData.theme;
+            
+            // Apply theme to UI
+            applyTheme();
+            
+            // Load cart
+            loadCart();
+            
+            // Setup payment method listeners
+            setupPaymentListeners();
+        }
+        
+        // =====================================================
+        // APPLY THEME TO UI
+        // =====================================================
+        function applyTheme() {
+            // Logo icon
+            const logoIcon = document.getElementById('logoIcon');
+            logoIcon.className = `w-9 h-9 bg-gradient-to-r ${theme.gradient} rounded-xl flex items-center justify-center shadow-md`;
+            
+            // Logo text
+            const logoText = document.getElementById('logoText');
+            logoText.className = `text-xl font-bold bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent`;
+            
+            // Back button
+            const backBtn = document.getElementById('backToMenu');
+            backBtn.href = 'menu.html';
+            backBtn.className = `text-gray-600 hover:${theme.text} transition p-2 rounded-lg ${theme.bgLight} hover:bg-opacity-20`;
+            
+            // Dashboard link
+            const dashLink = document.getElementById('dashboardLink');
+            dashLink.href = sessionData.dashboardUrl;
+            dashLink.className = `text-gray-600 hover:${theme.text} transition flex items-center gap-1 bg-gray-50 hover:bg-opacity-20 px-3 py-2 rounded-lg`;
+            
+            // Role badge
+            const roleBadge = document.getElementById('userRoleBadge');
+            roleBadge.textContent = sessionData.role.toUpperCase();
+            roleBadge.className = `text-xs px-2 py-1 ${theme.badge} rounded-full`;
+            
+            // Total amount color
+            document.getElementById('totalAmount').className = `py-4 px-4 font-bold ${theme.text} text-lg`;
+            
+            // Checkout total color
+            document.getElementById('checkoutTotal').className = `text-2xl font-bold ${theme.text}`;
+            
+            // Payment icon
+            document.getElementById('paymentIcon').className = `fas fa-credit-card ${theme.text}`;
+            
+            // Shop now button
+            const shopBtn = document.getElementById('shopNowBtn');
+            shopBtn.className = `inline-block bg-gradient-to-r ${theme.gradient} text-white px-6 py-3 rounded-xl font-medium hover:${theme.gradientHover} transition shadow-md`;
+            
+            // Checkout button
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            checkoutBtn.className = `w-full bg-gradient-to-r ${theme.gradient} text-white px-8 py-4 rounded-xl font-bold hover:${theme.gradientHover} transition shadow-lg flex items-center justify-center gap-2 disabled:opacity-50`;
+            
+            // Payment labels
+            applyPaymentLabelTheme('paymentTransfer');
+            applyPaymentLabelTheme('paymentQris');
+            applyPaymentLabelTheme('paymentWhatsapp');
+        }
+        
+        function applyPaymentLabelTheme(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.className = `relative border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-${theme.primary}-400 transition has-[:checked]:border-${theme.primary}-500 has-[:checked]:${theme.bgLight}`;
+            }
+        }
+        
+        // =====================================================
+        // SETUP PAYMENT LISTENERS
+        // =====================================================
+        function setupPaymentListeners() {
+            document.querySelectorAll('input[name="paymentMethod"]').forEach(r => {
+                r.addEventListener('change', function() {
+                    document.getElementById('selectedPayment').value = this.value;
+                });
+            });
+        }
+        
+        // =====================================================
+        // LOAD CART FROM LOCALSTORAGE
+        // =====================================================
+        function loadCart() {
+            const saved = localStorage.getItem('cart');
+            if (saved) {
+                try {
+                    cart = JSON.parse(saved);
+                } catch (e) {
+                    cart = [];
+                }
+            }
+            renderCart();
+        }
+        
+        // =====================================================
+        // RENDER CART
+        // =====================================================
+        function renderCart() {
+            const cd = document.getElementById('cartItemsDesktop');
+            const cm = document.getElementById('cartItemsMobile');
+            const tc = document.getElementById('totalAmount');
+            const cht = document.getElementById('checkoutTotal');
+            const cs = document.getElementById('checkoutSection');
+            const em = document.getElementById('emptyCartMessage');
+            
+            if (!cart?.length) {
+                if (cd) cd.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-500"><i class="fas fa-shopping-cart text-3xl mb-2 opacity-50"></i><p>Keranjang kosong</p></td></tr>`;
+                if (cm) cm.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fas fa-shopping-cart text-3xl mb-2 opacity-50"></i><p>Keranjang kosong</p></div>`;
+                tc.textContent = 'Rp 0';
+                cht.textContent = 'Rp 0';
+                cs.classList.add('hidden');
+                em.classList.remove('hidden');
+                document.getElementById('totalHidden').value = 0;
+                return;
+            }
+            
+            em.classList.add('hidden');
+            cs.classList.remove('hidden');
+            let total = 0;
+            
+            // Desktop view
+            if (cd) {
+                cd.innerHTML = cart.map((item, i) => {
+                    const st = (item.price || 0) * (item.quantity || 1);
+                    total += st;
+                    return `<tr class="border-b border-gray-100 hover:bg-opacity-10 ${theme.bgLight} cart-item-enter transition">
+                        <td class="py-4 px-4">
+                            <div class="flex items-center gap-3">
+                                ${item.image_url 
+                                    ? `<img src="${item.image_url}" alt="${item.name}" class="w-12 h-12 object-cover rounded-lg">` 
+                                    : `<div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center"><i class="fas fa-box ${theme.text}"></i></div>`
+                                }
+                                <span class="font-medium text-gray-800">${item.name || 'Produk'}</span>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 text-gray-700">${formatRupiah(item.price || 0)}</td>
+                        <td class="py-4 px-4">
+                            <div class="flex items-center gap-2">
+                                <button onclick="updateQuantity(${i}, ${item.quantity - 1})" class="w-8 h-8 bg-gray-100 rounded-lg hover:bg-gray-200 transition">-</button>
+                                <span class="w-8 text-center font-medium">${item.quantity || 1}</span>
+                                <button onclick="updateQuantity(${i}, ${item.quantity + 1})" class="w-8 h-8 bg-gray-100 rounded-lg hover:bg-gray-200 transition">+</button>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 font-medium text-gray-800">${formatRupiah(st)}</td>
+                        <td class="py-4 px-4">
+                            <button onclick="removeItem(${i})" class="text-red-500 hover:text-red-700 p-2 transition"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+            
+            // Mobile view
+            if (cm) {
+                let mt = 0;
+                cm.innerHTML = cart.map((item, i) => {
+                    const st = (item.price || 0) * (item.quantity || 1);
+                    mt += st;
+                    return `<div class="bg-white rounded-xl shadow-md p-4 cart-item-enter border border-gray-100">
+                        <div class="flex gap-3">
+                            <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                ${item.image_url 
+                                    ? `<img src="${item.image_url}" alt="${item.name}" class="w-full h-full object-cover">` 
+                                    : `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"><i class="fas fa-box ${theme.text} text-2xl"></i></div>`
+                                }
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-gray-800">${item.name || 'Produk'}</h4>
+                                <p class="${theme.text} font-bold">${formatRupiah(item.price || 0)}</p>
+                                <div class="flex items-center justify-between mt-2">
+                                    <div class="flex items-center gap-2">
+                                        <button onclick="updateQuantity(${i}, ${item.quantity - 1})" class="w-8 h-8 bg-gray-100 rounded-lg hover:bg-gray-200 transition">-</button>
+                                        <span class="w-8 text-center font-medium">${item.quantity || 1}</span>
+                                        <button onclick="updateQuantity(${i}, ${item.quantity + 1})" class="w-8 h-8 bg-gray-100 rounded-lg hover:bg-gray-200 transition">+</button>
+                                    </div>
+                                    <button onclick="removeItem(${i})" class="text-red-500 hover:text-red-700 p-2 transition"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100 flex justify-between">
+                            <span class="text-sm text-gray-500">Subtotal:</span>
+                            <span class="font-semibold text-gray-800">${formatRupiah(st)}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+                total = mt;
+            }
+            
+            tc.textContent = formatRupiah(total);
+            cht.textContent = formatRupiah(total);
+            document.getElementById('totalHidden').value = total;
+        }
+        
+        // =====================================================
+        // UPDATE QUANTITY
+        // =====================================================
+        window.updateQuantity = function(i, q) {
+            if (q <= 0) {
+                removeItem(i);
+            } else {
+                cart[i].quantity = q;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+            }
+        };
+        
+        // =====================================================
+        // REMOVE ITEM
+        // =====================================================
+        window.removeItem = function(i) {
+            const removed = cart[i];
+            cart.splice(i, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+            showToast(`"${removed.name}" dihapus dari keranjang`);
+        };
+        
+        // =====================================================
+        // REFRESH CART
+        // =====================================================
+        window.refreshCart = function() {
+            loadCart();
+            showToast('Keranjang diperbarui', 'success');
+        };
+        
+        // =====================================================
+        // CHECKOUT (AMAN DENGAN RPC)
+        // =====================================================
+        window.checkout = async function() {
+            if (!sessionData.isLoggedIn) {
+                showToast('Anda harus login terlebih dahulu', 'error');
+                redirectToLogin();
+                return;
+            }
+            
+            if (!cart?.length) {
+                showToast('Keranjang belanja kosong', 'error');
+                return;
+            }
+            
+            const pm = document.querySelector('input[name="paymentMethod"]:checked');
+            if (!pm) {
+                showToast('Pilih metode pembayaran terlebih dahulu', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('checkoutBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+            
+            try {
+                // Hitung ulang total (verifikasi ganda)
+                const calculatedTotal = cart.reduce((sum, item) => 
+                    sum + ((item.price || 0) * (item.quantity || 1)), 0
+                );
+                
+                // Format items untuk RPC
+                const formattedItems = cart.map(item => ({
+                    product_id: item.id,
+                    quantity: item.quantity || 1,
+                    price: item.price || 0
+                }));
+                
+                console.log('📦 Checkout:', {
+                    user_id: sessionData.userId,
+                    total: calculatedTotal,
+                    items: formattedItems.length,
+                    payment: pm.value
+                });
+                
+                // Panggil RPC yang aman
+                const { data: rpcResult, error: rpcError } = await supabase.rpc(
+                    'create_order_with_items',
+                    {
+                        p_user_id: sessionData.userId,
+                        p_total_amount: calculatedTotal,
+                        p_items: formattedItems
+                    }
+                );
+                
+                if (rpcError) {
+                    console.error('RPC Error:', rpcError);
+                    throw new Error(`Gagal membuat pesanan: ${rpcError.message}`);
+                }
+                
+                console.log('📦 RPC Result:', rpcResult);
+                
+                if (!rpcResult || !rpcResult.success) {
+                    throw new Error(rpcResult?.error || 'Gagal membuat pesanan');
+                }
+                
+                // Update payment method
+                const { error: updateError } = await supabase
+                    .from('orders')
+                    .update({ payment_method: pm.value })
+                    .eq('id', rpcResult.order_id);
+                    
+                if (updateError) {
+                    console.warn('⚠️ Gagal update payment method:', updateError);
+                }
+                
+                // Sukses
+                localStorage.removeItem('cart');
+                showToast(`✅ Pesanan #${rpcResult.order_id} berhasil dibuat!`, 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'my-orders.html';
+                }, 1500);
+                
+            } catch (e) {
+                console.error('❌ Checkout error:', e);
+                showToast('❌ Error: ' + e.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-lock mr-2"></i>Proses Pesanan';
+            }
+        };
+        
+        // =====================================================
+        // START
+        // =====================================================
+        init();
+    </script>
+</body>
+</html>

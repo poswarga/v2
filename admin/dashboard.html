@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Admin Dashboard - POS WARGA</title>
+    <link href="https://ik.imagekit.io/1ctpzpi1o/icon.png" rel="icon" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif !important; }
+        .fa,.fas,.far,.fab,.fal,.fad{font-family:"Font Awesome 6 Free"!important;font-weight:900}
+        .far{font-weight:400!important}
+        .fab{font-family:"Font Awesome 6 Brands"!important}
+        .animate-pulse-slow { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02); }
+        .menu-card { transition: all 0.3s ease; }
+        .menu-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02); }
+        @media (max-width: 768px) { .menu-card .flex { flex-direction: column; text-align: center; } .menu-card .w-12 { margin-bottom: 12px; } }
+        @media (max-width: 768px) { .orders-table th, .orders-table td { padding: 12px 8px; font-size: 12px; } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
+        .role-badge {
+            background: linear-gradient(135deg, #dc2626 0%, #16a34a 100%);
+        }
+        .revenue-card {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+            border: 1px solid #6ee7b7;
+            position: relative;
+            overflow: hidden;
+        }
+        .revenue-card::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 60px;
+            height: 60px;
+            background: rgba(16, 185, 129, 0.15);
+            border-radius: 50%;
+        }
+        /* ✅ PERUBAHAN: ukuran font nominal pendapatan 30% dari sebelumnya */
+        .revenue-amount {
+            font-size: 0.475rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            word-break: break-all;
+            line-height: 1.2;
+        }
+        @media (min-width: 640px) {
+            .revenue-amount {
+                font-size: 0.55rem;
+            }
+        }
+        @media (min-width: 1024px) {
+            .revenue-amount {
+                font-size: 0.625rem;
+            }
+        }
+        
+        .papan-menu-card {
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        .papan-menu-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        @keyframes papanSlideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl overflow-hidden shadow-lg flex-shrink-0">
+                        <img src="https://ik.imagekit.io/1ctpzpi1o/icon.png" alt="Icon POS WARGA" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <a href="../index.html" class="flex items-center">
+                            <img src="https://ik.imagekit.io/1ctpzpi1o/logo.png" alt="POS WARGA" class="h-7 md:h-8 w-auto object-contain">
+                        </a>
+                        <p class="text-xs text-gray-400 hidden sm:block">Admin Dashboard</p>
+                    </div>
+                    <span class="role-badge text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-sm ml-2">
+                        <i class="fas fa-crown"></i>
+                        <span class="font-medium">Administrator</span>
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <a href="../index.html" class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg text-sm transition" title="Ke Beranda">
+                        <i class="fas fa-home"></i>
+                    </a>
+                    <button onclick="refreshData()" id="refreshBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg text-sm transition" title="Refresh Data">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <a href="../postingan.html" target="_blank" class="bg-green-100 hover:bg-green-200 text-green-700 p-2 rounded-lg text-sm transition" title="Lihat Postingan">
+                        <i class="fas fa-newspaper"></i>
+                    </a>
+                    <div class="text-right hidden sm:block">
+                        <p id="adminName" class="text-sm font-semibold text-gray-800">Admin</p>
+                        <p id="adminEmail" class="text-xs text-gray-500">-</p>
+                    </div>
+                    <button onclick="logout()" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm transition shadow-md flex items-center gap-1">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="hidden sm:inline">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mx-auto px-4 py-6">
+        <!-- Welcome Section -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl text-white p-6 mb-8 shadow-lg">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                        <i class="fas fa-crown text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-bold">Selamat Datang, Admin!</h2>
+                        <p class="text-blue-100 text-sm mt-1">Kelola website & user Anda dari sini.</p>
+                    </div>
+                </div>
+                <a href="../tutorial.html?role=admin" class="flex items-center gap-3 bg-white/15 hover:bg-white/25 backdrop-blur-sm px-5 py-3 rounded-xl transition border border-white/20 shrink-0">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-book-open text-white text-lg"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="font-semibold text-sm">Tutorial</p>
+                        <p class="text-xs text-blue-100">Panduan Penggunaan</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-white/60 ml-2"></i>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Statistik Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-4 mb-8">
+            <div class="stat-card bg-white rounded-xl shadow-md p-4 text-center border border-gray-100"><div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3"><i class="fas fa-shopping-cart text-blue-600 text-lg"></i></div><div class="text-2xl font-bold text-gray-800" id="totalOrders">0</div><div class="text-xs text-gray-500 mt-1">Total Pesanan</div></div>
+            <div class="stat-card revenue-card rounded-xl shadow-md p-4 text-center">
+                <div class="w-10 h-10 bg-green-200 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <i class="fas fa-money-bill-wave text-green-700 text-lg"></i>
+                </div>
+                <div class="revenue-amount text-green-800" id="totalRevenue">Rp 0</div>
+                <div class="text-xs text-green-600 font-medium mt-1">Pendapatan</div>
+            </div>
+            <div class="stat-card bg-white rounded-xl shadow-md p-4 text-center border border-gray-100"><div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-3"><i class="fas fa-clock text-yellow-600 text-lg"></i></div><div class="text-2xl font-bold text-yellow-600" id="pendingPayments">0</div><div class="text-xs text-gray-500 mt-1">Menunggu Bayar</div></div>
+            <div class="stat-card bg-white rounded-xl shadow-md p-4 text-center border border-gray-100"><div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-3"><i class="fas fa-calendar-day text-indigo-600 text-lg"></i></div><div class="text-2xl font-bold text-indigo-600" id="todayOrders">0</div><div class="text-xs text-gray-500 mt-1">Hari Ini</div></div>
+            <div class="stat-card bg-white rounded-xl shadow-md p-4 text-center border border-gray-100"><div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3"><i class="fas fa-box text-blue-600 text-lg"></i></div><div class="text-2xl font-bold text-blue-600" id="totalProducts">0</div><div class="text-xs text-gray-500 mt-1">Total Produk</div></div>
+            <div class="stat-card bg-white rounded-xl shadow-md p-4 text-center border border-gray-100"><div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-3"><i class="fas fa-users text-orange-600 text-lg"></i></div><div class="text-2xl font-bold text-orange-600" id="totalUsers">0</div><div class="text-xs text-gray-500 mt-1">Total User</div></div>
+            <div class="stat-card bg-white rounded-xl shadow-md p-3 text-center border border-gray-100"><div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2"><i class="fas fa-crown text-red-600 text-sm"></i></div><div class="text-xl font-bold text-red-600" id="statAdmin">0</div><div class="text-xs text-gray-500">Admin</div></div>
+            <div class="stat-card bg-white rounded-xl shadow-md p-3 text-center border border-gray-100"><div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-2"><i class="fas fa-pen-fancy text-indigo-600 text-sm"></i></div><div class="text-xl font-bold text-indigo-600" id="statEditor">0</div><div class="text-xs text-gray-500">Editor</div></div>
+            <div class="stat-card bg-white rounded-xl shadow-md p-3 text-center border border-gray-100"><div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2"><i class="fas fa-star text-green-600 text-sm"></i></div><div class="text-xl font-bold text-green-600" id="statMember">0</div><div class="text-xs text-gray-500">Member</div></div>
+            <div class="stat-card bg-white rounded-xl shadow-md p-3 text-center border border-gray-100"><div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2"><i class="fas fa-user text-purple-600 text-sm"></i></div><div class="text-xl font-bold text-purple-600" id="statUser">0</div><div class="text-xs text-gray-500">User</div></div>
+        </div>
+        
+        <!-- Menu Cards -->
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">📋 Menu Kelola</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+            <a href="products.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-box text-blue-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Produk</h3><p class="text-xs text-gray-400 mt-1">Kelola produk</p></div></a>
+            <a href="orders.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-clipboard-list text-green-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Pesanan</h3><p class="text-xs text-gray-400 mt-1">Kelola pesanan</p></div></a>
+            <a href="users.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-users text-blue-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">User</h3><p class="text-xs text-gray-400 mt-1">Kelola user</p></div></a>
+            <a href="articles/index.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-newspaper text-blue-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Kelola Artikel</h3><p class="text-xs text-gray-400 mt-1">Semua Artikel</p><span id="pendingArticles" class="mt-2 bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full">0</span></div></a>
+            <a href="statistik-artikel.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-chart-bar text-purple-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Statistik Artikel</h3><p class="text-xs text-gray-400 mt-1">Analisis performa</p></div></a>
+            <a href="profile.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-user-circle text-orange-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Profil Saya</h3><p class="text-xs text-gray-400 mt-1">Avatar & Barcode</p></div></a>
+            <a href="manage-cards.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-id-card text-yellow-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Kartu PERS</h3><p class="text-xs text-gray-400 mt-1">Verifikasi & Cetak</p><span id="pendingCardsBadge" class="mt-2 bg-yellow-100 text-yellow-600 text-xs font-bold px-2 py-0.5 rounded-full">0</span></div></a>
+            <a href="cms-ik.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-cyan-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-image text-cyan-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Imagekit</h3><p class="text-xs text-gray-400 mt-1">Kelola gambar</p></div></a>
+            <a href="cms-gas.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-fire text-amber-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">GAS</h3><p class="text-xs text-gray-400 mt-1">Kelola Konten</p></div></a>
+            <a href="cms-tutor.html" class="menu-card bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition border border-gray-100"><div class="flex flex-col items-center text-center"><div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-3"><i class="fas fa-book-open text-emerald-600 text-2xl"></i></div><h3 class="font-semibold text-gray-800 text-sm">Kelola Tutorial</h3><p class="text-xs text-gray-400 mt-1">CRUD tutorial</p></div></a>
+            
+            <!-- Papan POS WARGA -->
+            <div class="menu-card papan-menu-card bg-white rounded-xl shadow-md border border-gray-100 col-span-2 sm:col-span-3 lg:col-span-2">
+                <div class="flex flex-col h-full">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <div class="w-8 h-8 bg-gradient-to-r from-red-600 to-red-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-bullhorn text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 text-sm">Info POS WARGA</h4>
+                            <p class="text-[10px] text-gray-400">Kirim pesan ke papan pengumuman</p>
+                        </div>
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-auto flex-shrink-0" title="Live"></span>
+                    </div>
+                    
+                    <div class="flex-1 flex flex-col">
+                        <textarea 
+                            id="papanMessage" 
+                            class="w-full flex-1 p-2.5 border border-gray-200 rounded-lg resize-none text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent bg-gray-50 hover:bg-white transition"
+                            placeholder="Tulis pesan singkat (maks 280 karakter)..."
+                            maxlength="280"
+                            rows="2"
+                        ></textarea>
+                        <div class="flex justify-between items-center mt-2">
+                            <span id="papanCharCount" class="text-[10px] text-gray-400">0/280</span>
+                            <div class="flex gap-1">
+                                <a href="papan-admin.html" class="text-[10px] text-blue-600 hover:text-blue-800 px-2 py-1.5 rounded-lg hover:bg-blue-50 transition flex items-center gap-1" title="Kelola semua pesan">
+                                    <i class="fas fa-cog"></i> Kelola
+                                </a>
+                                <button 
+                                    id="btnKirimPapan" 
+                                    class="bg-gradient-to-r from-red-600 to-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm flex items-center gap-1"
+                                    disabled
+                                >
+                                    <i class="fas fa-paper-plane text-[10px]"></i> Kirim
+                                </button>
+                            </div>
+                        </div>
+                        <div id="papanKirimStatus" class="mt-1 text-[10px] min-h-[16px]"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fitur -->
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">✨ Fitur</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            <a href="ai-article-generator.html" class="menu-card bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-md p-5 hover:shadow-lg transition">
+                <div class="flex items-start gap-3"><div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center"><i class="fas fa-robot text-white text-xl"></i></div><div>
+                    <h3 class="font-semibold text-white text-lg">AI Article Generator</h3><p class="text-blue-100 text-sm mt-1">Buat artikel dengan AI</p>
+                </div></div>
+            </a>
+        </div>
+        
+        <!-- Recent Orders Table -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+            <div class="px-5 py-4 border-b border-gray-100 bg-gray-50 flex flex-wrap justify-between items-center gap-3">
+                <div class="flex items-center gap-2"><i class="fas fa-history text-blue-600"></i><h3 class="font-semibold text-gray-800">Pesanan Terbaru</h3></div>
+                <a href="orders.html" class="text-sm text-blue-600 hover:text-blue-800 transition flex items-center gap-1"><span>Lihat Semua</span><i class="fas fa-arrow-right text-xs"></i></a>
+            </div>
+            <div class="overflow-x-auto"><table class="w-full orders-table"><thead class="bg-gray-50"><tr><th class="py-3 px-3 md:px-4 text-left text-xs font-semibold text-gray-500 uppercase">ID</th><th class="py-3 px-3 md:px-4 text-left text-xs font-semibold text-gray-500 uppercase">Customer</th><th class="py-3 px-3 md:px-4 text-left text-xs font-semibold text-gray-500 uppercase">Produk</th><th class="py-3 px-3 md:px-4 text-left text-xs font-semibold text-gray-500 uppercase">Total</th><th class="py-3 px-3 md:px-4 text-left text-xs font-semibold text-gray-500 uppercase">Status</th><th class="py-3 px-3 md:px-4 text-left text-xs font-semibold text-gray-500 uppercase">Tanggal</th><th class="py-3 px-3 md:px-4 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th></tr></thead><tbody id="recentOrdersTable"><tr><td colspan="7" class="text-center py-12 text-gray-500"><div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div><p class="mt-2">Memuat pesanan...</p></td></tr></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- Audio -->
+    <audio id="papanNotificationSound" preload="auto" style="display:none;">
+        <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYAsT5sAAAAAAAAAAAAAAAAAAAA//tQZAAD8AAAaJz4gAAAAGgAn0gAAABwm0ANlREREiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIg=" type="audio/mpeg">
+    </audio>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        // ==================== CONFIG LOADER ====================
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let cachedConfig = null, supabase = null;
+        async function loadConfig() {
+            if (cachedConfig) return cachedConfig;
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`Server error (${r.status})`);
+            cachedConfig = await r.json();
+            if (!cachedConfig.SUPABASE_URL || !cachedConfig.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            return cachedConfig;
+        }
+        async function initSupabase() {
+            try { const c = await loadConfig(); supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); window.supabase = supabase; } catch (e) { supabase = null; throw e; }
+        }
+        let recentOrders = [], productsMap = {}, stats = { totalOrders: 0, totalRevenue: 0, pendingPayments: 0, completedToday: 0, totalProducts: 0, totalUsers: 0, pendingArticles: 0, pendingCards: 0 };
+        
+        function playNotificationSound() { try { const a = new (window.AudioContext||window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value=880; g.gain.value=0.3; o.start(); setTimeout(()=>{o.stop();a.close()},500); setTimeout(()=>{const a2=new(window.AudioContext||window.webkitAudioContext)(),o2=a2.createOscillator(),g2=a2.createGain(); o2.connect(g2);g2.connect(a2.destination);o2.frequency.value=660;g2.gain.value=0.3;o2.start();setTimeout(()=>{o2.stop();a2.close()},400)},200) } catch(e){} }
+        
+        function subscribeToNotifications() {
+            if(!supabase)return;
+            const c=supabase.channel('admin-notifications');
+            c.on('broadcast',{event:'payment_uploaded'},(p)=>{playNotificationSound();if(Notification.permission==='granted')new Notification('💰 Pembayaran Masuk!',{body:`Ada bukti transfer baru untuk pesanan #${p.payload.order_id}`,icon:'/favicon.ico'});const t=document.createElement('div');t.className='fixed top-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-pulse';t.innerHTML='<i class="fas fa-upload mr-2"></i> Pelanggan kirim pembayaran, cek untuk konfirmasi!';document.body.appendChild(t);setTimeout(()=>t.remove(),5000);loadStats();loadRecentOrders()});
+            c.on('broadcast',{event:'article_submitted'},(p)=>{const t=document.createElement('div');t.className='fixed top-4 right-4 bg-blue-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-pulse';t.innerHTML=`<i class="fas fa-newspaper mr-2"></i> Artikel baru dari ${p.payload.author_name} menunggu review Editor`;document.body.appendChild(t);setTimeout(()=>t.remove(),5000);loadStats()});
+            c.on('broadcast',{event:'card_requested'},(p)=>{playNotificationSound();if(Notification.permission==='granted')new Notification('🪪 Pengajuan Kartu PERS Baru!',{body:`${p.payload.full_name} mengajukan kartu PERS. Segera verifikasi!`,icon:'/favicon.ico'});const t=document.createElement('div');t.className='fixed top-4 right-4 bg-purple-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-pulse';t.innerHTML=`<i class="fas fa-id-card mr-2"></i> Pengajuan Kartu PERS baru dari ${p.payload.full_name}`;document.body.appendChild(t);setTimeout(()=>t.remove(),5000);loadStats();loadPendingCardsCount()});
+            c.subscribe(()=>{});if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()
+        }
+        
+        async function checkAdmin() {
+            if(!supabase)return;
+            const{data:{session}}=await supabase.auth.getSession();if(!session){window.location.href='../auth/login.html';return}
+            const{data:p}=await supabase.from('profiles').select('role,full_name').eq('id',session.user.id).single();
+            if(!p||p.role!=='admin'){window.location.href='../user/dashboard.html';return}
+            document.getElementById('adminName').textContent=p.full_name||session.user.email;document.getElementById('adminEmail').textContent=session.user.email;
+            await loadProducts();await loadStats();await loadRecentOrders();await loadPendingCardsCount();subscribeToNotifications();
+            initPapanInput();
+        }
+        async function loadProducts(){if(!supabase)return;const{data:p}=await supabase.from('products').select('id,name,price');if(p){p.forEach(x=>{productsMap[x.id]=x});stats.totalProducts=p.length}}
+        async function loadPendingCardsCount(){if(!supabase)return;const{count}=await supabase.from('press_card_requests').select('*',{count:'exact',head:true}).eq('status','pending');stats.pendingCards=count||0;const b=document.getElementById('pendingCardsBadge');if(b){b.textContent=stats.pendingCards;if(stats.pendingCards>0)b.classList.add('animate-pulse');else b.classList.remove('animate-pulse')}}
+        async function loadStats(){
+            if(!supabase)return;
+            const{count:uc}=await supabase.from('profiles').select('*',{count:'exact',head:true});stats.totalUsers=uc||0;
+            const{data:rd}=await supabase.from('profiles').select('role');if(rd){const rc={admin:0,editor:0,member:0,user:0};rd.forEach(p=>{if(rc.hasOwnProperty(p.role))rc[p.role]++;else rc.user++});document.getElementById('statAdmin').textContent=rc.admin;document.getElementById('statEditor').textContent=rc.editor;document.getElementById('statMember').textContent=rc.member;document.getElementById('statUser').textContent=rc.user}
+            const{data:o}=await supabase.from('orders').select('total_amount,status');if(o){stats.totalOrders=o.length;stats.totalRevenue=o.reduce((s,x)=>s+(x.total_amount||0),0);stats.pendingPayments=o.filter(x=>x.status==='pending').length}
+            const today=new Date().toISOString().split('T')[0];const{count:tc}=await supabase.from('orders').select('*',{count:'exact',head:true}).gte('created_at',today);stats.completedToday=tc||0;
+            const{count:pc}=await supabase.from('article_index').select('*',{count:'exact',head:true}).eq('status','pending_editor');stats.pendingArticles=pc||0;
+            document.getElementById('totalOrders').textContent=stats.totalOrders.toLocaleString();document.getElementById('totalRevenue').textContent=`Rp ${stats.totalRevenue.toLocaleString('id-ID')}`;document.getElementById('pendingPayments').textContent=stats.pendingPayments;document.getElementById('todayOrders').textContent=stats.completedToday;document.getElementById('totalProducts').textContent=stats.totalProducts;document.getElementById('totalUsers').textContent=stats.totalUsers;document.getElementById('pendingArticles').textContent=stats.pendingArticles
+        }
+        async function loadRecentOrders(){
+            if(!supabase)return;
+            const{data:o}=await supabase.from('orders').select('*').order('created_at',{ascending:false}).limit(10);recentOrders=o||[];
+            for(let order of recentOrders){const{data:p}=await supabase.from('profiles').select('full_name,email,phone').eq('id',order.user_id).single();order.profile=p||{full_name:'Tidak diketahui',email:'-',phone:'-'};const{data:i}=await supabase.from('order_items').select('product_id,quantity,price').eq('order_id',order.id);order.items=i||[]}
+            renderRecentOrders()
+        }
+        function renderRecentOrders(){
+            const c=document.getElementById('recentOrdersTable');if(recentOrders.length===0){c.innerHTML='<tr><td colspan="7" class="text-center py-12 text-gray-500"><i class="fas fa-inbox text-4xl mb-3 opacity-50"></i><p>Belum ada pesanan</p></td></tr>';return}
+            c.innerHTML=recentOrders.map(o=>{const pn=o.items.map(i=>{const p=productsMap[i.product_id];return`${i.quantity}x ${p?.name||'Produk'}`}).join(', ');return`<tr class="border-b border-gray-100 hover:bg-gray-50 transition"><td class="py-3 px-3 md:px-4 font-mono text-xs">#${String(o.id).slice(0,8)}</td><td class="py-3 px-3 md:px-4"><div><p class="font-medium text-gray-800">${o.profile?.full_name||'-'}</p><p class="text-xs text-gray-400">${o.profile?.email||'-'}</p></div></td><td class="py-3 px-3 md:px-4 text-sm">${pn||'-'}</td><td class="py-3 px-3 md:px-4 font-semibold text-gray-800">Rp ${o.total_amount?.toLocaleString('id-ID')||0}</td><td class="py-3 px-3 md:px-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${gs(o.status)}">${gt(o.status)}</span></td><td class="py-3 px-3 md:px-4 text-sm text-gray-500">${new Date(o.created_at).toLocaleDateString('id-ID')}</td><td class="py-3 px-3 md:px-4"><a href="orders.html" class="text-blue-600 hover:text-blue-800 text-sm"><i class="fas fa-eye"></i> <span class="hidden md:inline">Detail</span></a></td></tr>`}).join('')
+        }
+        function gs(s){const c={pending:'bg-yellow-100 text-yellow-800',paid:'bg-blue-100 text-blue-800',processing:'bg-purple-100 text-purple-800',completed:'bg-green-100 text-green-800',cancelled:'bg-red-100 text-red-800'};return c[s]||'bg-gray-100 text-gray-800'}
+        function gt(s){const t={pending:'Menunggu Bayar',paid:'Dikonfirmasi',processing:'Diproses',completed:'Selesai',cancelled:'Dibatalkan'};return t[s]||s}
+        window.logout=async()=>{if(supabase)await supabase.auth.signOut();window.location.href='../auth/login.html'}
+        window.refreshData=async()=>{const b=document.getElementById('refreshBtn');b.innerHTML='<i class="fas fa-spinner fa-spin mr-1"></i>';b.disabled=true;await loadProducts();await loadStats();await loadRecentOrders();await loadPendingCardsCount();b.innerHTML='<i class="fas fa-sync-alt"></i>';b.disabled=false}
+        
+        // ============================================
+        // PAPAN POS WARGA — INPUT LOGIC (ADMIN)
+        // ============================================
+        function initPapanInput() {
+            const textarea = document.getElementById('papanMessage');
+            const charCount = document.getElementById('papanCharCount');
+            const btnKirim = document.getElementById('btnKirimPapan');
+            const statusDiv = document.getElementById('papanKirimStatus');
+            
+            if (!textarea || !btnKirim) return;
+            
+            textarea.addEventListener('input', function() {
+                const count = textarea.value.length;
+                charCount.textContent = count + '/280';
+                btnKirim.disabled = count === 0 || count > 280;
+            });
+            
+            btnKirim.addEventListener('click', async function() {
+                const message = textarea.value.trim();
+                if (!message || !supabase) return;
+                
+                btnKirim.disabled = true;
+                btnKirim.innerHTML = '<i class="fas fa-spinner fa-spin text-[10px]"></i> Mengirim...';
+                
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) throw new Error('Tidak login');
+                    
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('full_name, role, avatar_url')
+                        .eq('id', user.id)
+                        .single();
+                    
+                    const { error } = await supabase
+                        .from('info_board')
+                        .insert({
+                            message: message,
+                            sender_name: profile?.full_name || user.email?.split('@')[0] || 'Admin',
+                            sender_role: profile?.role || 'admin',
+                            sender_avatar: profile?.avatar_url || null
+                        });
+                    
+                    if (error) throw error;
+                    
+                    textarea.value = '';
+                    charCount.textContent = '0/280';
+                    statusDiv.innerHTML = '<span class="text-green-600">✅ Terkirim!</span>';
+                    
+                    setTimeout(function() {
+                        statusDiv.innerHTML = '';
+                    }, 3000);
+                    
+                } catch(e) {
+                    console.error('Papan error:', e);
+                    statusDiv.innerHTML = '<span class="text-red-600">❌ Gagal</span>';
+                } finally {
+                    btnKirim.disabled = true;
+                    btnKirim.innerHTML = '<i class="fas fa-paper-plane text-[10px]"></i> Kirim';
+                }
+            });
+        }
+        
+        async function init(){try{await initSupabase()}catch(e){}if(supabase)await checkAdmin();else window.location.href='../auth/login.html'}
+        init();
+    </script>
+</body>
+</html>

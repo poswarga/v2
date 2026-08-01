@@ -1,0 +1,67 @@
+/* Papan POS WARGA Styling */
+.papan-container {
+  @apply bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden;
+  max-width: 400px;
+  max-height: 500px;
+}
+
+.papan-header {
+  @apply bg-gradient-to-r from-red-600 to-red-700 text-white p-4;
+}
+
+.papan-header h3 {
+  @apply text-lg font-bold flex items-center gap-2;
+}
+
+.live-dot {
+  @apply w-2 h-2 bg-green-400 rounded-full animate-pulse inline-block;
+}
+
+.papan-messages {
+  @apply p-3 space-y-2 overflow-y-auto;
+  max-height: 380px;
+  scroll-behavior: smooth;
+}
+
+.papan-message {
+  @apply p-3 rounded-lg border border-gray-100 bg-gray-50;
+  animation: slideDown 0.3s ease-out;
+}
+
+.message-header {
+  @apply flex items-center gap-2 mb-1;
+}
+
+.sender-avatar {
+  @apply w-6 h-6 rounded-full;
+}
+
+.sender-name {
+  @apply text-sm font-semibold text-gray-800;
+}
+
+.badge-role {
+  @apply text-xs text-white px-2 py-0.5 rounded-full font-medium;
+}
+
+.badge-admin { @apply bg-red-600; }
+.badge-editor { @apply bg-blue-600; }
+.badge-member { @apply bg-green-600; }
+.badge-user { @apply bg-gray-600; }
+
+.message-text {
+  @apply text-sm text-gray-700;
+}
+
+.message-time {
+  @apply text-xs text-gray-400 mt-1;
+}
+
+.papan-footer {
+  @apply bg-gray-50 p-2 text-center border-t border-gray-100;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

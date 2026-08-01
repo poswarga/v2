@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kartu Pewarta - POSWARGA</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+<style>
+* { box-sizing: border-box; }
+body { 
+    background: #f1f5f9; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    min-height: 100vh; 
+    padding: 20px; 
+    margin: 0; 
+    font-family: system-ui, -apple-system, sans-serif;
+}
+.card {
+    width: 380px;
+    height: 580px;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    background: white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+}
+#front {
+    background-image: url('https://ik.imagekit.io/1ctpzpi1o/card-depan.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.dynamic-content { position: absolute; inset: 0; z-index: 10; }
+
+.photo-container {
+    position: absolute;
+    top: 115px;
+    left: 66px;
+    width: 150px; 
+    height: 175px; 
+    z-index: 25;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: none;
+    outline: none;
+}
+.photo {
+    width: 100%;
+    height: 100%;
+    line-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.photo img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    object-position: center top;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: none;
+    transform: scale(1.02);
+}
+
+.name-container {
+    position: absolute;
+    top: 314px;
+    left: 42px;
+    width: 208px;
+    text-align: center;
+    z-index: 30;
+}
+.name { font-size: 17.5px; font-weight: 800; color: #dc2626; letter-spacing: 0.5px; }
+
+.profile-details-container {
+    position: absolute;
+    top: 350px;
+    left: 42px; 
+    width: 250px;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 7px; 
+}
+.detail-row { display: flex; font-size: 11.5px; line-height: 1.3; color: #000; }
+.detail-label { width: 85px; font-weight: 600; flex-shrink: 0; }
+.detail-value { font-weight: 700; word-break: break-word; }
+
+.barcode-container {
+    position: absolute;
+    bottom: 35px;
+    left: 124px;
+    width: 92px; 
+    height: 92px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 6px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+#barcode { width: 100%; height: 100%; }
+#barcode img { width: 100% !important; height: 100% !important; display: block; }
+
+.barcode-label {
+    position: absolute;
+    bottom: 15px;
+    left: 124px;
+    width: 92px;
+    text-align: center;
+    font-size: 9px;
+    font-weight: 800;
+    color: #000;
+    text-transform: uppercase;
+    white-space: nowrap;
+    z-index: 45;
+}
+
+#back {
+    background-image: url('https://ik.imagekit.io/1ctpzpi1o/card-belakang.webp');
+    background-size: cover;
+    background-position: center;
+}
+.actions { margin-top: 20px; display: flex; gap: 10px; }
+button { background: #1f2937; color: #fff; padding: 8px 16px; border-radius: 10px; font-size: 13px; cursor: pointer; font-weight: 500; border: none; }
+button:hover { background: #374151; }
+</style>
+</head>
+<body>
+
+<div id="front" class="card">
+    <div class="dynamic-content">
+        <div class="photo-container"><div class="photo"><img id="foto" src="" alt="Foto" crossorigin="anonymous"></div></div>
+        <div class="name-container"><div class="name" id="nama">-</div></div>
+        <div class="profile-details-container">
+            <div class="detail-row"><div class="detail-label">ID No</div><div class="detail-value">: <span id="idNumber">-</span></div></div>
+            <div class="detail-row"><div class="detail-label">Regional</div><div class="detail-value">: <span id="regional">-</span></div></div>
+            <div class="detail-row"><div class="detail-label">Gabung Sejak</div><div class="detail-value">: <span id="joinDate">-</span></div></div>
+        </div>
+        
+        <div class="barcode-container">
+            <div id="barcode"></div>
+        </div>
+        <div class="barcode-label">Scan Verifikasi</div>
+    </div>
+</div>
+
+<div id="back" class="card"></div>
+
+<div class="actions">
+    <button onclick="downloadPNG()">Simpan PNG</button>
+    <button onclick="downloadPDF()">Download PDF</button>
+    <button onclick="window.print()">Cetak</button>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const API_URL = 'https://api.poswarga.com/api/config';
+let supabase = null;
+let cachedConfig = null;
+
+async function loadConfig() {
+    if (cachedConfig) return cachedConfig;
+    const r = await fetch(API_URL, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(5000)
+    });
+    if (!r.ok) {
+        throw new Error(`Server error (${r.status})`);
+    }
+    cachedConfig = await r.json();
+    return cachedConfig;
+}
+
+async function initSupabase() {
+    const c = await loadConfig();
+    supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY);
+    return supabase;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function generateQR(idNumber) {
+    const container = document.getElementById('barcode');
+    if (!container || !idNumber || idNumber === '-') return;
+    container.innerHTML = '';
+    
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const baseUrl = isLocal ? 'http://localhost:5500' : 'https://poswarga.com';
+    const targetUrl = `${baseUrl}/verify-card.html?id=${encodeURIComponent(idNumber.trim())}`;
+    
+    new QRCode(container, { 
+        text: targetUrl, 
+        width: 80, 
+        height: 80, 
+        colorDark: '#000000', 
+        colorLight: '#ffffff', 
+        correctLevel: QRCode.CorrectLevel.M 
+    });
+}
+
+async function getSignedAvatarUrl(avatarPath) {
+    if (!avatarPath || avatarPath.startsWith('http') || avatarPath.startsWith('data:')) {
+        return avatarPath;
+    }
+    const { data: signedData, error } = await supabase.storage
+        .from('avatars')
+        .createSignedUrl(avatarPath, 3600);
+    if (error) {
+        const { data: pubData } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(avatarPath);
+        return pubData?.publicUrl || avatarPath;
+    }
+    return signedData.signedUrl;
+}
+
+async function getProfileData(userId) {
+    const { data } = await supabase
+        .from('profiles')
+        .select('full_name, jabatan, alias, avatar_url')
+        .eq('id', userId)
+        .maybeSingle();
+    return data;
+}
+
+// ========== FUNGSI BARU UNTUK MEMBACA PARAMETER URL (PREVIEW ADMIN) ==========
+async function loadFromUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const idNo = urlParams.get('id_no');
+    const nama = urlParams.get('nama');
+    const jabatan = urlParams.get('jabatan');
+    const berlaku = urlParams.get('berlaku');
+    const fotoUrl = urlParams.get('foto');
+    const download = urlParams.get('download');
+    const print = urlParams.get('print');
+    
+    if (idNo && nama) {
+        document.getElementById('nama').textContent = nama;
+        document.getElementById('idNumber').textContent = idNo;
+        document.getElementById('regional').textContent = jabatan || '-';
+        document.getElementById('joinDate').textContent = berlaku || '-';
+        generateQR(idNo);
+        
+        const foto = document.getElementById('foto');
+        if (fotoUrl && fotoUrl !== 'null' && fotoUrl !== 'undefined') {
+            foto.src = fotoUrl;
+        } else {
+            foto.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=dc2626&color=fff`;
+        }
+        
+        if (download === 'true') {
+            setTimeout(() => downloadPNG(), 500);
+        }
+        if (print === 'true') {
+            setTimeout(() => window.print(), 500);
+        }
+        return true;
+    }
+    return false;
+}
+// ========== AKHIR FUNGSI BARU ==========
+
+// ========== FUNGSI PRELOAD BACKGROUND IMAGE UNTUK DOWNLOAD ==========
+async function preloadBackgroundImages() {
+    const images = [
+        'https://ik.imagekit.io/1ctpzpi1o/card-depan.webp',
+        'https://ik.imagekit.io/1ctpzpi1o/card-belakang.webp'
+    ];
+    
+    const promises = images.map(url => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = url;
+        });
+    });
+    
+    await Promise.all(promises);
+}
+// ========== AKHIR FUNGSI PRELOAD ==========
+
+async function loadCardData() {
+    try {
+        // CEK PARAMETER URL DULU (UNTUK PREVIEW ADMIN)
+        if (await loadFromUrlParams()) {
+            return;
+        }
+        
+        // LANJUTKAN KODE ASLI UNTUK USER BIASA
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            console.warn('Session tidak ditemukan');
+            return;
+        }
+        
+        const userId = session.user.id;
+        
+        const { data: card, error: cardError } = await supabase
+            .from('press_card_requests')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'approved')
+            .maybeSingle();
+        
+        if (cardError) {
+            console.error(cardError);
+            return;
+        }
+        
+        if (!card) {
+            console.warn('Kartu belum disetujui');
+            return;
+        }
+        
+        const profile = await getProfileData(userId);
+        
+        const displayName = profile?.full_name || card.full_name || 'POS WARGA';
+        const displayRegional = card.regional || card.jabatan || profile?.jabatan || profile?.alias || '-';
+        const fotoUrl = await getSignedAvatarUrl(card.foto_url || profile?.avatar_url);
+        
+        document.getElementById('nama').textContent = displayName;
+        document.getElementById('idNumber').textContent = card.id_no || '-';
+        document.getElementById('regional').textContent = displayRegional;
+        document.getElementById('joinDate').textContent = formatDate(card.created_at);
+        
+        generateQR(card.id_no);
+        
+        const foto = document.getElementById('foto');
+        if (fotoUrl && fotoUrl !== 'null' && fotoUrl !== 'undefined') {
+            foto.src = fotoUrl;
+        } else {
+            foto.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=dc2626&color=fff`;
+        }
+        
+        console.log('CARD:', card);
+        console.log('PROFILE:', profile);
+        
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// ========== DOWNLOAD PNG YANG DIPERBAIKI ==========
+window.downloadPNG = async () => {
+    const front = document.getElementById('front');
+    const back = document.getElementById('back');
+    
+    // Tampilkan loading
+    const btn = event?.target;
+    const originalText = btn?.innerHTML;
+    if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+    
+    try {
+        // Preload background images
+        await preloadBackgroundImages();
+        
+        // Tunggu DOM stabil
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        const frontCanvas = await html2canvas(front, { 
+            scale: 3, 
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            allowTaint: false
+        });
+        
+        const backCanvas = await html2canvas(back, { 
+            scale: 3, 
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            allowTaint: false
+        });
+        
+        const l1 = document.createElement('a'); 
+        l1.download = 'kartu-depan.png'; 
+        l1.href = frontCanvas.toDataURL('image/png'); 
+        l1.click();
+        
+        setTimeout(() => { 
+            const l2 = document.createElement('a'); 
+            l2.download = 'kartu-belakang.png'; 
+            l2.href = backCanvas.toDataURL('image/png'); 
+            l2.click(); 
+        }, 500);
+        
+    } catch (err) { 
+        console.error('Error download PNG:', err);
+        alert('Gagal download PNG: ' + err.message); 
+    } finally {
+        if (btn) btn.innerHTML = originalText;
+    }
+};
+// ========== AKHIR DOWNLOAD PNG ==========
+
+// ========== DOWNLOAD PDF YANG DIPERBAIKI ==========
+window.downloadPDF = async () => {
+    const front = document.getElementById('front');
+    const back = document.getElementById('back');
+    
+    const btn = event?.target;
+    const originalText = btn?.innerHTML;
+    if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+    
+    try {
+        // Preload background images
+        await preloadBackgroundImages();
+        
+        // Tunggu DOM stabil
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        const frontCanvas = await html2canvas(front, { 
+            scale: 3, 
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            allowTaint: false
+        });
+        
+        const backCanvas = await html2canvas(back, { 
+            scale: 3, 
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            allowTaint: false
+        });
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ 
+            orientation: 'portrait', 
+            unit: 'px', 
+            format: [380, 580] 
+        });
+        
+        pdf.addImage(frontCanvas.toDataURL('image/png'), 'PNG', 0, 0, 380, 580);
+        pdf.addPage();
+        pdf.addImage(backCanvas.toDataURL('image/png'), 'PNG', 0, 0, 380, 580);
+        pdf.save('kartu-pers.pdf');
+        
+    } catch (err) { 
+        console.error('Error download PDF:', err);
+        alert('Gagal download PDF: ' + err.message); 
+    } finally {
+        if (btn) btn.innerHTML = originalText;
+    }
+};
+// ========== AKHIR DOWNLOAD PDF ==========
+
+(async () => {
+    try {
+        await initSupabase();
+        await preloadBackgroundImages(); // Preload background untuk tampilan awal
+        await loadCardData();
+    } catch (e) {
+        console.error(e);
+    }
+})();
+</script>
+
+</body>
+</html>

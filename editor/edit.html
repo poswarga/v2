@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Edit Artikel - Editor POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <style>
+        .ql-editor { min-height: 300px; font-size: 16px; }
+        .ql-container { font-size: 16px; }
+        .action-btn { @apply px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2; }
+        .status-badge { @apply px-2 py-1 rounded-full text-xs font-medium; }
+        .ql-toolbar { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; border-color: #e5e7eb; }
+        .ql-container { border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; border-color: #e5e7eb; }
+        
+        /* ===== ENHANCED: SPACING SYNC (Create → Edit → Preview → Publish) ===== */
+        .ql-editor p { margin-bottom: 1.25em; line-height: 1.8; }
+        .ql-editor p:last-child { margin-bottom: 0; }
+        .ql-editor br + br { display: none; }
+        .ql-editor h1 { margin: 1.5em 0 0.75em; line-height: 1.3; font-size: 1.5em; font-weight: 700; }
+        .ql-editor h2 { margin: 1.25em 0 0.5em; line-height: 1.4; font-size: 1.25em; font-weight: 600; }
+        .ql-editor ol, .ql-editor ul { margin-bottom: 1.25em; padding-left: 2em; }
+        .ql-editor li { margin-bottom: 0.5em; line-height: 1.7; }
+        .ql-editor li:last-child { margin-bottom: 0; }
+        .ql-editor blockquote { margin: 1.25em 0; padding: 0.75em 1.25em; border-left: 4px solid #059669; background: #ecfdf5; border-radius: 0 8px 8px 0; }
+        .ql-editor pre.ql-syntax { margin: 1.25em 0; padding: 1em; background: #1e293b; color: #e2e8f0; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; }
+        .ql-editor img { max-width: 100%; height: auto; margin: 1.25em 0; border-radius: 8px; }
+        
+        /* Preview modal prose */
+        .prose p { margin-bottom: 1.25em; line-height: 1.8; }
+        .prose p:last-child { margin-bottom: 0; }
+        .prose br + br { display: none; }
+        .prose h1 { margin: 1.5em 0 0.75em; line-height: 1.3; }
+        .prose h2 { margin: 1.25em 0 0.5em; line-height: 1.4; }
+        .prose ol, .prose ul { margin-bottom: 1.25em; padding-left: 2em; }
+        .prose li { margin-bottom: 0.5em; line-height: 1.7; }
+        .prose blockquote { margin: 1.25em 0; padding: 0.75em 1.25em; border-left: 4px solid #059669; background: #ecfdf5; border-radius: 0 8px 8px 0; }
+        .prose img { max-width: 100%; height: auto; margin: 1.25em 0; border-radius: 8px; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="my-articles.html" class="text-gray-600 hover:text-green-600 transition p-2 rounded-lg hover:bg-green-50">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-edit text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-800 bg-clip-text text-transparent">Edit Artikel</h1>
+                        <p class="text-xs text-gray-400 hidden sm:block" id="articleStatus">-</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <button onclick="saveAsDraft()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-save mr-1"></i> Simpan Draft
+                    </button>
+                    <div class="text-right hidden sm:block">
+                        <p id="userName" class="text-sm font-semibold text-gray-800">Editor</p>
+                        <p id="userEmail" class="text-xs text-gray-500">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-4">
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul Artikel <span class="text-red-500">*</span></label>
+                    <input type="text" id="articleTitle" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500" placeholder="Masukkan judul artikel">
+                    
+                    <div class="flex items-center justify-between mt-4">
+                        <label class="block text-sm font-medium text-gray-700">Slug URL</label>
+                        <span class="text-xs text-gray-400">Otomatis dari judul</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="articleSlug" class="flex-1 border rounded-lg px-4 py-2 bg-gray-50" placeholder="slug-artikel">
+                        <button onclick="copySlug()" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg"><i class="fas fa-copy"></i></button>
+                        <button onclick="generateSlug()" class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Konten Artikel <span class="text-red-500">*</span></label>
+                    <div id="editor" class="bg-white"></div>
+                    <p class="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                        <i class="fas fa-info-circle"></i> <span id="wordCountDisplay">0 kata</span>
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Excerpt (Ringkasan) <span class="text-red-500">*</span></label>
+                        <span class="text-xs text-gray-400" id="excerptCount">0/160</span>
+                    </div>
+                    <textarea id="articleExcerpt" rows="3" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500" placeholder="Ringkasan singkat artikel..."></textarea>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-info-circle text-green-600"></i> Info Artikel</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between"><span class="text-gray-500">Status:</span><span id="statusBadge" class="px-2 py-1 rounded-full text-xs font-medium">-</span></div>
+                        <div class="flex justify-between"><span class="text-gray-500">Penulis:</span><span id="infoAuthor">-</span></div>
+                        <div class="flex justify-between"><span class="text-gray-500">Slug:</span><span id="infoSlug" class="font-medium font-mono text-xs">-</span></div>
+                        <div class="flex justify-between"><span class="text-gray-500">Dibuat:</span><span id="createdDate" class="font-medium">-</span></div>
+                    </div>
+                </div>
+
+                <div id="rejectionNoteCard" class="bg-red-50 rounded-xl shadow-md p-5 border border-red-200 hidden">
+                    <h3 class="font-semibold text-red-800 mb-2"><i class="fas fa-exclamation-triangle"></i> Catatan Penolakan</h3>
+                    <p id="rejectionNoteText" class="text-sm text-red-700"></p>
+                </div>
+
+                <!-- Featured Checkbox -->
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="isFeatured" class="w-5 h-5 text-yellow-500 rounded focus:ring-yellow-500">
+                        <span class="font-medium text-gray-800">
+                            <i class="fas fa-star text-yellow-500 mr-2"></i>Jadikan Featured Article
+                        </span>
+                    </label>
+                    <p class="text-xs text-gray-400 mt-2 ml-8">Artikel featured akan tampil di halaman utama dengan badge "Pilihan Editor".</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-image text-green-600"></i> Gambar Utama</h3>
+                    
+                    <!-- Tab Pilihan -->
+                    <div class="flex border-b mb-3">
+                        <button id="tabFile" class="flex-1 py-2 text-sm font-medium text-green-600 border-b-2 border-green-600" onclick="switchImageTab('file')">
+                            <i class="fas fa-upload mr-1"></i>Upload File
+                        </button>
+                        <button id="tabUrl" class="flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent" onclick="switchImageTab('url')">
+                            <i class="fas fa-link mr-1"></i>URL Gambar
+                        </button>
+                    </div>
+                    
+                    <div id="uploadFileSection">
+                        <input type="file" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="w-full border rounded-lg p-2 text-sm">
+                        <p class="text-xs text-gray-400 mt-1">Format: JPG, PNG, GIF, WebP. Maks 5MB.</p>
+                        <div id="uploadProgress" class="mt-2 hidden">
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                    <div id="progressBar" class="bg-green-600 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span id="progressText" class="text-xs text-gray-500">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="uploadUrlSection" class="hidden">
+                        <input type="text" id="featuredImage" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="https://...">
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Keterangan Gambar (Caption)</label>
+                        <input type="text" id="imageCaption" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Deskripsi gambar...">
+                    </div>
+                    
+                    <div id="imagePreview" class="mt-3 hidden">
+                        <img id="previewImg" class="w-full h-32 object-cover rounded-lg" src="" alt="Preview">
+                        <p id="previewCaption" class="text-xs text-gray-500 mt-1 text-center italic"></p>
+                        <button onclick="removeImage()" class="text-red-500 text-xs mt-2 hover:text-red-700"><i class="fas fa-trash"></i> Hapus Gambar</button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-tasks text-green-600"></i> Aksi Redaktur</h3>
+                    <div class="space-y-2">
+                        <button onclick="publishArticle()" id="publishBtn" class="action-btn w-full bg-green-600 hover:bg-green-700 text-white justify-center">
+                            <i class="fas fa-check-circle"></i> Simpan & Publish
+                        </button>
+                        <button onclick="saveAsDraft()" class="action-btn w-full bg-gray-100 hover:bg-gray-200 text-gray-700 justify-center">
+                            <i class="fas fa-save"></i> Simpan sebagai Draft
+                        </button>
+                        <hr class="my-3">
+                        <button onclick="previewArticle()" class="action-btn w-full bg-blue-100 hover:bg-blue-200 text-blue-700 justify-center">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                        <button onclick="window.location.href='my-articles.html'" class="action-btn w-full bg-gray-50 hover:bg-gray-100 text-gray-600 justify-center border">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden overflow-y-auto">
+        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between">
+                    <h3 class="font-bold text-lg">Preview Artikel</h3>
+                    <button onclick="closePreviewModal()" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6">
+                    <h2 id="previewTitle" class="text-2xl font-bold mb-4">-</h2>
+                    <figure id="previewFigure" class="hidden mb-4">
+                        <img id="previewImage" class="w-full h-64 object-cover rounded-lg" src="" alt="">
+                        <figcaption id="previewFigcaption" class="text-sm text-gray-500 mt-2 text-center italic"></figcaption>
+                    </figure>
+                    <div id="previewContent" class="prose max-w-none">-</div>
+                </div>
+                <div class="sticky bottom-0 bg-gray-50 border-t px-6 py-4 flex justify-end">
+                    <button onclick="closePreviewModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        let cachedConfig = null, supabase = null;
+        let currentImageTab = 'file';
+        
+        async function loadConfig() {
+            if(cachedConfig) return cachedConfig;
+            try { const r = await fetch('/api/config'); if(r.ok) { cachedConfig = await r.json(); return cachedConfig; } } catch(e) {}
+            cachedConfig = { SUPABASE_URL: 'https://oavxhkpdqgqnagblxhki.supabase.co', SUPABASE_ANON_KEY: 'sb_publishable_18LyL-W_22mu1PyrQ3Eu4g_D2nCMsWT' };
+            return cachedConfig;
+        }
+        
+        async function initSupabase() {
+            try { const c = await loadConfig(); supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); } catch(e) { supabase = null; }
+        }
+
+        let userId = null, userName = null, quill, articleId = null, articleData = null;
+
+        async function checkUser() {
+            if(!supabase) { window.location.href = '../auth/login.html'; return false; }
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = '../auth/login.html'; return false; }
+            const { data: profile } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if (profile?.role !== 'editor') {
+                if (profile?.role === 'admin') window.location.href = '../admin/dashboard.html';
+                else if (profile?.role === 'user') window.location.href = '../user/dashboard.html';
+                else if (profile?.role === 'member') window.location.href = '../member/dashboard.html';
+                else window.location.href = '../auth/login.html';
+                return false;
+            }
+            userId = session.user.id;
+            userName = profile?.full_name || session.user.email?.split('@')[0] || 'Editor';
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userEmail').textContent = session.user.email;
+            articleId = new URLSearchParams(window.location.search).get('id');
+            if (!articleId) { showToast('ID artikel tidak ditemukan', 'error'); setTimeout(() => window.location.href = 'my-articles.html', 2000); return false; }
+            return true;
+        }
+
+        // ===== ENHANCED QUILL INIT =====
+        function initQuill() {
+            // Override default tag DIV → P
+            const Block = Quill.import('blots/block');
+            Block.tagName = 'P';
+            Quill.register(Block, true);
+            
+            quill = new Quill('#editor', { theme: 'snow', placeholder: 'Tulis konten artikel...', modules: { toolbar: [['bold','italic','underline'],['blockquote'],[{'header':1},{'header':2}],[{'list':'ordered'},{'list':'bullet'}],[{'indent':'-1'},{'indent':'+1'}],[{'size':['small',false,'large','huge']}],[{'color':[]},{'background':[]}],[{'align':[]}],['clean'],['link']] } });
+            quill.on('text-change', function() { updateWordCount(); hasChanges = true; });
+            
+            // Shift+Enter = line break, Enter = new paragraph
+            quill.keyboard.addBinding({ key: 13, shiftKey: true }, function(range, context) {
+                quill.insertText(range.index, '\n');
+                return false;
+            });
+        }
+        
+        function updateWordCount() {
+            const wordCount = quill.getText().trim().split(/\s+/).filter(w => w.length > 0).length;
+            document.getElementById('wordCountDisplay').textContent = `${wordCount} kata`;
+        }
+
+        async function loadArticle() {
+            const { data, error } = await supabase.from('article_index').select('*').eq('id', articleId).single();
+            if (error || !data) { showToast('Artikel tidak ditemukan', 'error'); setTimeout(() => window.location.href = 'my-articles.html', 2000); return; }
+            articleData = data;
+            
+            document.getElementById('articleTitle').value = data.title || '';
+            document.getElementById('articleSlug').value = data.slug || '';
+            document.getElementById('articleExcerpt').value = data.excerpt || '';
+            document.getElementById('featuredImage').value = data.featured_image || '';
+            document.getElementById('imageCaption').value = data.image_caption || '';
+            document.getElementById('isFeatured').checked = data.is_featured || false;
+            document.getElementById('excerptCount').textContent = `${(data.excerpt || '').length}/160`;
+            if (data.content) quill.root.innerHTML = data.content;
+            updateWordCount();
+            
+            if (data.featured_image) { 
+                document.getElementById('previewImg').src = data.featured_image; 
+                document.getElementById('previewCaption').textContent = data.image_caption || '';
+                document.getElementById('imagePreview').classList.remove('hidden'); 
+            }
+            
+            updateArticleInfo(data);
+            updateStatusBadge(data.status);
+        }
+
+        function updateArticleInfo(data) {
+            document.getElementById('infoAuthor').textContent = data.author_name || '-';
+            document.getElementById('infoSlug').textContent = data.slug || '-';
+            document.getElementById('createdDate').textContent = data.created_at ? new Date(data.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'}) : '-';
+            if (data.rejection_note) { 
+                document.getElementById('rejectionNoteText').textContent = data.rejection_note; 
+                document.getElementById('rejectionNoteCard').classList.remove('hidden'); 
+            }
+        }
+
+        function updateStatusBadge(status) {
+            const badges = { draft: 'bg-gray-100 text-gray-800', pending_editor: 'bg-yellow-100 text-yellow-800', published: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800', archived: 'bg-gray-200 text-gray-600' };
+            const labels = { draft: 'Draft', pending_editor: 'Pending Editor', published: 'Published', rejected: 'Ditolak', archived: 'Arsip' };
+            const el = document.getElementById('statusBadge');
+            el.className = `px-2 py-1 rounded-full text-xs font-medium ${badges[status] || badges.draft}`;
+            el.textContent = labels[status] || status;
+            document.getElementById('articleStatus').textContent = `Status: ${labels[status] || status}`;
+        }
+
+        window.switchImageTab = function(tab) {
+            currentImageTab = tab;
+            document.getElementById('tabFile').className = tab === 'file' ? 'flex-1 py-2 text-sm font-medium text-green-600 border-b-2 border-green-600' : 'flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent';
+            document.getElementById('tabUrl').className = tab === 'url' ? 'flex-1 py-2 text-sm font-medium text-green-600 border-b-2 border-green-600' : 'flex-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent';
+            document.getElementById('uploadFileSection').classList.toggle('hidden', tab !== 'file');
+            document.getElementById('uploadUrlSection').classList.toggle('hidden', tab !== 'url');
+        };
+
+        document.getElementById('imageFile')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => { document.getElementById('previewImg').src = e.target.result; document.getElementById('imagePreview').classList.remove('hidden'); };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('featuredImage')?.addEventListener('input', function() {
+            if(this.value) { document.getElementById('previewImg').src = this.value; document.getElementById('imagePreview').classList.remove('hidden'); }
+        });
+
+        document.getElementById('imageCaption')?.addEventListener('input', function() {
+            document.getElementById('previewCaption').textContent = this.value;
+        });
+
+        window.removeImage = function() {
+            document.getElementById('featuredImage').value = '';
+            document.getElementById('imageFile').value = '';
+            document.getElementById('imageCaption').value = '';
+            document.getElementById('imagePreview').classList.add('hidden');
+        };
+
+        window.generateSlug = function() { 
+            const t = document.getElementById('articleTitle').value; 
+            if(t) document.getElementById('articleSlug').value = t.toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').trim(); 
+        };
+        
+        window.copySlug = function() { 
+            const s = document.getElementById('articleSlug'); 
+            if(!s.value) generateSlug();
+            s.select(); navigator.clipboard?.writeText(s.value) || document.execCommand('copy'); 
+            showToast('Slug disalin!'); 
+        };
+        
+        document.getElementById('articleTitle').addEventListener('input', generateSlug);
+        document.getElementById('articleExcerpt').addEventListener('input', function() { 
+            document.getElementById('excerptCount').textContent = `${this.value.length}/160`; 
+        });
+
+        async function uploadImage(file) {
+            const fileName = `articles/${userId}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+            const { error } = await supabase.storage.from('articles').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) throw error;
+            const { data } = supabase.storage.from('articles').getPublicUrl(fileName);
+            return data.publicUrl;
+        }
+
+        function validateForm() {
+            const t = document.getElementById('articleTitle').value.trim();
+            const c = quill.root.innerHTML.trim();
+            const e = document.getElementById('articleExcerpt').value.trim();
+            if(!t) { showToast('Judul harus diisi','error'); return false; }
+            if(t.length > 70) { showToast('Judul maks 70 karakter','error'); return false; }
+            if(!c || c === '<p><br></p>') { showToast('Konten harus diisi','error'); return false; }
+            if(!e) { showToast('Excerpt harus diisi','error'); return false; }
+            if(e.length > 160) { showToast('Excerpt maks 160 karakter','error'); return false; }
+            return true;
+        }
+
+        async function getFormData() {
+            if(!document.getElementById('articleSlug').value) generateSlug();
+            let img = articleData?.featured_image || null;
+            
+            if (currentImageTab === 'file') {
+                const file = document.getElementById('imageFile').files[0];
+                if (file) {
+                    document.getElementById('uploadProgress').classList.remove('hidden');
+                    try { img = await uploadImage(file); } 
+                    catch (e) { showToast('Gagal upload: ' + e.message, 'error'); throw e; }
+                    finally { document.getElementById('uploadProgress').classList.add('hidden'); }
+                }
+            } else {
+                img = document.getElementById('featuredImage').value || null;
+            }
+            
+            return { 
+                title: document.getElementById('articleTitle').value.trim(), 
+                slug: document.getElementById('articleSlug').value, 
+                excerpt: document.getElementById('articleExcerpt').value.trim(), 
+                content: quill.root.innerHTML, 
+                featured_image: img, 
+                image_caption: document.getElementById('imageCaption').value || null,
+                is_featured: document.getElementById('isFeatured').checked,
+                file_path: img, 
+                updated_at: new Date().toISOString() 
+            };
+        }
+
+        window.saveAsDraft = async function() {
+            if(!document.getElementById('articleTitle').value.trim()) { showToast('Minimal isi judul','error'); return; }
+            try {
+                const fd = await getFormData(); fd.status = 'draft';
+                const { error } = await supabase.from('article_index').update(fd).eq('id', articleId);
+                if(error) throw error;
+                showToast('Draft disimpan'); loadArticle();
+            } catch(e) { showToast(e.message, 'error'); }
+        };
+
+        window.publishArticle = async function() {
+            if(!validateForm()) return;
+            if(!confirm('Simpan dan publish artikel ini?')) return;
+            const btn = document.getElementById('publishBtn');
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Mempublish...';
+            try {
+                const fd = await getFormData(); 
+                fd.status = 'published';
+                fd.editor_id = userId;
+                fd.published_at = new Date().toISOString();
+                const { error } = await supabase.from('article_index').update(fd).eq('id', articleId);
+                if(error) throw error;
+                showToast('✅ Artikel dipublish!'); 
+                setTimeout(() => window.location.href = 'my-articles.html', 1500);
+            } catch(e) { 
+                showToast(e.message, 'error'); 
+                btn.disabled = false; 
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Simpan & Publish';
+            }
+        };
+
+        window.previewArticle = function() {
+            document.getElementById('previewTitle').textContent = document.getElementById('articleTitle').value || articleData?.title || 'Tanpa Judul';
+            let img = document.getElementById('featuredImage').value;
+            if (currentImageTab === 'file' && document.getElementById('imageFile').files[0]) {
+                img = URL.createObjectURL(document.getElementById('imageFile').files[0]);
+            }
+            const cap = document.getElementById('imageCaption').value;
+            if(img) { 
+                document.getElementById('previewImage').src = img; 
+                document.getElementById('previewFigcaption').textContent = cap || ''; 
+                document.getElementById('previewFigure').classList.remove('hidden'); 
+            } else {
+                document.getElementById('previewFigure').classList.add('hidden');
+            }
+            document.getElementById('previewContent').innerHTML = quill.root.innerHTML;
+            document.getElementById('previewModal').classList.remove('hidden');
+        };
+        
+        window.closePreviewModal = () => document.getElementById('previewModal').classList.add('hidden');
+
+        function showToast(m, type='success') {
+            const t = document.getElementById('toast'), msg = document.getElementById('toastMessage');
+            t.classList.remove('bg-green-500','bg-red-500'); 
+            t.classList.add(type==='success'?'bg-green-500':'bg-red-500');
+            msg.textContent = m; t.classList.remove('hidden'); 
+            setTimeout(() => t.classList.add('hidden'), 3000);
+        }
+
+        document.addEventListener('keydown', e => { if(e.key === 'Escape') closePreviewModal(); });
+        
+        let hasChanges = false;
+        document.getElementById('articleTitle').addEventListener('input', () => hasChanges = true);
+        window.addEventListener('beforeunload', e => { if(hasChanges) { e.preventDefault(); e.returnValue = ''; } });
+
+        (async () => {
+            await initSupabase();
+            if(supabase) {
+                if (await checkUser()) { initQuill(); await loadArticle(); quill?.on('text-change', () => hasChanges = true); }
+            } else window.location.href = '../auth/login.html';
+        })();
+    </script>
+</body>
+</html>

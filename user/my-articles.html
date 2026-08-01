@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Artikel Saya - User POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .article-row:hover { background: linear-gradient(to right, #fef3c7, #fde68a); }
+        .filter-chip { @apply px-3 py-1.5 rounded-full text-xs bg-gray-100 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600 transition cursor-pointer; }
+        .filter-chip.active { @apply bg-yellow-600 text-white; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <a href="dashboard.html" class="text-gray-600 hover:text-yellow-600 transition p-2 rounded-lg hover:bg-yellow-50">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div class="w-10 h-10 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-list text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-yellow-500 to-amber-600 bg-clip-text text-transparent">Artikel Saya</h1>
+                        <p class="text-xs text-gray-400 hidden sm:block">Kelola semua artikel Anda</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <a href="create-article.html" class="bg-gradient-to-r from-yellow-400 to-amber-500 text-white px-4 py-2 rounded-lg text-sm transition shadow-md hover:from-yellow-500 hover:to-amber-600">
+                        <i class="fas fa-plus mr-1"></i> Tulis Artikel
+                    </a>
+                    <div class="text-right hidden sm:block">
+                        <p id="userName" class="text-sm font-semibold text-gray-800">User</p>
+                        <p id="userEmail" class="text-xs text-gray-500">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6">
+        <!-- Stat Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <div class="bg-white rounded-xl shadow-md p-3 border border-gray-100 cursor-pointer hover:shadow-lg transition" onclick="filterByStatus('all')">
+                <p class="text-xs text-gray-500">Semua</p>
+                <p class="text-xl font-bold text-gray-800" id="statAll">0</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-3 border border-gray-100 cursor-pointer hover:shadow-lg transition" onclick="filterByStatus('draft')">
+                <p class="text-xs text-gray-500">Draft</p>
+                <p class="text-xl font-bold text-gray-600" id="statDraft">0</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-3 border border-gray-100 cursor-pointer hover:shadow-lg transition" onclick="filterByStatus('pending')">
+                <p class="text-xs text-gray-500">Pending</p>
+                <p class="text-xl font-bold text-yellow-600" id="statPending">0</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-3 border border-gray-100 cursor-pointer hover:shadow-lg transition" onclick="filterByStatus('published')">
+                <p class="text-xs text-gray-500">Published</p>
+                <p class="text-xl font-bold text-green-600" id="statPublished">0</p>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100">
+            <div class="flex flex-wrap gap-3 items-center justify-between">
+                <div class="flex flex-wrap gap-2">
+                    <span class="filter-chip active" data-status="all">Semua</span>
+                    <span class="filter-chip" data-status="draft">Draft</span>
+                    <span class="filter-chip" data-status="pending_editor">Pending Editor</span>
+                    <span class="filter-chip" data-status="published">Published</span>
+                    <span class="filter-chip" data-status="rejected">Ditolak</span>
+                </div>
+                <button onclick="refreshData()" class="bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition" title="Refresh">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Articles Table -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-100">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Judul</th>
+                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Tanggal</th>
+                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="articleTableBody">
+                        <tr><td colspan="4" class="text-center py-8 text-gray-500">Memuat...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden transition-all">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        // ==================== CONFIG LOADER (AMAN - NO HARDCODE) ====================
+        const API_URL = 'https://api.poswarga.com/api/config';
+        let cachedConfig = null, supabase = null;
+        async function loadConfig() { 
+            if (cachedConfig) return cachedConfig; 
+            const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+            if (!r.ok) throw new Error(`Server error (${r.status})`);
+            cachedConfig = await r.json();
+            if (!cachedConfig.SUPABASE_URL || !cachedConfig.SUPABASE_ANON_KEY) throw new Error('Konfigurasi server tidak lengkap');
+            return cachedConfig; 
+        }
+        
+        async function initSupabase() { 
+            try { const c = await loadConfig(); supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY); console.log("✅ Supabase connected"); } 
+            catch (e) { console.warn("⚠️ Supabase gagal"); supabase = null; throw e; } 
+        }
+        
+        let userId = null, userRole = null, articles = [], currentStatus = 'all';
+        
+        async function checkUser() {
+            if(!supabase) return;
+            const { data: { session } } = await supabase.auth.getSession();
+            if(!session) { window.location.href = '../auth/login.html'; return; }
+            const { data: profile } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if(profile?.role !== 'user' && profile?.role !== 'member') { window.location.href = '../auth/login.html'; return; }
+            userId = session.user.id; userRole = profile.role;
+            document.getElementById('userName').textContent = profile?.full_name || session.user.email;
+            document.getElementById('userEmail').textContent = session.user.email;
+            loadArticles();
+        }
+        
+        async function loadArticles() {
+            const authorRole = userRole === 'member' ? 'member' : 'user';
+            const { data, error } = await supabase
+                .from('article_index')
+                .select('id, title, slug, status, rejection_note, created_at, updated_at')
+                .eq('author_id', userId)
+                .eq('author_role', authorRole)
+                .neq('status', 'archived')
+                .order('updated_at', { ascending: false });
+            
+            if(error) { console.error(error); showToast('Gagal memuat artikel', 'error'); return; }
+            articles = data || []; updateStats(); renderArticles();
+        }
+        
+        function updateStats() {
+            document.getElementById('statAll').textContent = articles.length;
+            document.getElementById('statDraft').textContent = articles.filter(a => a.status === 'draft').length;
+            document.getElementById('statPending').textContent = articles.filter(a => a.status === 'pending_editor').length;
+            document.getElementById('statPublished').textContent = articles.filter(a => a.status === 'published').length;
+        }
+        
+        function renderArticles() {
+            const tbody = document.getElementById('articleTableBody');
+            let filtered = articles;
+            if(currentStatus !== 'all') {
+                filtered = currentStatus === 'pending' 
+                    ? articles.filter(a => a.status === 'pending_editor')
+                    : articles.filter(a => a.status === currentStatus);
+            }
+            if(!filtered.length) { 
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-12"><i class="fas fa-newspaper text-4xl text-gray-300 mb-3"></i><p class="text-gray-500">Tidak ada artikel</p><a href="create-article.html" class="inline-block mt-3 text-yellow-600 hover:text-yellow-700 text-sm"><i class="fas fa-plus mr-1"></i>Tulis artikel sekarang</a></td></tr>`; 
+                return; 
+            }
+            tbody.innerHTML = filtered.map(a => {
+                const d = new Date(a.updated_at || a.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                const isRejected = a.status === 'rejected', isDraft = a.status === 'draft', isPending = a.status === 'pending_editor', isPublished = a.status === 'published';
+                return `<tr class="border-b border-gray-100 hover:bg-yellow-50 transition"><td class="py-3 px-4"><p class="font-medium text-gray-800">${a.title||'Tanpa Judul'}</p>${isRejected && a.rejection_note ? `<p class="text-xs text-red-500 mt-1">${a.rejection_note.substring(0,50)}...</p>` : ''}</td><td class="py-3 px-4">${getStatusBadge(a.status)}</td><td class="py-3 px-4 text-sm text-gray-500">${d}</td><td class="py-3 px-4"><div class="flex gap-1">${isRejected ? `<a href="edit-article.html?id=${a.id}" class="text-yellow-600 hover:text-yellow-700 p-2 hover:bg-yellow-100 rounded-lg transition" title="Revisi"><i class="fas fa-redo"></i></a>` : (isDraft || isPending) ? `<a href="edit-article.html?id=${a.id}" class="text-yellow-600 hover:text-yellow-700 p-2 hover:bg-yellow-100 rounded-lg transition" title="Edit"><i class="fas fa-edit"></i></a>` : ''}${isPublished ? `<a href="https://postingan.poswarga.com/posts/${a.slug}" target="_blank" class="text-blue-600 hover:text-blue-700 p-2 hover:bg-blue-100 rounded-lg transition" title="Lihat"><i class="fas fa-eye"></i></a>` : ''}</div></td></tr>`;
+            }).join('');
+        }
+        
+        function getStatusBadge(s) { 
+            const b = { draft: 'bg-gray-100 text-gray-800', pending_editor: 'bg-yellow-100 text-yellow-800', published: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800' };
+            const l = { draft: 'Draft', pending_editor: 'Pending Editor', published: 'Published', rejected: 'Ditolak' }; 
+            return `<span class="px-2 py-1 rounded-full text-xs font-medium ${b[s]||b.draft}">${l[s]||'Draft'}</span>`; 
+        }
+        
+        window.filterByStatus = function(s) { 
+            currentStatus = s; 
+            document.querySelectorAll('[data-status]').forEach(c => { c.classList.toggle('active', c.dataset.status === s); });
+            renderArticles(); 
+        };
+        
+        document.querySelectorAll('[data-status]').forEach(c => { c.addEventListener('click', () => filterByStatus(c.dataset.status)); });
+        
+        function showToast(m, t = 'success') { 
+            const toast = document.getElementById('toast'), msg = document.getElementById('toastMessage'); 
+            toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-yellow-500'); 
+            toast.classList.add(t === 'success' ? 'bg-green-500' : t === 'error' ? 'bg-red-500' : 'bg-yellow-500'); 
+            msg.textContent = m; toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 3000); 
+        }
+        
+        window.refreshData = async function() {
+            const btn = event.target.closest('button');
+            const icon = btn.querySelector('i');
+            icon.classList.add('fa-spin');
+            await loadArticles();
+            icon.classList.remove('fa-spin');
+            showToast('Data diperbarui');
+        };
+        
+        window.logout = async () => { if(supabase) await supabase.auth.signOut(); window.location.href = '../auth/login.html'; };
+        
+        (async () => { 
+            try { await initSupabase(); } catch(e) { window.location.href = '../auth/login.html'; return; }
+            if(supabase) { await checkUser(); } else { window.location.href = '../auth/login.html'; }
+        })();
+    </script>
+</body>
+</html>

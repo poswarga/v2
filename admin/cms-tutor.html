@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Kelola Tutorial - Admin POS WARGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <style>
+        .ql-editor { min-height: 300px; }
+        .tab-btn { transition: all 0.2s ease; }
+        .tab-btn.active { background: #eff6ff; color: #2563eb; border-bottom: 3px solid #2563eb; }
+        .tutorial-row { transition: all 0.2s ease; }
+        .tutorial-row:hover { background: #f8fafc; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+
+<!-- Navbar -->
+<nav class="bg-white shadow-lg sticky top-0 z-20 border-b border-gray-100">
+    <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <a href="../index.html" class="text-gray-500 hover:text-blue-600 transition p-2 rounded-lg hover:bg-blue-50" title="Beranda">
+                    <i class="fas fa-home text-lg"></i>
+                </a>
+                <a href="dashboard.html" class="text-gray-500 hover:text-blue-600 transition p-2 rounded-lg hover:bg-blue-50" title="Dashboard">
+                    <i class="fas fa-tachometer-alt text-lg"></i>
+                </a>
+                <div class="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md">
+                    <i class="fas fa-book-open text-white text-sm"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent">Kelola Tutorial</h1>
+                    <p class="text-xs text-gray-400 hidden sm:block">Panduan penggunaan website</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="adminName" class="text-sm text-gray-600 hidden sm:inline"></span>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition shadow-md">
+                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Sidebar — Tabs Role -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-md p-5 border border-gray-100 sticky top-24">
+                <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-filter text-emerald-600"></i> Filter Role
+                </h3>
+                <div class="space-y-1" id="roleTabs">
+                    <button class="tab-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium active" data-role="all">
+                        <i class="fas fa-list mr-2"></i> Semua Tutorial
+                    </button>
+                    <button class="tab-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-600" data-role="user">
+                        <i class="fas fa-user mr-2"></i> Untuk User
+                    </button>
+                    <button class="tab-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-600" data-role="member">
+                        <i class="fas fa-star mr-2"></i> Untuk Member
+                    </button>
+                    <button class="tab-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-600" data-role="editor">
+                        <i class="fas fa-pen-fancy mr-2"></i> Untuk Editor
+                    </button>
+                    <button class="tab-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-600" data-role="admin">
+                        <i class="fas fa-crown mr-2"></i> Untuk Admin
+                    </button>
+                </div>
+                <button onclick="openCreateForm()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg font-medium transition shadow-md">
+                    <i class="fas fa-plus mr-2"></i> Tambah Tutorial
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content — Table -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-book-open text-emerald-600"></i>
+                        <h3 class="font-semibold text-gray-800" id="tableTitle">Semua Tutorial</h3>
+                    </div>
+                    <span class="text-xs text-gray-400" id="tutorialCount">0 tutorial</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Judul</th>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Role</th>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Order</th>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tutorialTableBody">
+                            <tr><td colspan="5" class="text-center py-12 text-gray-500">Memuat...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form Modal -->
+<div id="formModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-start justify-center pt-8 px-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl my-8">
+        <div class="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+            <h3 class="text-lg font-bold text-gray-800" id="formModalTitle">Tambah Tutorial</h3>
+            <button onclick="closeFormModal()" class="text-gray-400 hover:text-gray-600 p-2"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul <span class="text-red-500">*</span></label>
+                    <input type="text" id="tutorialTitle" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Slug <span class="text-red-500">*</span></label>
+                    <input type="text" id="tutorialSlug" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Role <span class="text-red-500">*</span></label>
+                    <select id="tutorialRole" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500">
+                        <option value="user">User</option>
+                        <option value="member">Member</option>
+                        <option value="editor">Editor</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="tutorialStatus" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500">
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Urutan</label>
+                    <input type="number" id="tutorialOrder" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500" value="0" min="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Excerpt</label>
+                    <input type="text" id="tutorialExcerpt" class="w-full border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500" placeholder="Ringkasan singkat...">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Konten <span class="text-red-500">*</span></label>
+                <div id="quillEditor" class="bg-white border border-gray-200 rounded-lg"></div>
+            </div>
+        </div>
+        <div class="px-6 py-4 border-t bg-gray-50 flex justify-end gap-2 rounded-b-2xl">
+            <button onclick="closeFormModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">Batal</button>
+            <button onclick="saveTutorial()" id="saveBtn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition shadow-md">
+                <i class="fas fa-save mr-2"></i> Simpan
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 hidden transition-all">
+    <span id="toastMessage"></span>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const API_URL = 'https://api.poswarga.com/api/config';
+let cachedConfig = null, supabase = null, quill = null;
+let editingId = null, currentRole = 'all', tutorials = [];
+
+async function loadConfig() {
+    if (cachedConfig) return cachedConfig;
+    const r = await fetch(API_URL, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+    if (!r.ok) throw new Error(`Server error (${r.status})`);
+    cachedConfig = await r.json();
+    return cachedConfig;
+}
+
+async function initSupabase() {
+    const c = await loadConfig();
+    supabase = createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY);
+    window.supabase = supabase;
+}
+
+async function checkAdmin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../auth/login.html'; return; }
+    const { data: p } = await supabase.from('profiles').select('role,full_name').eq('id', session.user.id).single();
+    if (p?.role !== 'admin') { window.location.href = '../user/dashboard.html'; return; }
+    document.getElementById('adminName').textContent = p.full_name || session.user.email;
+    initQuill();
+    await loadTutorials();
+}
+
+function initQuill() {
+    quill = new Quill('#quillEditor', {
+        theme: 'snow',
+        placeholder: 'Tulis konten tutorial...',
+        modules: {
+            toolbar: [
+                ['bold','italic','underline','strike'],
+                ['blockquote'],
+                [{'header':1},{'header':2},{'header':3}],
+                [{'list':'ordered'},{'list':'bullet'}],
+                [{'indent':'-1'},{'indent':'+1'}],
+                ['link','image'],
+                ['clean']
+            ]
+        }
+    });
+}
+
+async function loadTutorials() {
+    let query = supabase.from('tutorials').select('*').order('order_index', { ascending: true });
+    if (currentRole !== 'all') query = query.eq('role', currentRole);
+    const { data, error } = await query;
+    if (error) { showToast('Gagal memuat tutorial', 'error'); return; }
+    tutorials = data || [];
+    renderTable();
+    document.getElementById('tutorialCount').textContent = `${tutorials.length} tutorial`;
+}
+
+function renderTable() {
+    const tbody = document.getElementById('tutorialTableBody');
+    if (!tutorials.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-gray-500">
+            <i class="fas fa-book-open text-4xl mb-3 opacity-30"></i>
+            <p>Belum ada tutorial</p>
+            <button onclick="openCreateForm()" class="mt-2 text-emerald-600 hover:underline text-sm">+ Tambah Tutorial</button>
+        </td></tr>`;
+        return;
+    }
+    const roleLabels = { user: 'User', member: 'Member', editor: 'Editor', admin: 'Admin' };
+    const roleColors = { user: 'bg-purple-100 text-purple-700', member: 'bg-green-100 text-green-700', editor: 'bg-indigo-100 text-indigo-700', admin: 'bg-red-100 text-red-700' };
+    tbody.innerHTML = tutorials.map(t => `
+        <tr class="tutorial-row border-b border-gray-100">
+            <td class="py-3 px-4">
+                <p class="font-medium text-gray-800">${escapeHtml(t.title)}</p>
+                ${t.excerpt ? `<p class="text-xs text-gray-400 mt-1">${escapeHtml(t.excerpt.substring(0, 60))}...</p>` : ''}
+            </td>
+            <td class="py-3 px-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${roleColors[t.role] || ''}">${roleLabels[t.role] || t.role}</span></td>
+            <td class="py-3 px-4">${t.status === 'published' ? '<span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Published</span>' : '<span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Draft</span>'}</td>
+            <td class="py-3 px-4 text-sm text-gray-500">${t.order_index || 0}</td>
+            <td class="py-3 px-4">
+                <div class="flex gap-1">
+                    <button onclick="openEditForm('${t.id}')" class="text-blue-600 hover:text-blue-700 p-2 hover:bg-blue-100 rounded-lg transition" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteTutorial('${t.id}')" class="text-red-600 hover:text-red-700 p-2 hover:bg-red-100 rounded-lg transition" title="Hapus"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function escapeHtml(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// Slug generator
+document.getElementById('tutorialTitle').addEventListener('input', function() {
+    if (!editingId) {
+        document.getElementById('tutorialSlug').value = this.value
+            .toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').substring(0, 100);
+    }
+});
+
+// Role tabs
+document.querySelectorAll('#roleTabs .tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('#roleTabs .tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentRole = this.dataset.role;
+        document.getElementById('tableTitle').textContent = currentRole === 'all' ? 'Semua Tutorial' : `Tutorial: ${this.textContent.trim()}`;
+        loadTutorials();
+    });
+});
+
+// Form modal
+window.openCreateForm = function() {
+    editingId = null;
+    document.getElementById('formModalTitle').textContent = 'Tambah Tutorial';
+    document.getElementById('tutorialTitle').value = '';
+    document.getElementById('tutorialSlug').value = '';
+    document.getElementById('tutorialRole').value = 'user';
+    document.getElementById('tutorialStatus').value = 'draft';
+    document.getElementById('tutorialOrder').value = '0';
+    document.getElementById('tutorialExcerpt').value = '';
+    if (quill) quill.root.innerHTML = '';
+    document.getElementById('formModal').classList.remove('hidden');
+};
+
+window.openEditForm = function(id) {
+    const t = tutorials.find(x => x.id == id);
+    if (!t) return;
+    editingId = id;
+    document.getElementById('formModalTitle').textContent = 'Edit Tutorial';
+    document.getElementById('tutorialTitle').value = t.title || '';
+    document.getElementById('tutorialSlug').value = t.slug || '';
+    document.getElementById('tutorialRole').value = t.role || 'user';
+    document.getElementById('tutorialStatus').value = t.status || 'draft';
+    document.getElementById('tutorialOrder').value = t.order_index || 0;
+    document.getElementById('tutorialExcerpt').value = t.excerpt || '';
+    if (quill) quill.root.innerHTML = t.content || '';
+    document.getElementById('formModal').classList.remove('hidden');
+};
+
+window.closeFormModal = function() {
+    document.getElementById('formModal').classList.add('hidden');
+};
+
+window.saveTutorial = async function() {
+    const title = document.getElementById('tutorialTitle').value.trim();
+    const slug = document.getElementById('tutorialSlug').value.trim();
+    const role = document.getElementById('tutorialRole').value;
+    const status = document.getElementById('tutorialStatus').value;
+    const order_index = parseInt(document.getElementById('tutorialOrder').value) || 0;
+    const excerpt = document.getElementById('tutorialExcerpt').value.trim();
+    const content = quill ? quill.root.innerHTML : '';
+
+    if (!title || !slug || !content) {
+        showToast('Judul, slug, dan konten wajib diisi', 'error');
+        return;
+    }
+
+    const payload = { title, slug, content, excerpt, role, status, order_index, updated_at: new Date().toISOString() };
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+
+    let error;
+    if (editingId) {
+        ({ error } = await supabase.from('tutorials').update(payload).eq('id', editingId));
+    } else {
+        payload.created_at = new Date().toISOString();
+        ({ error } = await supabase.from('tutorials').insert(payload));
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-save mr-2"></i>Simpan';
+
+    if (error) {
+        showToast('Gagal menyimpan: ' + error.message, 'error');
+        return;
+    }
+
+    showToast('Tutorial berhasil disimpan!');
+    closeFormModal();
+    await loadTutorials();
+};
+
+window.deleteTutorial = async function(id) {
+    if (!confirm('Hapus tutorial ini?')) return;
+    const { error } = await supabase.from('tutorials').delete().eq('id', id);
+    if (error) { showToast('Gagal menghapus', 'error'); return; }
+    showToast('Tutorial dihapus');
+    await loadTutorials();
+};
+
+function showToast(m, t = 'success') {
+    const toast = document.getElementById('toast'), msg = document.getElementById('toastMessage');
+    toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-yellow-500');
+    toast.classList.add(t === 'success' ? 'bg-green-500' : t === 'error' ? 'bg-red-500' : 'bg-yellow-500');
+    msg.textContent = m;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+window.logout = async () => { await supabase.auth.signOut(); window.location.href = '../auth/login.html'; };
+
+document.getElementById('formModal').addEventListener('click', function(e) { if (e.target === this) closeFormModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormModal(); });
+
+(async () => {
+    await initSupabase();
+    await checkAdmin();
+})();
+</script>
+</body>
+</html>
