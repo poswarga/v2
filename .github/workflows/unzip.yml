@@ -1,0 +1,63 @@
+name: Auto Unzip Root Files
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# TAMBAHKAN INI - Beri izin write
+permissions:
+  contents: write
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Unzip all .zip files in root
+        run: |
+          echo "🔍 Scanning for .zip files in root..."
+          ZIP_FOUND=false
+          
+          for zipfile in *.zip; do
+            if [ -f "$zipfile" ]; then
+              ZIP_FOUND=true
+              echo "📦 Extracting: $zipfile"
+              unzip -o "$zipfile"
+              echo "🗑️  Deleting: $zipfile"
+              rm "$zipfile"
+              echo "✅ Done: $zipfile"
+              echo "-----------------------------------"
+            fi
+          done
+          
+          if [ "$ZIP_FOUND" = false ]; then
+            echo "ℹ️  No .zip files found in root"
+          fi
+      
+      - name: Show extracted structure
+        run: |
+          echo ""
+          echo "========================================="
+          echo "📂 Repository structure after unzip:"
+          echo "========================================="
+          find . -type f -not -path './.git/*' | sort
+      
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add -A
+          
+          if git diff --staged --quiet; then
+            echo "ℹ️  No changes to commit"
+          else
+            echo "📤 Committing and pushing changes..."
+            git commit -m "🤖 Auto-unzip: extracted and removed .zip files"
+            git push
+            echo "✅ Changes pushed to repository"
+          fi
